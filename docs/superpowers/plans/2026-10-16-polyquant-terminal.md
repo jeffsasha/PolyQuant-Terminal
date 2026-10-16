@@ -296,4 +296,4 @@ After Task 00, report the actual production capability matrix and any access res
 
 ## Current authorization and handoff
 
-The owner requested this detailed plan and explicitly authorized starting production API availability verification. Execute Task 00 now. Product implementation Tasks 01–15 have not started. Recommend native execution with a final fresh review for the later product work; the shared ledger and staged checks preserve progress. Request plan review with the Task 00 evidence so any venue limitation is visible before application implementation.
+The owner approved this plan, native implementation, a final independent review, and local deployment. The English paper-only terminal has been implemented as a limited local build with reference-dependent strategies disabled. See ../../VERIFICATION_REPORT.md for executed checks, review findings/fixes and incomplete gates. Original task checklists are retained as requirements and must not be interpreted as completed work. Full engineering/research acceptance remains pending.

@@ -59,9 +59,11 @@ The local interface is runnable, but the complete engineering/research acceptanc
 Next.js Turbopack could not spawn its CSS worker on this host. Use the supported Webpack build:
 
 ```sh
-.venv/bin/python -m pytest -q --tb=short
-# Set PYTHONPATH=services:tests/unit and use only polyquant_test for integration tests.
-# Node and pnpm package versions are pinned in apps/web/package.json and pnpm-lock.yaml.
+PYTHONPATH=services:tests/unit .venv/bin/python -m pytest -q --tb=short
+# Integration tests refuse to use any database except polyquant_test.
+POLYQUANT_NODE="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node"
+"$POLYQUANT_NODE" apps/web/node_modules/next/dist/bin/next build apps/web --webpack
+PLAYWRIGHT_BROWSERS_PATH="$PWD/.local/browsers" "$POLYQUANT_NODE" apps/web/node_modules/@playwright/test/cli.js test --config apps/web/playwright.config.ts
 ```
 
 The native launcher uses the installed Homebrew PostgreSQL 17 binaries and this Mac's bundled Node runtime. It is not a portable installer. Compose files preserve a migration path but have not been executed because Docker is unavailable on this host. Keep the services local; this build is not an internet-hosted application.
@@ -78,4 +80,4 @@ python3 scripts/local.py db
 python3 scripts/local.py start
 ```
 
-Restore verification creates and removes a new random disposable database; it never overwrites `polyquant`. Backups contain sensitive local sessions and must stay private. Also preserve `.local/raw`, its manifest files, and the private `.env` separately; a database dump alone cannot restore raw recordings. The compare drill checks table counts and account state, not every record's content hash.
+Restore verification creates and removes a new random disposable database; it never overwrites `polyquant`. Backups contain sensitive local sessions and must stay private. Also preserve `.local/raw`, its manifest files, and the private `.env` separately; a database dump alone cannot restore raw recordings. The comparison checks every listed application table's canonical row hashes plus counts and account state; it does not test every possible restore failure or PostgreSQL catalog property.

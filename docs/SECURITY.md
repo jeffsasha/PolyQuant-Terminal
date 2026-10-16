@@ -1,6 +1,6 @@
 # Security and Reliability Design
 
-Status: Required implementation behavior; no controls have been tested yet.
+Status: Approved security requirements. Local paper boundary, authentication and process checks have been tested; see VERIFICATION_REPORT.md for actual evidence and remaining gaps.
 
 ## Paper-only boundary
 

@@ -1,8 +1,8 @@
 # PolyQuant Terminal — Design for Review
 
-Version: 0.1 · Date: October 16, 2026 · Status: Design approved; product implementation has not started.
+Version: 0.1 · Date: October 16, 2026 · Status: Design approved; limited local paper terminal implemented.
 
-**Review update:** The owner approved this design on October 16. The [detailed implementation plan](docs/superpowers/plans/2026-10-16-polyquant-terminal.md) and [public production verification](docs/PRODUCTION_API_AVAILABILITY.md) are now available. Both requested BTC cadences were observed through production APIs; reference reconstruction failed and authenticated streaming remains untested. Product implementation has not started. The approved requirements below are preserved.
+**Review update:** The owner approved this design on October 16. The [detailed implementation plan](docs/superpowers/plans/2026-10-16-polyquant-terminal.md) and [public production verification](docs/PRODUCTION_API_AVAILABILITY.md) are now available. Both requested BTC cadences were observed through production APIs; reference reconstruction failed and authenticated streaming remains untested. A limited English localhost terminal is now implemented. The [verification report](docs/VERIFICATION_REPORT.md) records review fixes, executed checks, and remaining release gates. The approved requirements below are preserved.
 
 ## Intended outcome
 

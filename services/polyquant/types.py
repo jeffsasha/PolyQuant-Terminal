@@ -25,7 +25,8 @@ def utcnow(): return datetime.now(timezone.utc)
 def jsonable(value):
     def encode(item):
         if hasattr(item,'__dataclass_fields__'): return asdict(item)
-        if isinstance(item,(Decimal,datetime)): return str(item)
+        if isinstance(item,datetime): return item.isoformat()
+        if isinstance(item,Decimal): return str(item)
         raise TypeError('Unsupported JSON value')
     return json.loads(json.dumps(value,default=encode))
 
@@ -84,6 +85,7 @@ class BookSnapshot:
 
     def fresh(self,at,max_age=2):
         if self.source_at is None: return False
+        if self.cache_age is not None and not 0<=self.cache_age<=max_age: return False
         ages=[(at-self.received_at).total_seconds(),(at-self.source_at).total_seconds()]
         return self.state=='MARKET_STATE_OPEN' and all(0<=age<=max_age for age in ages)
 

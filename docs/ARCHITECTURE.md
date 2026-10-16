@@ -1,6 +1,6 @@
 # Architecture
 
-Status: Proposed design, not an implemented system.
+Status: Approved architecture. A limited local implementation exists; actual implemented and unverified behavior is recorded in VERIFICATION_REPORT.md.
 
 ## Runtime and boundaries
 

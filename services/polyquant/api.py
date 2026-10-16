@@ -61,7 +61,8 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
     @app.get('/health')
     def health():
         with store.connect() as c: c.execute('SELECT 1')
-        return {'status':'running','mode':'PAPER','reference_validated':False,'trading_ready':False}
+        runtime=app.state.runtime
+        return {'status':'running' if runtime.collection else 'degraded','mode':'PAPER','reference_validated':False,'trading_ready':False}
     @app.post('/login')
     def login(payload:Login,request:Request,response:Response):
         ip=request.client.host if request.client else 'local'
@@ -133,7 +134,11 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
         return Replay().run(rows)
     @app.post('/recordings/seal')
     def seal(value=Depends(authenticated)):
-        manifest=app.state.runtime.recorder.seal(); store.save_manifest(manifest)
+        try:
+            manifest=app.state.runtime.recorder.seal(); store.save_manifest(manifest)
+        except Exception:
+            app.state.runtime.persistence_halt('PERSISTENCE_FAILED')
+            raise HTTPException(503,'Recording persistence failed. Collection halted.')
         return {'manifest':manifest}
     return app
 

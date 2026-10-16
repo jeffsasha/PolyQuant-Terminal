@@ -19,3 +19,15 @@ def test_daily_halt_cannot_resume_same_day(store):
     import pytest
     store.halt('probability','DAILY_LOSS_LIMIT')
     with pytest.raises(ValueError): store.resume('probability')
+
+def test_daily_halt_resumes_explicitly_after_risk_day_rollover(store,monkeypatch):
+    from datetime import timedelta
+    import polyquant.store as module
+    from polyquant.types import utcnow
+    now=utcnow();monkeypatch.setattr(module,'utcnow',lambda:now)
+    store.halt('probability','DAILY_LOSS_LIMIT')
+    monkeypatch.setattr(module,'utcnow',lambda:now+timedelta(days=1))
+    store.roll_days()
+    assert store.state('probability').halts==('DAILY_LOSS_LIMIT',)
+    store.resume('probability')
+    assert store.state('probability').halts==()

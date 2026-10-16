@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS datasets (
 CREATE TABLE IF NOT EXISTS settlements (id text PRIMARY KEY, market_id text NOT NULL, outcome text NOT NULL, payload jsonb NOT NULL, created_at timestamptz DEFAULT now());
 CREATE TABLE IF NOT EXISTS equity_snapshots (id bigserial PRIMARY KEY,account_id text NOT NULL,equity numeric(24,8) NOT NULL,created_at timestamptz NOT NULL DEFAULT now());
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS horizon text;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS daily_halt_day text;
+UPDATE accounts SET daily_halt_day=day_id WHERE daily_halt_day IS NULL AND halts ? 'DAILY_LOSS_LIMIT';
 ALTER TABLE positions ADD COLUMN IF NOT EXISTS horizon text;
 ALTER TABLE positions ADD COLUMN IF NOT EXISTS settled_at timestamptz;
 CREATE TABLE IF NOT EXISTS instrument_versions(id text NOT NULL,version text NOT NULL,raw jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(id,version));

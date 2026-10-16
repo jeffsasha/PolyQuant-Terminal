@@ -27,15 +27,27 @@ class Runtime:
         event=MarketEvent(str(uuid.uuid4()),market_id,kind,source_at,at,at,self.sequence,payload)
         try:
             self.recorder.append(event)
-        except StorageHalt:
-            self.collection=False; self.errors['recorder']='STORAGE_LIMIT'
-            for name in ['probability','momentum','book']: self.store.halt(name,'STORAGE_LIMIT')
-            raise
+            if self.recorder.events>=60: self.store.save_manifest(self.recorder.seal())
+        except (StorageHalt,OSError) as error:
+            reason='STORAGE_LIMIT' if isinstance(error,StorageHalt) else 'PERSISTENCE_FAILED'
+            self.persistence_halt(reason)
+            raise StorageHalt(reason) from None
+        except Exception:
+            self.persistence_halt('PERSISTENCE_FAILED')
+            raise StorageHalt('PERSISTENCE_FAILED') from None
         self.events.append(event); self.last_update=at
-        if self.recorder.events>=60: self.store.save_manifest(self.recorder.seal())
         return event
+    def persistence_halt(self,reason):
+        self.collection=False; self.recorder.halted=True; self.errors['recorder']=reason
+        for name in ['probability','momentum','book']:
+            try: self.store.halt(name,reason)
+            except Exception: self.errors['database']='PERSISTENCE_FAILED'
     async def start(self):
         if not self.store.acquire_writer(): raise RuntimeError('Another trading writer owns this database')
+        try:
+            for manifest in self.recorder.recover(): self.store.save_manifest(manifest)
+            if self.recorder.recovery_errors: self.persistence_halt('PERSISTENCE_FAILED')
+        except Exception: self.persistence_halt('PERSISTENCE_FAILED')
         self.store.reconcile(); self.store.audit('RUNTIME_STARTED',payload={'mode':'PAPER','reference_validated':False})
         self.tasks=[asyncio.create_task(self.data_loop()),asyncio.create_task(self.strategy_loop()),asyncio.create_task(self.stream_loop())]
     async def close(self):
@@ -43,8 +55,10 @@ class Runtime:
         for task in self.tasks: task.cancel()
         for task in self.tasks:
             with contextlib.suppress(asyncio.CancelledError): await task
-        self.store.save_manifest(self.recorder.seal())
-        await self.venue.close(); await self.spot_provider.close(); self.store.close()
+        try: self.store.save_manifest(self.recorder.seal())
+        except Exception: self.persistence_halt('PERSISTENCE_FAILED')
+        finally:
+            await self.venue.close(); await self.spot_provider.close(); self.store.close()
     async def data_loop(self):
         while self.running:
             if not self.collection: await asyncio.sleep(5); continue

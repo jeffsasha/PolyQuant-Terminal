@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Native encrypted-at-rest permissions; restore only to a new disposable database."""
-import argparse,json,os,subprocess,sys,uuid
+"""Owner-only file permissions; restore only to a new disposable database."""
+import argparse,hashlib,json,os,subprocess,sys,uuid
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import local
@@ -8,7 +8,7 @@ sys.path.insert(0,str(local.ROOT/'services'))
 import psycopg
 from psycopg.conninfo import conninfo_to_dict
 
-TABLES=['accounts','orders','fills','positions','postings','audit','settlements','datasets','equity_snapshots','instrument_versions']
+TABLES=['accounts','orders','fills','positions','postings','audit','settlements','datasets','equity_snapshots','instrument_versions','decisions','sessions']
 
 def environment(database=None):
     values=conninfo_to_dict(local.env()['DATABASE_URL']);env=dict(os.environ)
@@ -26,7 +26,8 @@ def fingerprint(database=None):
     env=environment(database)
     with psycopg.connect(host=env['PGHOST'],port=env['PGPORT'],user=env['PGUSER'],password=env['PGPASSWORD'],dbname=env['PGDATABASE']) as c:
         result={table:c.execute('SELECT count(*) FROM '+table).fetchone()[0] for table in TABLES}
-        result['account_state']=[tuple(str(v) for v in row) for row in c.execute('SELECT id,cash,reserved,day_start,day_id,halts,config FROM accounts ORDER BY id').fetchall()]
+        result['table_hashes']={table:hashlib.sha256('\n'.join(sorted(row[0] for row in c.execute('SELECT to_jsonb(t)::text FROM '+table+' t').fetchall())).encode()).hexdigest() for table in TABLES}
+        result['account_state']=[tuple(str(v) for v in row) for row in c.execute('SELECT id,cash,reserved,day_start,day_id,daily_halt_day,halts,config FROM accounts ORDER BY id').fetchall()]
         return result
 
 def backup(destination):
@@ -48,7 +49,7 @@ def verify(destination):
         run(['pg_restore','--exit-on-error','--no-owner','--no-acl','--dbname='+target,str(destination)],environment(target))
         actual=fingerprint(target)
         if actual!=expected: raise RuntimeError('Restored state differs; stop collection before the comparison drill')
-        print('Restore verification passed: table counts and account money, reservations, halts and configs match.')
+        print('Restore verification passed: all table record hashes, counts, account money, reservations, halts and configs match.')
     finally: run(['dropdb',target],environment())
 
 if __name__=='__main__':

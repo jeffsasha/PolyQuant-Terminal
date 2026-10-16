@@ -97,6 +97,8 @@ class Store:
             a=c.execute('SELECT * FROM accounts WHERE id=%s FOR UPDATE',(account_id,)).fetchone()
             reasons=list(dict.fromkeys(a['halts']+[reason]))
             c.execute('UPDATE accounts SET halts=%s WHERE id=%s',(Jsonb(reasons),account_id))
+            if reason=='DAILY_LOSS_LIMIT' and reason not in a['halts']:
+                c.execute('UPDATE accounts SET daily_halt_day=%s WHERE id=%s',(risk_day_id(utcnow()),account_id))
             rows=c.execute("SELECT id FROM orders WHERE account_id=%s AND status='PENDING_ARRIVAL'",(account_id,)).fetchall()
             for row in rows:
                 c.execute("UPDATE orders SET status='CANCELED',reason=%s,reserved=0 WHERE id=%s",(reason,row['id']))
@@ -105,9 +107,9 @@ class Store:
     def resume(self,account_id):
         with self.connect() as c:
             a=c.execute('SELECT * FROM accounts WHERE id=%s FOR UPDATE',(account_id,)).fetchone()
-            if 'DAILY_LOSS_LIMIT' in a['halts'] and a['day_id']==risk_day_id(utcnow()): raise ValueError('Daily loss lock cannot be cleared in the same risk day')
+            if 'DAILY_LOSS_LIMIT' in a['halts'] and a['daily_halt_day']==risk_day_id(utcnow()): raise ValueError('Daily loss lock cannot be cleared in the same risk day')
             if any(r in a['halts'] for r in ['STORAGE_LIMIT','PERSISTENCE_FAILED']): raise ValueError('Resolve storage/persistence fault before resuming')
-            c.execute("UPDATE accounts SET halts='[]'::jsonb WHERE id=%s",(account_id,))
+            c.execute("UPDATE accounts SET halts='[]'::jsonb,daily_halt_day=NULL WHERE id=%s",(account_id,))
             self.audit('MANUAL_RESUME',account_id,c=c)
     def decision(self,account_id,market_id,strategy,payload):
         identity=str(uuid.uuid4())

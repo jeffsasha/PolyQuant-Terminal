@@ -25,7 +25,7 @@ The read-only availability investigation is complete for this snapshot. The full
 | Historical typed contracts | PASS examples only | Historical detail/listing responses include both cadences. Broad history scans were capped; not a complete inventory or historical L2 dataset |
 | Automated rollover | NOT TESTED | One active market per cadence was observed; observing consecutive live boundaries remains required |
 | Authenticated market stream | NOT TESTED | Owner will configure local backend `.env` later; no credentials were accessed |
-| Paper/live order execution | NOT RUN | No application execution engine exists; zero real or simulated orders submitted by these probes |
+| Paper/live order execution | NOT RUN | At the time of these public probes no application execution engine existed; these probes submitted zero real or simulated orders. See VERIFICATION_REPORT.md for later local implementation |
 
 ## Actual production instruments
 

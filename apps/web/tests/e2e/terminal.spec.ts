@@ -22,5 +22,29 @@ test('local English terminal authenticates and keeps unsafe trading blocked',asy
   await expect(page.getByTestId('risk-state')).toContainText('HALTED');
   await page.getByRole('button',{name:'Resume paper account'}).click();
   await expect(page.getByTestId('risk-state')).toContainText('REFERENCE BLOCKED');
-  await page.screenshot({path:resolve(__dirname,'../../../../docs/images/local-terminal.png'),fullPage:true});
+  await page.screenshot({path:resolve(__dirname,'../../../../docs/images/local-terminal.png'),fullPage:true,animations:'disabled'});
+});
+
+test('real feed, rejection provenance and mobile layout remain usable',async({page})=>{
+ const password=readFileSync(resolve(__dirname,'../../../../.local/login-password.txt'),'utf8').trim();
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.getByLabel('Local password').fill(password);await page.getByRole('button',{name:'Open terminal'}).click();
+ await expect(page.getByText('REST • DEGRADED',{exact:true})).toBeVisible({timeout:15000});
+ await page.getByRole('button',{name:'Inspect costs & risk →'}).click();
+ await expect(page.getByText('REJECTED',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Record paper attempt'}).click();
+ await page.getByRole('button',{name:'Signal log',exact:true}).click();
+ await expect(page.getByRole('cell',{name:'manual',exact:true}).first()).toBeVisible();
+ await page.getByRole('button',{name:'Overview',exact:true}).click();
+ await expect(page.locator('canvas').first()).toBeVisible();
+ await expect(page.locator('.chart-caption')).toContainText(/Latest candle: \d{2}:\d{2} UTC/);
+ await expect.poll(()=>page.locator('.chart-wrap').evaluate(element=>element.querySelector('canvas')!.getBoundingClientRect().width/element.clientWidth)).toBeGreaterThan(.8);
+ await page.screenshot({path:resolve(__dirname,'../../../../docs/images/local-terminal-overview.png'),fullPage:true,animations:'disabled'});
+ await page.getByRole('button',{name:'Switch theme'}).click();
+ await expect(page.locator('.chart-caption')).toContainText(/Latest candle: \d{2}:\d{2} UTC/);
+ await page.screenshot({path:resolve(__dirname,'../../../../docs/images/local-terminal-light.png'),fullPage:true,animations:'disabled'});
+ await page.setViewportSize({width:390,height:844});
+ await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.screenshot({path:resolve(__dirname,'../../../../docs/images/local-terminal-mobile.png'),fullPage:true,animations:'disabled'});
+ expect(errors).toEqual([]);
 });

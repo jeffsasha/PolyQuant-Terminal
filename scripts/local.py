@@ -8,6 +8,7 @@ import signal
 import subprocess
 import sys
 import time
+import urllib.request
 
 ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/'.local'
@@ -57,11 +58,39 @@ def database():
             subprocess.run([str(PG/'createdb'),'-h','127.0.0.1','-p','55432','-U','polyquant',name],env=e,check=True)
 
 
+def owned_process(pid,name):
+    command=subprocess.run(['ps','-p',str(pid),'-o','command='],capture_output=True,text=True).stdout.strip()
+    if not command: return False
+    expected=ROOT/'apps/web' if name=='web' else ROOT
+    rows=subprocess.run(['/usr/sbin/lsof','-a','-p',str(pid),'-d','cwd','-Fn'],capture_output=True,text=True).stdout.splitlines()
+    cwd=next((line[1:] for line in rows if line.startswith('n')),None)
+    identity=('next-server' in command or str(ROOT/'apps/web/node_modules/next') in command) if name=='web' else 'uvicorn polyquant.api:app' in command
+    return cwd==str(expected) and identity
+
+
+def stop_process(name):
+    pidfile=DATA/(name+'.pid')
+    if not pidfile.exists(): return
+    pid=int(pidfile.read_text())
+    if owned_process(pid,name):
+        os.kill(pid,signal.SIGTERM)
+        for _ in range(100):
+            if not owned_process(pid,name): break
+            time.sleep(.1)
+        else:
+            os.kill(pid,signal.SIGKILL)
+            for _ in range(30):
+                if not owned_process(pid,name): break
+                time.sleep(.1)
+            else: raise RuntimeError('Owned service did not stop; database remains running')
+    pidfile.unlink()
+
+
 def spawn(name,args,cwd):
     pidfile=DATA/(name+'.pid')
     if pidfile.exists():
-        pid=int(pidfile.read_text()); command=subprocess.run(['ps','-p',str(pid),'-o','command='],capture_output=True,text=True).stdout
-        if str(ROOT) in command: return
+        pid=int(pidfile.read_text())
+        if owned_process(pid,name): return
     log=(DATA/(name+'.log')).open('ab')
     child_env=env()
     if name=='web':
@@ -70,23 +99,35 @@ def spawn(name,args,cwd):
     pidfile.write_text(str(process.pid))
 
 
+def ready(name):
+    port=3000 if name=='web' else 8000
+    path='/' if name=='web' else '/health'
+    for _ in range(100):
+        pid=int((DATA/(name+'.pid')).read_text())
+        try:
+            if owned_process(pid,name):
+                with urllib.request.urlopen(f'http://127.0.0.1:{port}{path}',timeout=1) as response:
+                    if response.status==200: return
+        except (OSError,ValueError): pass
+        time.sleep(.1)
+    raise RuntimeError(f'{name} did not become ready; inspect its private local log')
+
+
 def main():
     command=sys.argv[1] if len(sys.argv)>1 else 'start'
     if command in ['db','start','backend','web']:
         database()
         if command in ['start','backend']:
-            spawn('backend',[str(ROOT/'.venv/bin/python'),'-m','uvicorn','polyquant.api:app','--host','127.0.0.1','--port','8000'],ROOT)
+            spawn('backend',[str(ROOT/'.venv/bin/python'),'-m','uvicorn','polyquant.api:app','--host','127.0.0.1','--port','8000','--timeout-graceful-shutdown','5'],ROOT)
         if command in ['start','web']:
             spawn('web',[str(NODE),str(ROOT/'apps/web/node_modules/next/dist/bin/next'),'start','--hostname','127.0.0.1','--port','3000'],ROOT/'apps/web')
+        if command in ['start','backend']: ready('backend')
+        if command in ['start','web']: ready('web')
         print('Workspace database is running on 127.0.0.1:55432.')
         if command!='db': print('Terminal: http://127.0.0.1:3000 — password is in .local/login-password.txt')
     elif command=='stop':
         for name in ['web','backend']:
-            p=DATA/(name+'.pid')
-            if p.exists():
-                pid=int(p.read_text()); text=subprocess.run(['ps','-p',str(pid),'-o','command='],capture_output=True,text=True).stdout
-                if str(ROOT) in text: os.kill(pid,signal.SIGTERM)
-                p.unlink()
+            stop_process(name)
         subprocess.run([str(PG/'pg_ctl'),'-D',str(DATA/'postgres'),'stop','-m','fast'],check=False)
     else:
         print('Use: python3 scripts/local.py db|start|backend|web|stop'); return 2
