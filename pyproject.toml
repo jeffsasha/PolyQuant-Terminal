@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polyquant-terminal"
+version = "0.1.0"
+requires-python = ">=3.12"
+description = "Local US BTC paper trading research terminal"
+
+[tool.setuptools.packages.find]
+where = ["services"]
+
+[tool.pytest.ini_options]
+pythonpath = ["services"]
+testpaths = ["tests"]
+markers = ["production_readonly: optional public production data checks"]
