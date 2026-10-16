@@ -1,11 +1,12 @@
 import asyncio,contextlib,time,uuid
 from collections import deque
 from decimal import Decimal as D
-from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot
+from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot,ACCOUNT_IDS,MarketTerms
 from .venue.us import USDataAdapter
 from .reference import ReferenceProvider,SpotProvider
 from .recorder import Recorder,StorageHalt
-from .execution import PaperExecutionEngine
+from .execution import PaperExecutionEngine,sweep
+from .settlement import SettlementProvider
 from .strategies.probability import ProbabilityStrategy
 from .strategies.momentum import MomentumStrategy
 from .strategies.book import BookStrategy
@@ -21,6 +22,7 @@ class Runtime:
         self.events=deque(maxlen=2000); self.sequence=0; self.connection_epoch=str(uuid.uuid4())
         self.errors={}; self.tasks=[]; self.running=True; self.collection=True; self.latency_ms=None
         self.last_discovery=None; self.last_update=None; self.strategies=[ProbabilityStrategy(),MomentumStrategy(),BookStrategy()]
+        self.book_locks={}; self.command_locks={}; self.settlement=SettlementProvider(self.venue.transport,store)
         self.started_at=utcnow(); self.stream_status='NOT_CONFIGURED'; self.last_stream=None; self.gaps=0
     def event(self,kind,payload,market_id=None,source_at=None):
         self.sequence+=1; at=utcnow()
@@ -39,7 +41,7 @@ class Runtime:
         return event
     def persistence_halt(self,reason):
         self.collection=False; self.recorder.halted=True; self.errors['recorder']=reason
-        for name in ['probability','momentum','book']:
+        for name in ACCOUNT_IDS:
             try: self.store.halt(name,reason)
             except Exception: self.errors['database']='PERSISTENCE_FAILED'
     async def start(self):
@@ -49,7 +51,9 @@ class Runtime:
             if self.recorder.recovery_errors: self.persistence_halt('PERSISTENCE_FAILED')
         except Exception: self.persistence_halt('PERSISTENCE_FAILED')
         self.store.reconcile(); self.store.audit('RUNTIME_STARTED',payload={'mode':'PAPER','reference_validated':False})
-        self.tasks=[asyncio.create_task(self.data_loop()),asyncio.create_task(self.strategy_loop()),asyncio.create_task(self.stream_loop())]
+        for row in self.store.held_instruments():
+            market=MarketTerms.from_raw(row['raw']); self.markets[market.id]=market
+        self.tasks=[asyncio.create_task(loop()) for loop in [self.data_loop,self.book_loop,self.execution_loop,self.settlement_loop,self.strategy_loop,self.stream_loop]]
     async def close(self):
         self.running=False
         for task in self.tasks: task.cancel()
@@ -69,23 +73,12 @@ class Runtime:
                         self.event('instrument',market.raw,market.id)
                         self.store.save_instrument(market); self.markets[market.id]=market
                     # Retain ended instruments only while a holding needs settlement.
-                    held={p['market_id'] for name in ['probability','momentum','book'] for p in self.store.state(name).positions}
+                    held={p['market_id'] for name in ACCOUNT_IDS for p in self.store.state(name).positions}
                     for identity in list(self.markets):
                         if self.markets[identity].end<utcnow() and identity not in held:
                             self.markets.pop(identity,None); self.books.pop(identity,None)
                             self.errors.pop('book:'+identity,None)
                     self.last_discovery=utcnow(); self.errors.pop('discovery',None)
-                for market in list(self.markets.values()):
-                    if market.end<=utcnow(): continue
-                    started=time.monotonic()
-                    try:
-                        book,raw=await self.venue.book(market)
-                        self.event('book',raw,market.id,book.source_at)
-                        previous=self.books.get(market.id)
-                        if not previous or (book.source_at and (not previous.source_at or book.source_at>=previous.source_at)):
-                            self.books[market.id]=book
-                        self.latency_ms=round((time.monotonic()-started)*1000,1); self.errors.pop('book:'+market.id,None)
-                    except Exception as error: self.errors['book:'+market.id]=type(error).__name__
                 try:
                     ref=await self.reference_provider.latest()
                     self.event('index',jsonable(ref),source_at=ref.source_at); self.reference=ref; self.errors.pop('index',None)
@@ -94,11 +87,83 @@ class Runtime:
                     spot=await self.spot_provider.latest(); self.event('spot',spot); self.spot=spot; self.errors.pop('spot',None)
                 except Exception as error: self.errors['spot']=type(error).__name__
                 self.store.roll_days(self.marks())
-                self.engine.process_due()
             except StorageHalt: pass
             except Exception as error:
                 self.errors['discovery']=type(error).__name__; self.gaps+=1
-            await asyncio.sleep(3)
+            await asyncio.sleep(10)
+    async def capture_book(self,identity):
+        if not self.collection: raise StorageHalt('Collection is halted')
+        market=self.markets.get(identity)
+        if not market: raise ValueError('Market not discovered')
+        async with self.book_locks.setdefault(identity,asyncio.Lock()):
+            started=time.monotonic()
+            book,raw=await self.venue.book(market,fresh=True)
+            self.event('book',raw,identity,book.source_at)
+            previous=self.books.get(identity)
+            if not previous or (book.source_at and (not previous.source_at or book.source_at>=previous.source_at)):
+                self.books[identity]=book
+            self.latency_ms=round((time.monotonic()-started)*1000,1)
+            self.errors.pop('book:'+identity,None)
+            return self.books.get(identity,book)
+    async def book_loop(self):
+        while self.running:
+            if self.collection:
+                for market in list(self.markets.values()):
+                    if not market.start<=utcnow()<market.end: continue
+                    try: await self.capture_book(market.id)
+                    except Exception as error: self.errors['book:'+market.id]=type(error).__name__
+            await asyncio.sleep(5)
+    async def preview_order(self,intent):
+        try: book=await self.capture_book(intent.market_id)
+        except Exception as error:
+            self.errors['book:'+intent.market_id]=type(error).__name__
+            return {'allowed':False,'reasons':['BOOK_REFRESH_FAILED'],'maximum_cost':None,'estimate':None}
+        decision=self.engine.preview(intent); result=jsonable(decision)
+        result.update({'order_id':intent.id,'book_version':book.version,'source_at':book.source_at.isoformat() if book.source_at else None,'estimate':None})
+        if book.fresh(utcnow()):
+            estimate=sweep(intent,book,self.markets[intent.market_id].tick,utcnow())
+            result['estimate']={'qty':str(estimate.qty),'cost':str(estimate.cost),'fees':str(estimate.fees),'vwap':str(estimate.vwap) if estimate.vwap else None,'label':'PREVIEW_ONLY_NOT_A_FILL'}
+        return result
+    async def place_order(self,intent):
+        async with self.command_locks.setdefault(intent.account_id,asyncio.Lock()):
+            previous=self.store.get_order(intent.id)
+            if previous:
+                if any(previous[key]!=value for key,value in [('account_id',intent.account_id),('market_id',intent.market_id),('side',intent.side),('qty',intent.qty),('limit_price',intent.limit),('scenario',intent.scenario)]):
+                    raise ValueError('Order ID already belongs to a different request')
+                return {'allowed':True,'reasons':[],'order_id':intent.id,'status':previous['status']}
+            preview=await self.preview_order(intent)
+            if preview['allowed']: decision=self.engine.submit(intent)
+            else:
+                self.store.decision(intent.account_id,intent.market_id,intent.strategy,{'action':'REJECTED','reasons':preview['reasons'],'intent':intent})
+                return {**preview,'status':'REJECTED'}
+            order=self.store.get_order(intent.id)
+            return {**jsonable(decision),'order_id':intent.id,'status':order['status'] if order else 'REJECTED'}
+    async def process_arrivals_once(self):
+        due=self.store.pending_due(utcnow())
+        for identity in dict.fromkeys(row['market_id'] for row in due):
+            selected=[row['id'] for row in due if row['market_id']==identity]
+            try: await self.capture_book(identity)
+            except Exception as error:
+                self.errors['arrival:'+identity]=type(error).__name__
+                for order in selected: self.store.cancel(order,'ARRIVAL_BOOK_REFRESH_FAILED')
+                continue
+            self.engine.process_due(utcnow(),order_ids=selected)
+    async def execution_loop(self):
+        while self.running:
+            try: await self.process_arrivals_once()
+            except Exception as error: self.errors['execution']=type(error).__name__;self.persistence_halt('PERSISTENCE_FAILED')
+            await asyncio.sleep(.05)
+    async def settlement_loop(self):
+        while self.running:
+            for row in self.store.held_instruments():
+                market=MarketTerms.from_raw(row['raw'])
+                if market.end>utcnow(): continue
+                try:
+                    status=await self.settlement.reconcile(market)
+                    if status=='SETTLED': self.errors.pop('settlement:'+market.id,None)
+                    else: self.errors['settlement:'+market.id]=status
+                except Exception as error: self.errors['settlement:'+market.id]=type(error).__name__
+            await asyncio.sleep(10)
     async def strategy_loop(self):
         while self.running:
             try:
@@ -107,7 +172,7 @@ class Runtime:
                     for strategy in self.strategies:
                         signal=strategy.evaluate(list(self.events),market,self.store.state(strategy.name),ExperimentConfig(),utcnow(),False)
                         self.store.decision(strategy.name,market.id,strategy.name,signal)
-                for name in ['probability','momentum','book']:
+                for name in ACCOUNT_IDS:
                     account=self.store.state(name,self.marks())
                     with self.store.connect() as c: c.execute('INSERT INTO equity_snapshots(account_id,equity) VALUES(%s,%s)',(name,account.equity))
             except Exception as error: self.errors['strategy']=type(error).__name__
@@ -168,14 +233,15 @@ class Runtime:
                   'book':jsonable(book) if book else None,'book_fresh':book.fresh(now) if book else False,
                   'source_age_seconds':(now-book.source_at).total_seconds() if book and book.source_at else None}
             markets.append(item)
-        accounts=[jsonable(self.store.state(name,self.marks())) for name in ['probability','momentum','book']]
+        accounts=[jsonable(self.store.state(name,self.marks())) for name in ACCOUNT_IDS]
         return jsonable({'mode':'PAPER','environment':'production','server_time':now,'started_at':self.started_at,
             'collection':self.collection,'engine_state':'REFERENCE_BLOCKED','reference_validated':False,
+            'manual_trading_ready':self.collection and not self.store.state('manual').halts and any(book.fresh(now) for book in self.books.values()),
             'reference':self.reference,'spot':self.spot,'markets':markets,'accounts':accounts,
             'http_latency_ms':self.latency_ms,'last_update':self.last_update,'stream_status':self.stream_status,
             'last_stream':self.last_stream,'gap_count':self.gaps,'errors':self.errors,'recorder':self.recorder.status(),
             'decisions':self.store.history('decisions',60),'orders':self.store.history('orders',60),
-            'fills':self.store.history('fills',100),'datasets':self.store.history('datasets',60),
+            'fills':self.store.fills(100),'datasets':self.store.history('datasets',60),
             'equity_history':self.store.history('equity_snapshots',120),
             'performance':self.store.performance(),
             'research':{'status':'INSUFFICIENT_EVIDENCE','calibration':None,

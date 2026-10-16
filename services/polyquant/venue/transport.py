@@ -1,4 +1,5 @@
 import re
+import asyncio,time
 
 PRODUCTION_HOST = "https://gateway.polymarket.us"
 
@@ -21,10 +22,19 @@ class ReadOnlyUSTransport:
         context = ssl.create_default_context(cafile=ca if Path(ca).exists() else None)
         self.client = httpx.AsyncClient(base_url=PRODUCTION_HOST, verify=context,
             timeout=15, follow_redirects=False, headers={"Accept":"application/json"})
+        self.rate_lock=asyncio.Lock(); self.next_request=0
 
     async def request(self, method: str, path: str, params=None):
         validate_read_route(method, path)
-        response = await self.client.request(method, path, params=params)
+        async with self.rate_lock:
+            delay=self.next_request-time.monotonic()
+            if delay>0: await asyncio.sleep(delay)
+            response = await self.client.request(method, path, params=params)
+            self.next_request=time.monotonic()+1  # Public REST fallback; prefer authenticated streaming when configured.
+            if response.status_code==429:
+                retry=response.headers.get('retry-after','10')
+                cooldown=max(10,int(retry)) if retry.isdigit() else 30
+                self.next_request=time.monotonic()+cooldown
         response.raise_for_status()
         if len(response.content) > 8_000_000 or "json" not in response.headers.get("content-type", ""):
             raise ValueError("Invalid or oversized venue response")

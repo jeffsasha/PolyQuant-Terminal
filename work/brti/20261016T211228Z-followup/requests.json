@@ -1,0 +1,20 @@
+[
+  {
+    "url": "https://gateway.polymarket.us/v1/markets/?closed=true&categories=crypto&includeHidden=true&limit=100&offset=0&endDateMin=2026-10-16T18%3A00%3A00Z&endDateMax=2026-10-16T21%3A30%3A00Z&orderBy=gameStartTime&orderDirection=desc",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:12:28.204137+00:00",
+    "error": "Redirect rejected",
+    "received_at": "2026-10-16T21:12:28.399579+00:00",
+    "elapsed_seconds": 0.195456
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/markets/?closed=true&categories=crypto&includeHidden=true&limit=100&offset=0&orderBy=gameStartTime&orderDirection=desc",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:12:28.400191+00:00",
+    "error": "Redirect rejected",
+    "received_at": "2026-10-16T21:12:28.632431+00:00",
+    "elapsed_seconds": 0.232288
+  }
+]

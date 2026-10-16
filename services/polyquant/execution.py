@@ -59,11 +59,14 @@ class PaperExecutionEngine:
             from .types import RiskDecision
             return RiskDecision(False,('DUPLICATE_OR_CONCURRENT_RISK_REJECTION',))
         return decision
-    def process_due(self,at=None):
+    def process_due(self,at=None,order_ids=None):
         at=at or self.clock.now(); results=[]
         for row in self.store.pending_due(at):
+            if order_ids is not None and row['id'] not in order_ids: continue
             intent=OrderIntent(row['id'],row['account_id'],row['market_id'],row['side'],row['qty'],row['limit_price'],row['strategy'],row['probability'],row['scenario'])
             market=self.markets.get(intent.market_id); book=self.books.get(intent.market_id)
+            if book and book.received_at<row['arrival_at']:
+                self.store.cancel(intent.id,'ARRIVAL_BOOK_NOT_OBSERVED'); continue
             if not market or not book or not book.fresh(at) or market.end<=at or self.store.state(intent.account_id).halts:
                 self.store.cancel(intent.id,'ARRIVAL_REVALIDATION_FAILED'); continue
             account=self.store.state(intent.account_id)

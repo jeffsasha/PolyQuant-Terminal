@@ -68,10 +68,20 @@ def owned_process(pid,name):
     return cwd==str(expected) and identity
 
 
+def listener_pids(name):
+    port='3000' if name=='web' else '8000'
+    output=subprocess.run(['/usr/sbin/lsof','-nP','-t','-iTCP:'+port,'-sTCP:LISTEN'],capture_output=True,text=True).stdout
+    return list(dict.fromkeys(int(line) for line in output.splitlines() if line.isdigit()))
+
+
 def stop_process(name):
     pidfile=DATA/(name+'.pid')
-    if not pidfile.exists(): return
-    pid=int(pidfile.read_text())
+    pid=int(pidfile.read_text()) if pidfile.exists() else None
+    if pid is None or not owned_process(pid,name):
+        candidates=[value for value in listener_pids(name) if owned_process(value,name)]
+        if not candidates:
+            pidfile.unlink(missing_ok=True);return
+        pid=candidates[0]
     if owned_process(pid,name):
         os.kill(pid,signal.SIGTERM)
         for _ in range(100):
@@ -91,6 +101,11 @@ def spawn(name,args,cwd):
     if pidfile.exists():
         pid=int(pidfile.read_text())
         if owned_process(pid,name): return
+    listeners=listener_pids(name)
+    if listeners:
+        if len(listeners)==1 and owned_process(listeners[0],name):
+            pidfile.write_text(str(listeners[0]));return
+        raise RuntimeError(f'{name} port is occupied by another process; refusing to start or stop it')
     log=(DATA/(name+'.log')).open('ab')
     child_env=env()
     if name=='web':
@@ -105,7 +120,7 @@ def ready(name):
     for _ in range(100):
         pid=int((DATA/(name+'.pid')).read_text())
         try:
-            if owned_process(pid,name):
+            if owned_process(pid,name) and listener_pids(name)==[pid]:
                 with urllib.request.urlopen(f'http://127.0.0.1:{port}{path}',timeout=1) as response:
                     if response.status==200: return
         except (OSError,ValueError): pass

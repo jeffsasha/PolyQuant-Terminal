@@ -6,6 +6,7 @@ from .fees import FeeModel
 class RiskManager:
     def evaluate(self,intent,account,market,book,reference,config,at):
         reasons=[]; selling=intent.side.startswith('SELL_')
+        discretionary=intent.account_id=='manual' and intent.strategy=='manual_discretionary'
         if intent.side not in ['BUY_UP','BUY_DOWN','SELL_UP','SELL_DOWN']: reasons.append('INVALID_SIDE')
         if not intent.qty.is_finite() or not intent.limit.is_finite() or intent.qty<=0 or not 0<intent.limit<1:
             return RiskDecision(False,('INVALID_ORDER_VALUES',))
@@ -24,8 +25,9 @@ class RiskManager:
             held=sum((p['qty'] for p in account.positions if p['market_id']==market.id and p['direction']==intent.side.split('_')[-1]),D('0'))
             if held<intent.qty: reasons.append('UNCOVERED_SALE')
         else:
-            if not reference.validated: reasons.append('REFERENCE_RECONCILIATION_FAILED')
-            elif not reference.source_at or not 0<=(at-reference.source_at).total_seconds()<=3: reasons.append('STALE_REFERENCE')
+            if not discretionary:
+                if not reference.validated: reasons.append('REFERENCE_RECONCILIATION_FAILED')
+                elif not reference.source_at or not 0<=(at-reference.source_at).total_seconds()<=3: reasons.append('STALE_REFERENCE')
             if market.threshold is None: reasons.append('OFFICIAL_THRESHOLD_UNAVAILABLE')
             if (market.end-at).total_seconds()<={'15m':120,'1h':300}[market.horizon]: reasons.append('NO_ENTRY_WINDOW')
             if account.equity<=0 or maximum_cost>account.equity*config.risk_per_trade: reasons.append('PER_TRADE_LOSS_LIMIT')
@@ -39,7 +41,8 @@ class RiskManager:
             if committed+maximum_cost>account.equity*config.exposure_limit: reasons.append('COMBINED_EXPOSURE_LIMIT')
             cadence=sum((p['cost'] for p in positions if p.get('horizon')==market.horizon),D('0'))+sum((p['reserved'] for p in pending if p.get('horizon')==market.horizon),D('0'))
             if cadence+maximum_cost>account.equity*config.cadence_limit: reasons.append('CADENCE_EXPOSURE_LIMIT')
-            if intent.probability is None or not intent.probability.is_finite() or not 0<=intent.probability<=1:
+            if discretionary: pass  # Human decision, never represented as a model/edge observation.
+            elif intent.probability is None or not intent.probability.is_finite() or not 0<=intent.probability<=1:
                 reasons.append('MODEL_PROBABILITY_UNAVAILABLE')
             elif intent.probability-intent.limit-fee/intent.qty<config.min_edge: reasons.append('INSUFFICIENT_NET_EDGE')
         if maximum_cost>account.cash-account.reserved: reasons.append('INSUFFICIENT_CAPITAL')

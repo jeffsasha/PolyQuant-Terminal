@@ -1,0 +1,234 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "protos/gateway/asset-prices/v1/asset_prices.proto",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://gateway.polymarket.us",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "AssetPricesService"
+    }
+  ],
+  "paths": {
+    "/v1/asset-prices/history": {
+      "get": {
+        "summary": "Get A Bucketed OHLC Price Series For One Or More Assets",
+        "description": "Returns a dense, ascending OHLC candle series per requested asset between from and to, one candle per bucket. Buckets with no ticks are gap-filled: close is carried forward, open/high/low equal that close, and tick_count is 0. The server clamps rather than rejects: a to of 0 or in the future becomes now, and from is raised so the series holds at most 3600 candles. That count is the only size limit, so the widest window scales with the bucket: an hour at 1S, 60 hours at 1M, 150 days at 1H. The effective bounds are echoed on each series. Duplicate assets are deduped; the response holds one series per distinct asset. Match a series to a requested asset by its asset field, never by position: the order is not guaranteed, and the REST surface returns the series sorted by symbol because a repeated query parameter does not keep its order. An unknown symbol in a known class returns an empty series, not an error; an unknown class is rejected.",
+        "operationId": "AssetPricesService_GetAssetPriceHistory",
+        "responses": {
+          "200": {
+            "description": "Asset price series",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway.asset_prices.v1.GetAssetPriceHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - no assets, more than 10 assets, an asset not in <class>:<symbol> form or of an unknown class, or an unspecified bucket",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "assets",
+            "description": "Assets in canonical <class>:<symbol> form (gateway.types.v1.AssetId), e.g. crypto:btc. Repeat the query parameter to request multiple, e.g. ?assets=crypto:btc&assets=crypto:eth. At most 10; duplicates are deduped server-side.",
+            "in": "query",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "from",
+            "description": "Unix-seconds start of the window. Required. Aligned down to the bucket, and raised when the window would exceed 3600 candles; the effective start is echoed in AssetPriceSeries.from.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "to",
+            "description": "Unix-seconds end of the window. 0 or a future value means now. The in-progress bucket is included. A past value is aligned up to 10 s for sub-minute buckets, or to one bucket otherwise; the effective end is echoed in AssetPriceSeries.to.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "bucket",
+            "description": "Candle width. Required; ASSET_PRICE_BUCKET_UNSPECIFIED is rejected.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASSET_PRICE_BUCKET_1S",
+                "ASSET_PRICE_BUCKET_5S",
+                "ASSET_PRICE_BUCKET_15S",
+                "ASSET_PRICE_BUCKET_1M",
+                "ASSET_PRICE_BUCKET_5M",
+                "ASSET_PRICE_BUCKET_15M",
+                "ASSET_PRICE_BUCKET_1H",
+                "ASSET_PRICE_BUCKET_1D"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "Asset Prices"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "gateway.asset_prices.v1.AssetPriceBucket": {
+        "type": "string",
+        "enum": [
+          "ASSET_PRICE_BUCKET_1S",
+          "ASSET_PRICE_BUCKET_5S",
+          "ASSET_PRICE_BUCKET_15S",
+          "ASSET_PRICE_BUCKET_1M",
+          "ASSET_PRICE_BUCKET_5M",
+          "ASSET_PRICE_BUCKET_15M",
+          "ASSET_PRICE_BUCKET_1H",
+          "ASSET_PRICE_BUCKET_1D"
+        ]
+      },
+      "gateway.asset_prices.v1.AssetPriceCandle": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Bucket start (unix seconds)"
+          },
+          "open": {
+            "type": "string",
+            "format": "decimal",
+            "example": "63000.10",
+            "description": "First price in the bucket, as a decimal string in the series currency"
+          },
+          "high": {
+            "type": "string",
+            "format": "decimal",
+            "example": "63010.00",
+            "description": "Highest price in the bucket, as a decimal string in the series currency"
+          },
+          "low": {
+            "type": "string",
+            "format": "decimal",
+            "example": "62990.50",
+            "description": "Lowest price in the bucket, as a decimal string in the series currency"
+          },
+          "close": {
+            "type": "string",
+            "format": "decimal",
+            "example": "63005.25",
+            "description": "Last price in the bucket, as a decimal string in the series currency; carried forward from the previous bucket when the bucket had no ticks"
+          },
+          "tickCount": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of index ticks in the bucket. 0 marks a gap-filled bucket whose open/high/low equal its close."
+          }
+        }
+      },
+      "gateway.asset_prices.v1.AssetPriceSeries": {
+        "type": "object",
+        "properties": {
+          "asset": {
+            "$ref": "#/components/schemas/gateway.types.v1.AssetId"
+          },
+          "currency": {
+            "type": "string",
+            "example": "USD",
+            "description": "ISO 4217 currency code every candle price is quoted in"
+          },
+          "bucket": {
+            "$ref": "#/components/schemas/gateway.asset_prices.v1.AssetPriceBucket"
+          },
+          "from": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Effective window start (unix seconds) after alignment and clamping"
+          },
+          "to": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Effective window end (unix seconds) after clamping"
+          },
+          "candles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/gateway.asset_prices.v1.AssetPriceCandle"
+            },
+            "description": "Dense ascending candles, one per bucket in the effective window. Empty when the asset has no data."
+          }
+        }
+      },
+      "gateway.asset_prices.v1.GetAssetPriceHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "series": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/gateway.asset_prices.v1.AssetPriceSeries"
+            },
+            "description": "One series per distinct requested asset. Match by the asset field, never by position: the order is not guaranteed and REST returns the series sorted by symbol"
+          }
+        }
+      },
+      "gateway.types.v1.AssetClass": {
+        "type": "string",
+        "enum": [
+          "ASSET_CLASS_CRYPTO"
+        ],
+        "description": "AssetClass namespaces asset symbols."
+      },
+      "gateway.types.v1.AssetId": {
+        "type": "object",
+        "properties": {
+          "assetClass": {
+            "$ref": "#/components/schemas/gateway.types.v1.AssetClass"
+          },
+          "symbol": {
+            "type": "string",
+            "example": "btc",
+            "description": "Lower-case symbol within the class, e.g. btc. Matches [a-z0-9-], at most 64 characters."
+          }
+        },
+        "description": "Identifies one priced asset. The canonical string form is class:symbol, e.g. crypto:btc."
+      }
+    }
+  }
+}

@@ -5,7 +5,7 @@ import uuid
 import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
-from .types import AccountState,ExperimentConfig,jsonable,utcnow
+from .types import AccountState,ExperimentConfig,jsonable,utcnow,ACCOUNT_IDS
 from .clock import risk_day_id
 
 
@@ -16,7 +16,7 @@ class Store:
         with self.connect() as c: c.execute((Path(__file__).resolve().parents[2]/'migrations/001_core.sql').read_text())
     def bootstrap(self):
         with self.connect() as c:
-            for name in ['probability','momentum','book']:
+            for name in ACCOUNT_IDS:
                 c.execute('INSERT INTO accounts(id,day_id,config) VALUES(%s,%s,%s) ON CONFLICT DO NOTHING',
                           (name,risk_day_id(utcnow()),Jsonb(jsonable(ExperimentConfig()))))
     def acquire_writer(self):
@@ -45,8 +45,8 @@ class Store:
             account=c.execute('SELECT * FROM accounts WHERE id=%s FOR UPDATE',(intent.account_id,)).fetchone()
             if account['halts'] or maximum_cost>account['cash']-account['reserved']: return False
             if validator is not None and not validator(): return False
-            existing=c.execute('SELECT id FROM orders WHERE id=%s OR (account_id=%s AND market_id=%s AND strategy=%s)',
-                (intent.id,intent.account_id,intent.market_id,intent.strategy)).fetchone()
+            existing=c.execute("SELECT id FROM orders WHERE id=%s OR (%s<>'manual_discretionary' AND account_id=%s AND market_id=%s AND strategy=%s)",
+                (intent.id,intent.strategy,intent.account_id,intent.market_id,intent.strategy)).fetchone()
             if existing: return False
             c.execute('INSERT INTO orders(id,account_id,market_id,side,qty,limit_price,reserved,status,strategy,scenario,probability,arrival_at,horizon) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
                 (intent.id,intent.account_id,intent.market_id,intent.side,intent.qty,intent.limit,maximum_cost,'PENDING_ARRIVAL',intent.strategy,intent.scenario,intent.probability,arrival_at or utcnow(),market.horizon if market else None))
@@ -68,15 +68,19 @@ class Store:
             if result.qty:
                 if order['side'].startswith('BUY'):
                     delta=-(result.cost+result.fees)
-                    c.execute('INSERT INTO positions(account_id,market_id,direction,qty,cost,fees,horizon) VALUES(%s,%s,%s,%s,%s,%s,%s) ON CONFLICT(account_id,market_id,direction) DO UPDATE SET qty=positions.qty+EXCLUDED.qty,cost=positions.cost+EXCLUDED.cost,fees=positions.fees+EXCLUDED.fees',
+                    c.execute("INSERT INTO positions(account_id,market_id,direction,qty,cost,fees,horizon) VALUES(%s,%s,%s,%s,%s,%s,%s) ON CONFLICT(account_id,market_id,direction) WHERE status='OPEN' DO UPDATE SET qty=positions.qty+EXCLUDED.qty,cost=positions.cost+EXCLUDED.cost,fees=positions.fees+EXCLUDED.fees",
                         (order['account_id'],order['market_id'],direction,result.qty,result.cost,result.fees,order['horizon']))
                     postings=[('CASH',delta),('INVENTORY',result.cost),('FEES',result.fees)]
                 else:
                     p=c.execute("SELECT * FROM positions WHERE account_id=%s AND market_id=%s AND direction=%s AND status='OPEN' FOR UPDATE",(order['account_id'],order['market_id'],direction)).fetchone()
                     if not p or p['qty']<result.qty: raise ValueError('Uncovered sale prohibited')
                     basis=(p['cost']*result.qty/p['qty']).quantize(D('0.00000001'))
+                    entry_fees=(p['fees']*result.qty/p['qty']).quantize(D('0.00000001'))
                     delta=result.cost-result.fees
-                    c.execute('UPDATE positions SET qty=qty-%s,cost=cost-%s WHERE id=%s',(result.qty,basis,p['id']))
+                    closed=result.qty==p['qty']
+                    c.execute("UPDATE positions SET qty=qty-%s,cost=cost-%s,fees=fees-%s,realized_pnl=realized_pnl+%s,status=%s,settled_at=%s WHERE id=%s",
+                        (result.qty,basis,entry_fees,result.cost-basis-entry_fees-result.fees,'CLOSED' if closed else 'OPEN',utcnow() if closed else None,p['id']))
+                    if closed: self.update_loss_streak(order['account_id'],c)
                     postings=[('CASH',delta),('INVENTORY',-basis),('FEES',result.fees),('REALIZED',basis-result.cost)]
                 for i,f in enumerate(result.fills):
                     c.execute('INSERT INTO fills(id,order_id,price,qty,fee) VALUES(%s,%s,%s,%s,%s)',(f'{order_id}:{i}',order_id,f.price,f.qty,f.fee))
@@ -122,12 +126,26 @@ class Store:
         with self.connect() as c:
             rows=c.execute("SELECT a.id, (SELECT COUNT(*) FROM fills f JOIN orders o ON o.id=f.order_id WHERE o.account_id=a.id) AS fill_count, COALESCE((SELECT -SUM(p.amount) FROM postings p WHERE p.account_id=a.id AND p.bucket IN ('REALIZED','SETTLEMENT_PNL','FEES')),0) AS net_realized_pnl FROM accounts a").fetchall()
         return {row['id']:{'fill_count':row['fill_count'],'net_realized_pnl':row['net_realized_pnl']} for row in rows}
+    def get_order(self,identity):
+        with self.connect() as c: return c.execute('SELECT * FROM orders WHERE id=%s',(identity,)).fetchone()
+    def fills(self,limit=100):
+        with self.connect() as c:
+            return c.execute('SELECT f.*,o.account_id,o.market_id,o.side,o.book_version,o.scenario FROM fills f JOIN orders o ON o.id=f.order_id ORDER BY f.created_at DESC LIMIT %s',(min(limit,500),)).fetchall()
+    def update_loss_streak(self,account_id,c):
+        settled=c.execute("SELECT realized_pnl+payout-cost-fees AS pnl FROM positions WHERE account_id=%s AND status IN ('SETTLED','CLOSED') ORDER BY settled_at DESC,id DESC",(account_id,)).fetchall()
+        losses=0
+        for position in settled:
+            if position['pnl']>=0: break
+            losses+=1
+        previous=c.execute('SELECT consecutive_losses,cooldown_until FROM accounts WHERE id=%s',(account_id,)).fetchone()
+        cooldown=previous['cooldown_until'] if previous['consecutive_losses']==losses else utcnow()+timedelta(minutes=30) if losses>=3 else None
+        c.execute('UPDATE accounts SET consecutive_losses=%s,cooldown_until=%s WHERE id=%s',(losses,cooldown,account_id))
     def pending_due(self,at):
         with self.connect() as c: return c.execute("SELECT * FROM orders WHERE status='PENDING_ARRIVAL' AND arrival_at<=%s ORDER BY created_at",(at,)).fetchall()
     def save_manifest(self,manifest):
         if manifest:
             with self.connect() as c: c.execute('INSERT INTO datasets(id,filename,sha256,bytes,events,first_at,last_at) VALUES(%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING',tuple(manifest[k] for k in ['id','filename','sha256','bytes','events','first_at','last_at']))
-    def settle_market(self,market_id,outcome,revision_id,final=False):
+    def settle_market(self,market_id,outcome,revision_id,final=False,provenance=None):
         if not final: return
         if outcome not in ['UP','DOWN','VOID']: raise ValueError('Unsupported final outcome')
         with self.connect() as c:
@@ -136,7 +154,7 @@ class Store:
             for account in rows:
                 account_id=account['account_id']
                 c.execute('SELECT id FROM accounts WHERE id=%s FOR UPDATE',(account_id,))
-                positions=c.execute('SELECT * FROM positions WHERE account_id=%s AND market_id=%s FOR UPDATE',(account_id,market_id)).fetchall()
+                positions=c.execute("SELECT * FROM positions WHERE account_id=%s AND market_id=%s AND status IN ('OPEN','SETTLED') FOR UPDATE",(account_id,market_id)).fetchall()
                 for p in positions:
                     payment=p['cost'] if outcome=='VOID' else p['qty'] if p['direction']==outcome else D('0')
                     difference=payment-p['payout']
@@ -146,18 +164,12 @@ class Store:
                     for bucket,amount in postings:
                         c.execute('INSERT INTO postings(group_id,account_id,bucket,amount) VALUES(%s,%s,%s,%s)',(revision_id+':'+str(p['id']),account_id,bucket,amount))
                     c.execute("UPDATE positions SET status='SETTLED',payout=%s,settled_at=COALESCE(settled_at,now()) WHERE id=%s",(payment,p['id']))
-                settled=c.execute("SELECT payout-cost-fees AS pnl FROM positions WHERE account_id=%s AND status='SETTLED' ORDER BY settled_at DESC,id DESC",(account_id,)).fetchall()
-                losses=0
-                for p in settled:
-                    if p['pnl']>=0: break
-                    losses+=1
-                c.execute('UPDATE accounts SET consecutive_losses=%s,cooldown_until=%s WHERE id=%s',
-                    (losses,utcnow()+timedelta(minutes=30) if losses>=3 else None,account_id))
+                self.update_loss_streak(account_id,c)
                 self.audit('OFFICIAL_SETTLEMENT_APPLIED',account_id,{'market_id':market_id,'outcome':outcome,'revision':revision_id},c)
-            c.execute('INSERT INTO settlements(id,market_id,outcome,payload) VALUES(%s,%s,%s,%s)',(revision_id,market_id,outcome,Jsonb({'final':True})))
+            c.execute('INSERT INTO settlements(id,market_id,outcome,payload) VALUES(%s,%s,%s,%s)',(revision_id,market_id,outcome,Jsonb(jsonable({'final':True,'provenance':provenance}))))
     def roll_days(self,marks=None):
         day=risk_day_id(utcnow())
-        for account_id in ['probability','momentum','book']:
+        for account_id in ACCOUNT_IDS:
             state=self.state(account_id,marks)
             with self.connect() as c:
                 c.execute('UPDATE accounts SET day_start=%s,day_id=%s WHERE id=%s AND day_id<>%s',(state.equity,day,account_id,day))
@@ -166,3 +178,7 @@ class Store:
         raw=jsonable(market.raw); version=hashlib.sha256(json.dumps(raw,sort_keys=True).encode()).hexdigest()
         with self.connect() as c:
             c.execute('INSERT INTO instrument_versions(id,version,raw) VALUES(%s,%s,%s) ON CONFLICT DO NOTHING',(market.id,version,Jsonb(raw)))
+
+    def held_instruments(self):
+        with self.connect() as c:
+            return c.execute("SELECT DISTINCT ON (v.id) v.raw FROM instrument_versions v JOIN positions p ON p.market_id=v.id WHERE (p.status='OPEN' AND p.qty>0) OR (p.status='SETTLED' AND p.settled_at>now()-interval '24 hours') ORDER BY v.id,v.created_at DESC").fetchall()

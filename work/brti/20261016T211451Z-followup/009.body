@@ -1,0 +1,1 @@
+{"series":[{"asset":{"assetClass":"ASSET_CLASS_CRYPTO", "symbol":"btc"}, "currency":"USD", "bucket":"ASSET_PRICE_BUCKET_1M", "from":1792174440, "to":1792174500, "candles":[{"timestamp":1792174440, "open":"81228.64", "high":"81245.97", "low":"81197.58", "close":"81208.96", "tickCount":60}]}]}

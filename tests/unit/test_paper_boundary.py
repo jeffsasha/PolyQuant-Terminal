@@ -32,3 +32,17 @@ class PaperBoundaryTests(unittest.TestCase):
 
 
 if __name__=="__main__": unittest.main()
+
+def test_read_transport_honors_retry_after_and_bounds_polling():
+    import asyncio,httpx
+    from polyquant.venue.transport import ReadOnlyUSTransport
+    async def run():
+        transport=ReadOnlyUSTransport();await transport.client.aclose()
+        transport.client=httpx.AsyncClient(base_url="https://gateway.polymarket.us",transport=httpx.MockTransport(lambda request:httpx.Response(429,headers={'Retry-After':'10'},request=request)))
+        import time
+        before=time.monotonic()
+        try:await transport.request('GET','/v1/markets')
+        except httpx.HTTPStatusError:pass
+        assert transport.next_request>=before+10
+        await transport.close()
+    asyncio.run(run())

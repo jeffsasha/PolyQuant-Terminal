@@ -1,4 +1,5 @@
 import asyncio,hashlib,hmac,json,os,uuid
+from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import Literal
 from fastapi import FastAPI,Request,Response,HTTPException,Depends
@@ -16,7 +17,7 @@ class Login(BaseModel):
     password:str=Field(max_length=256)
 class AccountCommand(BaseModel):
     model_config=ConfigDict(extra='forbid')
-    account_id:Literal['probability','momentum','book']='probability'
+    account_id:Literal['manual','probability','momentum','book']='manual'
 class PaperTicket(AccountCommand):
     id:str=Field(min_length=8,max_length=100)
     market_id:str=Field(max_length=80)
@@ -41,7 +42,10 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
     async def boundary(request,call_next):
         if request.headers.get('host') not in ['127.0.0.1:8000','127.0.0.1:3000','localhost:8000','localhost:3000','backend:8000']:
             return JSONResponse({'detail':'Invalid local host'},400)
-        if request.method not in ['GET','HEAD','OPTIONS'] and request.headers.get('origin')!=settings.web_origin:
+        origins={settings.web_origin}
+        if settings.web_origin in ['http://127.0.0.1:3000','http://localhost:3000']:
+            origins.update(['http://127.0.0.1:3000','http://localhost:3000'])
+        if request.method not in ['GET','HEAD','OPTIONS'] and request.headers.get('origin') not in origins:
             return JSONResponse({'detail':'Origin denied'},403)
         response=await call_next(request)
         response.headers['Cache-Control']='no-store'
@@ -94,6 +98,10 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
         try: rows=await app.state.runtime.spot_provider.candles(timeframe)
         except Exception: return {'source':'Coinbase BTC-USD spot','status':'UNAVAILABLE','candles':[]}
         return {'source':'Coinbase BTC-USD spot','status':'REAL_DATA','candles':rows}
+    @app.get('/research/reference')
+    def reference_report(value=Depends(authenticated)):
+        path=Path(__file__).resolve().parents[2]/'docs/BRTI_FOLLOWUP_RESEARCH.md'
+        return Response(path.read_text(),media_type='text/plain')
     @app.get('/decisions/{identity}')
     def decision(identity:str,value=Depends(authenticated)):
         with store.connect() as c: row=c.execute('SELECT * FROM decisions WHERE id=%s',(identity,)).fetchone()
@@ -118,13 +126,25 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
             qty=decimal(payload.qty); price=decimal(payload.limit)
             if qty<=0 or qty>1000000 or not 0<price<1: raise ValueError('Invalid quantity or price')
         except ValueError as error: raise HTTPException(422,str(error))
-        return OrderIntent(payload.id,payload.account_id,payload.market_id,payload.side,qty,price,'manual',None,payload.scenario)
+        strategy='manual_discretionary' if payload.account_id=='manual' else 'manual'
+        return OrderIntent(payload.id,payload.account_id,payload.market_id,payload.side,qty,price,strategy,None,payload.scenario)
     @app.post('/paper/preview')
-    def preview(payload:PaperTicket,value=Depends(authenticated)):
-        return jsonable(app.state.runtime.engine.preview(intent(payload)))
+    async def preview(payload:PaperTicket,value=Depends(authenticated)):
+        return await app.state.runtime.preview_order(intent(payload))
     @app.post('/paper/orders')
-    def order(payload:PaperTicket,value=Depends(authenticated)):
-        return jsonable(app.state.runtime.engine.submit(intent(payload)))
+    async def order(payload:PaperTicket,value=Depends(authenticated)):
+        try: return await app.state.runtime.place_order(intent(payload))
+        except ValueError as error: raise HTTPException(409,str(error))
+    @app.get('/paper/orders/{identity}')
+    def order_status(identity:str,value=Depends(authenticated)):
+        row=store.get_order(identity)
+        if not row: raise HTTPException(404,'Paper order not found')
+        return jsonable(row)
+    @app.post('/paper/orders/{identity}/cancel')
+    def cancel_order(identity:str,value=Depends(authenticated)):
+        if not store.get_order(identity): raise HTTPException(404,'Paper order not found')
+        store.cancel(identity,'USER_CANCELED')
+        return jsonable(store.get_order(identity))
     @app.get('/datasets/{identity}/replay')
     def replay(identity:str,value=Depends(authenticated)):
         with store.connect() as c: manifest=c.execute('SELECT * FROM datasets WHERE id=%s',(identity,)).fetchone()

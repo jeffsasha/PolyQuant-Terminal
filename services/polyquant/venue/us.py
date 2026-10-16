@@ -1,4 +1,4 @@
-import asyncio
+import asyncio,uuid
 from ..types import MarketTerms,utcnow
 from ..market_data import normalize_book
 from .transport import ReadOnlyUSTransport
@@ -29,9 +29,12 @@ class USDataAdapter:
         if not self.last_discovery_complete: raise ValueError('Discovery page cap reached')
         return result
 
-    async def book(self,market):
-        raw,headers=await self.transport.request('GET',f'/v1/markets/{market.slug}/book')
+    async def book(self,market,fresh=False):
+        params={'_pq_read':uuid.uuid4().hex} if fresh else None
+        raw,headers=await self.transport.request('GET',f'/v1/markets/{market.slug}/book',params)
         at=utcnow()
-        return normalize_book(market.id,raw,headers,at),raw
+        book=normalize_book(market.id,raw,headers,at)
+        capture={'body':raw,'book_version':book.version,'response_headers':{key:headers[key] for key in ['age','date','cf-cache-status','cache-control'] if key in headers}}
+        return book,capture
 
     async def close(self): await self.transport.close()

@@ -40,3 +40,9 @@ def test_login_rate_limit(store,monkeypatch):
     with client_for(store,monkeypatch) as client:
         for _ in range(5): assert client.post('/login',json={'password':'wrong'},headers={'Origin':'http://127.0.0.1:3000'}).status_code==401
         assert client.post('/login',json={'password':'wrong'},headers={'Origin':'http://127.0.0.1:3000'}).status_code==429
+
+def test_localhost_origin_is_usable_without_allowing_external_origins(store,monkeypatch):
+    with client_for(store,monkeypatch) as client:
+        response=client.post('/login',json={'password':'fixture-password'},headers={'Origin':'http://localhost:3000','Host':'localhost:8000'})
+        assert response.status_code==200
+        assert client.post('/login',json={'password':'fixture-password'},headers={'Origin':'https://evil.test'}).status_code==403

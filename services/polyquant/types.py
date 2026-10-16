@@ -4,6 +4,8 @@ from decimal import Decimal,InvalidOperation
 import hashlib
 import json
 
+ACCOUNT_IDS=('manual','probability','momentum','book')
+
 
 def decimal(value) -> Decimal:
     if isinstance(value,float): raise ValueError('Financial values must be decimal strings')
