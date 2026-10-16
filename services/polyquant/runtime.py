@@ -1,0 +1,168 @@
+import asyncio,contextlib,time,uuid
+from collections import deque
+from decimal import Decimal as D
+from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot
+from .venue.us import USDataAdapter
+from .reference import ReferenceProvider,SpotProvider
+from .recorder import Recorder,StorageHalt
+from .execution import PaperExecutionEngine
+from .strategies.probability import ProbabilityStrategy
+from .strategies.momentum import MomentumStrategy
+from .strategies.book import BookStrategy
+
+
+class Runtime:
+    def __init__(self,store,settings):
+        self.store=store; self.settings=settings; self.venue=USDataAdapter()
+        self.reference_provider=ReferenceProvider(self.venue.transport); self.spot_provider=SpotProvider()
+        self.reference=ReferenceSnapshot(); self.spot=None; self.markets={}; self.books={}
+        self.recorder=Recorder(settings.data_dir/'raw',quota=settings.raw_quota)
+        self.engine=PaperExecutionEngine(store,self.markets,self.books,lambda:self.reference)
+        self.events=deque(maxlen=2000); self.sequence=0; self.connection_epoch=str(uuid.uuid4())
+        self.errors={}; self.tasks=[]; self.running=True; self.collection=True; self.latency_ms=None
+        self.last_discovery=None; self.last_update=None; self.strategies=[ProbabilityStrategy(),MomentumStrategy(),BookStrategy()]
+        self.started_at=utcnow(); self.stream_status='NOT_CONFIGURED'; self.last_stream=None; self.gaps=0
+    def event(self,kind,payload,market_id=None,source_at=None):
+        self.sequence+=1; at=utcnow()
+        event=MarketEvent(str(uuid.uuid4()),market_id,kind,source_at,at,at,self.sequence,payload)
+        try:
+            self.recorder.append(event)
+        except StorageHalt:
+            self.collection=False; self.errors['recorder']='STORAGE_LIMIT'
+            for name in ['probability','momentum','book']: self.store.halt(name,'STORAGE_LIMIT')
+            raise
+        self.events.append(event); self.last_update=at
+        if self.recorder.events>=60: self.store.save_manifest(self.recorder.seal())
+        return event
+    async def start(self):
+        if not self.store.acquire_writer(): raise RuntimeError('Another trading writer owns this database')
+        self.store.reconcile(); self.store.audit('RUNTIME_STARTED',payload={'mode':'PAPER','reference_validated':False})
+        self.tasks=[asyncio.create_task(self.data_loop()),asyncio.create_task(self.strategy_loop()),asyncio.create_task(self.stream_loop())]
+    async def close(self):
+        self.running=False
+        for task in self.tasks: task.cancel()
+        for task in self.tasks:
+            with contextlib.suppress(asyncio.CancelledError): await task
+        self.store.save_manifest(self.recorder.seal())
+        await self.venue.close(); await self.spot_provider.close(); self.store.close()
+    async def data_loop(self):
+        while self.running:
+            if not self.collection: await asyncio.sleep(5); continue
+            try:
+                if not self.last_discovery or (utcnow()-self.last_discovery).total_seconds()>45:
+                    found=await self.venue.discover()
+                    for market in found:
+                        self.event('instrument',market.raw,market.id)
+                        self.store.save_instrument(market); self.markets[market.id]=market
+                    # Retain ended instruments only while a holding needs settlement.
+                    held={p['market_id'] for name in ['probability','momentum','book'] for p in self.store.state(name).positions}
+                    for identity in list(self.markets):
+                        if self.markets[identity].end<utcnow() and identity not in held:
+                            self.markets.pop(identity,None); self.books.pop(identity,None)
+                            self.errors.pop('book:'+identity,None)
+                    self.last_discovery=utcnow(); self.errors.pop('discovery',None)
+                for market in list(self.markets.values()):
+                    if market.end<=utcnow(): continue
+                    started=time.monotonic()
+                    try:
+                        book,raw=await self.venue.book(market)
+                        self.event('book',raw,market.id,book.source_at)
+                        previous=self.books.get(market.id)
+                        if not previous or (book.source_at and (not previous.source_at or book.source_at>=previous.source_at)):
+                            self.books[market.id]=book
+                        self.latency_ms=round((time.monotonic()-started)*1000,1); self.errors.pop('book:'+market.id,None)
+                    except Exception as error: self.errors['book:'+market.id]=type(error).__name__
+                try:
+                    ref=await self.reference_provider.latest()
+                    self.event('index',jsonable(ref),source_at=ref.source_at); self.reference=ref; self.errors.pop('index',None)
+                except Exception as error: self.errors['index']=type(error).__name__
+                try:
+                    spot=await self.spot_provider.latest(); self.event('spot',spot); self.spot=spot; self.errors.pop('spot',None)
+                except Exception as error: self.errors['spot']=type(error).__name__
+                self.store.roll_days(self.marks())
+                self.engine.process_due()
+            except StorageHalt: pass
+            except Exception as error:
+                self.errors['discovery']=type(error).__name__; self.gaps+=1
+            await asyncio.sleep(3)
+    async def strategy_loop(self):
+        while self.running:
+            try:
+                for market in list(self.markets.values()):
+                    if not market.start<=utcnow()<market.end: continue
+                    for strategy in self.strategies:
+                        signal=strategy.evaluate(list(self.events),market,self.store.state(strategy.name),ExperimentConfig(),utcnow(),False)
+                        self.store.decision(strategy.name,market.id,strategy.name,signal)
+                for name in ['probability','momentum','book']:
+                    account=self.store.state(name,self.marks())
+                    with self.store.connect() as c: c.execute('INSERT INTO equity_snapshots(account_id,equity) VALUES(%s,%s)',(name,account.equity))
+            except Exception as error: self.errors['strategy']=type(error).__name__
+            await asyncio.sleep(30)
+    def marks(self):
+        result={}
+        for identity,book in self.books.items():
+            if book.fresh(utcnow()) and book.bids and book.asks:
+                result[(identity,'UP')]=book.bids[0][0]; result[(identity,'DOWN')]=1-book.asks[0][0]
+        return result
+    async def stream_loop(self):
+        import os
+        key=os.environ.get('POLYMARKET_US_KEY_ID'); secret=os.environ.get('POLYMARKET_US_SECRET_KEY')
+        if not key or not secret: return
+        # Import only the official market-data socket, never an SDK order client.
+        from polymarket_us.websocket.markets import MarketsWebSocket
+        delay=1
+        while self.running:
+            socket=None
+            try:
+                selected={m.slug:m for m in self.markets.values() if m.end>utcnow()}
+                if not selected: await asyncio.sleep(3); continue
+                queue=asyncio.Queue(maxsize=256)
+                socket=MarketsWebSocket(key_id=key,secret_key=secret)
+                def receive(frame):
+                    try: queue.put_nowait(frame)
+                    except asyncio.QueueFull: self.errors['stream']='BACKLOG'; self.stream_status='BACKLOG'
+                socket.on('message',receive); socket.on('close',lambda:receive({'_closed':True}))
+                socket.on('error',lambda error:receive({'_error':type(error).__name__}))
+                await socket.connect(); await socket.subscribe_market_data('polyquant-books',list(selected))
+                await socket.subscribe_trades('polyquant-trades',list(selected))
+                self.stream_status='CONNECTED'; delay=1
+                while self.running:
+                    frame=await asyncio.wait_for(queue.get(),timeout=20)
+                    if '_closed' in frame or '_error' in frame: raise ConnectionError('Market stream disconnected')
+                    if self.stream_status=='BACKLOG': raise ConnectionError('Stream backlog; snapshot resync required')
+                    self.last_stream=utcnow()
+                    if set(selected)!={m.slug for m in self.markets.values() if m.end>utcnow()}: break
+                    data=frame.get('marketData')
+                    if data and data.get('marketSlug') in selected:
+                        from .market_data import normalize_book
+                        market=selected[data['marketSlug']]; book=normalize_book(market.id,frame,{},utcnow())
+                        self.event('book',frame,market.id,book.source_at); self.books[market.id]=book
+                    elif frame.get('trade'): self.event('trade',frame)
+            except asyncio.CancelledError: raise
+            except Exception as error:
+                self.stream_status='DISCONNECTED'; self.errors['stream']=type(error).__name__; self.gaps+=1
+            finally:
+                if socket: await socket.close()
+            await asyncio.sleep(delay); delay=min(delay*2,30)
+    def snapshot(self):
+        now=utcnow(); markets=[]
+        for market in sorted(self.markets.values(),key=lambda m:m.horizon):
+            book=self.books.get(market.id); features=BookStrategy().features(book) if book else None
+            item={'id':market.id,'slug':market.slug,'horizon':market.horizon,'start':market.start,'end':market.end,
+                  'threshold':market.threshold,'status':market.status,'tick':market.tick,'minimum_qty':market.minimum_qty,
+                  'signal':'NO TRADE','model_probability':None,'net_edge':None,'imbalance':features.get('imbalance') if features else None,
+                  'book':jsonable(book) if book else None,'book_fresh':book.fresh(now) if book else False,
+                  'source_age_seconds':(now-book.source_at).total_seconds() if book and book.source_at else None}
+            markets.append(item)
+        accounts=[jsonable(self.store.state(name,self.marks())) for name in ['probability','momentum','book']]
+        return jsonable({'mode':'PAPER','environment':'production','server_time':now,'started_at':self.started_at,
+            'collection':self.collection,'engine_state':'REFERENCE_BLOCKED','reference_validated':False,
+            'reference':self.reference,'spot':self.spot,'markets':markets,'accounts':accounts,
+            'http_latency_ms':self.latency_ms,'last_update':self.last_update,'stream_status':self.stream_status,
+            'last_stream':self.last_stream,'gap_count':self.gaps,'errors':self.errors,'recorder':self.recorder.status(),
+            'decisions':self.store.history('decisions',60),'orders':self.store.history('orders',60),
+            'fills':self.store.history('fills',100),'datasets':self.store.history('datasets',60),
+            'equity_history':self.store.history('equity_snapshots',120),
+            'performance':self.store.performance(),
+            'research':{'status':'INSUFFICIENT_EVIDENCE','calibration':None,
+                        'message':'Models are unfitted. Reference reconciliation must pass before reference-dependent strategies activate.'}})

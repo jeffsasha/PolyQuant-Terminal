@@ -63,7 +63,10 @@ def spawn(name,args,cwd):
         pid=int(pidfile.read_text()); command=subprocess.run(['ps','-p',str(pid),'-o','command='],capture_output=True,text=True).stdout
         if str(ROOT) in command: return
     log=(DATA/(name+'.log')).open('ab')
-    process=subprocess.Popen(args,cwd=cwd,env=env(),stdout=log,stderr=log,start_new_session=True)
+    child_env=env()
+    if name=='web':
+        child_env={key:value for key,value in child_env.items() if not key.startswith(('POLYMARKET_', 'POLYQUANT_', 'PG')) and key!='DATABASE_URL'}
+    process=subprocess.Popen(args,cwd=cwd,env=child_env,stdout=log,stderr=log,start_new_session=True)
     pidfile.write_text(str(process.pid))
 
 

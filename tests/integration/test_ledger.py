@@ -45,3 +45,13 @@ def test_single_writer_lock(store):
     store.close()
     assert other.acquire_writer()
     other.close()
+
+def test_performance_comes_from_postings_and_account_scoped_fills(store):
+    order=OrderIntent('performance-buy','probability','fixture','BUY_UP',D('4'),D('.5'))
+    store.reserve(order,D('2.10'))
+    store.commit_execution(order.id,ExecutionResult((Fill(D('.5'),D('4'),D('.07')),),'FILLED'))
+    result=store.performance()
+    assert result['probability']['fill_count']==1
+    assert result['probability']['net_realized_pnl']==D('-.07')
+    assert result['momentum']['fill_count']==0
+    assert result['momentum']['net_realized_pnl']==0

@@ -23,8 +23,11 @@ def utcnow(): return datetime.now(timezone.utc)
 
 
 def jsonable(value):
-    if hasattr(value,'__dataclass_fields__'): value=asdict(value)
-    return json.loads(json.dumps(value,default=str))
+    def encode(item):
+        if hasattr(item,'__dataclass_fields__'): return asdict(item)
+        if isinstance(item,(Decimal,datetime)): return str(item)
+        raise TypeError('Unsupported JSON value')
+    return json.loads(json.dumps(value,default=encode))
 
 
 @dataclass(frozen=True)

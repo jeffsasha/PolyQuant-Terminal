@@ -1,0 +1,10 @@
+.git
+.venv
+.local
+.env
+.env.*
+**/node_modules
+**/.next
+**/__pycache__
+**/test-results
+.superpowers

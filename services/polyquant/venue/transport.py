@@ -28,7 +28,8 @@ class ReadOnlyUSTransport:
         response.raise_for_status()
         if len(response.content) > 8_000_000 or "json" not in response.headers.get("content-type", ""):
             raise ValueError("Invalid or oversized venue response")
-        return response.json(), dict(response.headers)
+        from decimal import Decimal
+        return response.json(parse_float=Decimal), dict(response.headers)
 
     async def close(self):
         await self.client.aclose()

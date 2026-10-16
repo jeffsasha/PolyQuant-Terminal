@@ -116,6 +116,10 @@ class Store:
     def history(self,table,limit=100):
         if table not in ['orders','fills','positions','decisions','audit','datasets','equity_snapshots']: raise ValueError('Invalid history type')
         with self.connect() as c: return c.execute(f'SELECT * FROM {table} ORDER BY '+('created_at DESC' if table!='positions' else 'id DESC')+' LIMIT %s',(min(limit,500),)).fetchall()
+    def performance(self):
+        with self.connect() as c:
+            rows=c.execute("SELECT a.id, (SELECT COUNT(*) FROM fills f JOIN orders o ON o.id=f.order_id WHERE o.account_id=a.id) AS fill_count, COALESCE((SELECT -SUM(p.amount) FROM postings p WHERE p.account_id=a.id AND p.bucket IN ('REALIZED','SETTLEMENT_PNL','FEES')),0) AS net_realized_pnl FROM accounts a").fetchall()
+        return {row['id']:{'fill_count':row['fill_count'],'net_realized_pnl':row['net_realized_pnl']} for row in rows}
     def pending_due(self,at):
         with self.connect() as c: return c.execute("SELECT * FROM orders WHERE status='PENDING_ARRIVAL' AND arrival_at<=%s ORDER BY created_at",(at,)).fetchall()
     def save_manifest(self,manifest):
