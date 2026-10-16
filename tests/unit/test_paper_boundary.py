@@ -44,5 +44,8 @@ def test_read_transport_honors_retry_after_and_bounds_polling():
         try:await transport.request('GET','/v1/markets')
         except httpx.HTTPStatusError:pass
         assert transport.next_request>=before+10
+        import pytest
+        with pytest.raises(RuntimeError,match='rate limited'):
+            await asyncio.wait_for(transport.request('GET','/v1/markets'),timeout=.1)
         await transport.close()
     asyncio.run(run())
