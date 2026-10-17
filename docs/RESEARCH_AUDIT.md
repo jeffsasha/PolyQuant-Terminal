@@ -59,6 +59,14 @@ across all resolved BTC 15m and 1h markets between 2026-10-16 ~19:30 and
 - `settlementPrice == index(windowEnd − 1s)`: 49/49
 - `settlement == 1 ⇔ settlementPrice ≥ priceToBeat`: 49/49
 
+**Update (full history, 2026-10-17, after Phase 4 backfill of 2,950 settled markets):** the rule is not universal.
+`priceToBeat == index(windowStart − 1s)` failed for 44/44 markets on Sep 22, 117/118 on Sep 23 and 47/110 on Sep 24
+(differences up to $2.67, i.e. launch week used a slightly different computation). It held for **every market from
+Sep 25 onward except one** (Sep 28, $0.12 off). The venue outcome agreed with `settlementPrice ≥ priceToBeat` in
+all 2,944 markets that have both (6 markets have no `priceToBeat` and are excluded). Consequences: research labels
+always use the venue's official values, never the reconstruction. The live engine only *cross-checks* the rule and
+alerts on mismatch.
+
 **Conclusion:** the public series is a trailing 60s average of BRTI. This is not
 stated in the docs, so the system re-verifies it continuously. The recorder
 compares every resolved market against the recorded index and raises a

@@ -17,7 +17,8 @@ profitable.
 | 2b Authenticated L2 WebSocket | **done** (see `docs/TEST_REPORT_PHASE2B.md`). Runs automatically when `.env` has a key. |
 | 2c Next.js terminal UI | blocked on Node.js ≥20 being installed |
 | 3 Fees, paper execution, risk, ledger, settlement | **done** (see `docs/TEST_REPORT_PHASE3.md`) |
-| 4–6 Strategies, replay/backtest, QA | not started |
+| 4 Strategy framework, fair-probability baseline, calibration, replay | **done** (see `docs/TEST_REPORT_PHASE4.md`; no edge shown) |
+| 5–6 Smart Money doc, QA | not started |
 
 Key verified facts that shape the design (details in `docs/RESEARCH_AUDIT.md`):
 
@@ -110,6 +111,23 @@ endpoints need `API_TOKEN` in `.env`:
 
 Every order goes through the central risk engine. Every decision, including rejections with all their reasons,
 is stored in `risk_decisions`.
+
+## Research
+
+```bash
+.venv/bin/polyquant backfill --since 2026-09-22
+```
+
+```bash
+.venv/bin/polyquant calibrate
+```
+
+```bash
+.venv/bin/polyquant backtest
+```
+
+These write `reports/phase4/calibration.md` (chronological split, untouched test set, walk-forward, model vs
+market) and `reports/phase4/backtest.md` (execution replay over recorded books, all four profiles).
 
 ## Tests
 

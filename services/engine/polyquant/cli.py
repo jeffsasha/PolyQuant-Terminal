@@ -165,6 +165,58 @@ async def cmd_verify(settings: Settings, *, hours: float) -> int:
     return 0 if bad == 0 else 1
 
 
+async def cmd_backfill(settings: Settings, *, since: str, until: str | None, what: str) -> int:
+    from polyquant.recorder.db import create_pool, migrate
+    from polyquant.recorder.store import RecorderSink
+    from polyquant.research.backfill import backfill_index, backfill_instruments
+    from polyquant.venue.gateway import GatewayClient
+
+    start = datetime.fromisoformat(since).replace(tzinfo=UTC) if "T" not in since else datetime.fromisoformat(since)
+    end = datetime.fromisoformat(until) if until else datetime.now(UTC) - timedelta(seconds=5)
+    pool = await create_pool(settings.database_url)
+    async with pool.acquire() as conn:
+        await migrate(conn)
+    rec = RecorderSink(pool)
+    try:
+        async with GatewayClient(max_rps=settings.gateway_max_rps) as gw:
+            if what in ("all", "instruments"):
+                n = await backfill_instruments(gw, rec, since=start, until=end + timedelta(hours=2),
+                                               asset=settings.asset, horizons=settings.horizons)
+                print(f"instruments: {n}")
+            if what in ("all", "index"):
+                n = await backfill_index(gw, rec, since=start - timedelta(hours=6), until=end, asset=settings.asset)
+                print(f"index points fetched: {n}")
+    finally:
+        await rec.flush()
+        await pool.close()
+    print(f"recorder wrote {rec.written}, dropped {rec.dropped}")
+    return 0
+
+
+async def cmd_research(settings: Settings, *, what: str, out: str) -> int:
+    from pathlib import Path
+
+    from polyquant.recorder.db import create_pool
+    from polyquant.research.runner import run_backtest, run_calibration
+
+    pool = await create_pool(settings.database_url)
+    try:
+        if what == "calibrate":
+            r = await run_calibration(pool, Path(out))
+            t = r["test"]
+            print(f"selected {r['selected_variant']}; test log loss {t['log_loss']:.4f} vs coin-flip "
+                  f"{t['log_loss_coinflip']:.4f}; Brier {t['brier']:.4f}; n={t['n_predictions']} "
+                  f"({t['n_markets']} markets); report: {out}/calibration.md")
+        else:
+            r = await run_backtest(pool, Path(out))
+            for name, p in r.get("profiles", {}).items():
+                print(f"{name:12s} trades={p['trades']:3d} net={p['net_pnl']:+.2f} fees={p['fees']:.2f}")
+            print(f"report: {out}/backtest.md")
+    finally:
+        await pool.close()
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="polyquant", description="PolyQuant Terminal engine (PAPER mode only)")
     p.add_argument("--log-level", default="INFO")
@@ -176,6 +228,13 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("status", help="show recorded data counts")
     v = sub.add_parser("verify-references", help="re-verify the reference-price rule on resolved markets")
     v.add_argument("--hours", type=float, default=3.0)
+    b = sub.add_parser("backfill", help="backfill resolved BTC up/down instruments and the official 1s index")
+    b.add_argument("--since", required=True, help="UTC date or ISO datetime, e.g. 2026-09-22")
+    b.add_argument("--until", default=None)
+    b.add_argument("--what", choices=("all", "instruments", "index"), default="all")
+    for name in ("calibrate", "backtest"):
+        rp = sub.add_parser(name, help=f"research: {name} the fair-probability baseline")
+        rp.add_argument("--out", default="reports/phase4")
     args = p.parse_args(argv)
 
     settings = Settings()
@@ -186,6 +245,10 @@ def main(argv: list[str] | None = None) -> int:
         coro = cmd_run(settings, api=not args.no_api, duration_s=args.duration)
     elif args.cmd == "status":
         coro = cmd_status(settings)
+    elif args.cmd in ("calibrate", "backtest"):
+        coro = cmd_research(settings, what=args.cmd, out=args.out)
+    elif args.cmd == "backfill":
+        coro = cmd_backfill(settings, since=args.since, until=args.until, what=args.what)
     else:
         coro = cmd_verify(settings, hours=args.hours)
     return asyncio.run(coro)

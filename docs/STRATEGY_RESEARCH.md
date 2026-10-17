@@ -24,6 +24,15 @@ average of BRTI** sampled at `t−1s` (RESEARCH_AUDIT §1.3). Implications:
    hypothesis for Strategy A/B, and also the one most likely already priced by
    other participants.
 
+## Results so far (2026-10-17, see TEST_REPORT_PHASE4.md)
+
+- **B (fair probability):** well calibrated out of sample on 593 markets (log loss 0.316, Brier 0.100, ECE 0.019).
+  MA-lag drift helps consistently. **No edge shown:** on the 21 decision points with recorded books, the market
+  mid forecast better (log loss 0.456 vs 0.666). Execution replay covers only 11 markets, which is noise.
+  Status: *not ready*.
+- **Next hypothesis:** the market likely prices spot ahead of the 60 s average. Test external spot as a feature
+  (Strategy A) against the market mid on the growing recorded-book sample.
+
 ## 2. Strategy B — fair probability (baseline first)
 
 Baseline model, which is interpretable:

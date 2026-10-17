@@ -1,0 +1,163 @@
+{
+ "generated_at": "2026-10-17T17:09:05.929128+00:00",
+ "variant": "L7200_k120_t4_drift1",
+ "markets_with_books": 11,
+ "profiles": {
+  "optimistic": {
+   "profile": "optimistic",
+   "strategy": "fair_prob[L7200_k120_t4_drift1]",
+   "markets_replayed": 11,
+   "decisions": 1385,
+   "signals": 7,
+   "trades": 7,
+   "independent_markets_traded": 7,
+   "net_pnl": -1.5874999999999986,
+   "gross_pnl": -0.6174999999999997,
+   "fees": 0.9700000000000001,
+   "spread_cost": 0.44125000000000003,
+   "slippage": 0.0,
+   "roi_on_deployed": -0.05602117335685924,
+   "win_rate": 0.42857142857142855,
+   "profit_factor": 0.9018547140649151,
+   "ev_per_trade": -0.2267857142857141,
+   "ev_per_trade_90ci": [
+    -3.148571428571428,
+    2.6978750000000002
+   ],
+   "max_drawdown": 10.022499999999997,
+   "max_losing_streak": 2,
+   "fill_rate": 1.0,
+   "unfilled_signals": 0,
+   "risk_rejections": {},
+   "arrival_rejections": {},
+   "by_horizon": {
+    "15m": {
+     "trades": 5,
+     "net": 6.510000000000001
+    },
+    "1h": {
+     "trades": 2,
+     "net": -8.0975
+    }
+   },
+   "sample_adequate": false
+  },
+  "base": {
+   "profile": "base",
+   "strategy": "fair_prob[L7200_k120_t4_drift1]",
+   "markets_replayed": 11,
+   "decisions": 1385,
+   "signals": 7,
+   "trades": 7,
+   "independent_markets_traded": 7,
+   "net_pnl": -1.3724999999999992,
+   "gross_pnl": -0.41249999999999964,
+   "fees": 0.9600000000000001,
+   "spread_cost": 0.44125000000000003,
+   "slippage": -0.20500000000000002,
+   "roi_on_deployed": -0.048804338163392275,
+   "win_rate": 0.42857142857142855,
+   "profit_factor": 0.9151468315301393,
+   "ev_per_trade": -0.19607142857142845,
+   "ev_per_trade_90ci": [
+    -3.148571428571428,
+    2.7589285714285716
+   ],
+   "max_drawdown": 9.942499999999999,
+   "max_losing_streak": 2,
+   "fill_rate": 1.0,
+   "unfilled_signals": 0,
+   "risk_rejections": {},
+   "arrival_rejections": {},
+   "by_horizon": {
+    "15m": {
+     "trades": 5,
+     "net": 6.725
+    },
+    "1h": {
+     "trades": 2,
+     "net": -8.0975
+    }
+   },
+   "sample_adequate": false
+  },
+  "conservative": {
+   "profile": "conservative",
+   "strategy": "fair_prob[L7200_k120_t4_drift1]",
+   "markets_replayed": 11,
+   "decisions": 1385,
+   "signals": 7,
+   "trades": 6,
+   "independent_markets_traded": 6,
+   "net_pnl": 2.137500000000001,
+   "gross_pnl": 3.0175,
+   "fees": 0.88,
+   "spread_cost": 0.41000000000000003,
+   "slippage": 0.3025,
+   "roi_on_deployed": 0.08684611477907572,
+   "win_rate": 0.5,
+   "profit_factor": 1.1725529767911202,
+   "ev_per_trade": 0.3562500000000002,
+   "ev_per_trade_90ci": [
+    -2.81125,
+    3.7816666666666663
+   ],
+   "max_drawdown": 10.237499999999999,
+   "max_losing_streak": 2,
+   "fill_rate": 1.0,
+   "unfilled_signals": 1,
+   "risk_rejections": {},
+   "arrival_rejections": {},
+   "by_horizon": {
+    "15m": {
+     "trades": 4,
+     "net": 10.315000000000001
+    },
+    "1h": {
+     "trades": 2,
+     "net": -8.177499999999998
+    }
+   },
+   "sample_adequate": false
+  },
+  "stress": {
+   "profile": "stress",
+   "strategy": "fair_prob[L7200_k120_t4_drift1]",
+   "markets_replayed": 11,
+   "decisions": 1385,
+   "signals": 7,
+   "trades": 3,
+   "independent_markets_traded": 3,
+   "net_pnl": 8.07,
+   "gross_pnl": 8.5,
+   "fees": 0.43000000000000005,
+   "spread_cost": 0.25875,
+   "slippage": 0.2675,
+   "roi_on_deployed": 0.6492357200321802,
+   "win_rate": 0.6666666666666666,
+   "profit_factor": 2.9682926829268297,
+   "ev_per_trade": 2.69,
+   "ev_per_trade_90ci": [
+    -1.4466666666666665,
+    6.826666666666667
+   ],
+   "max_drawdown": 4.1,
+   "max_losing_streak": 1,
+   "fill_rate": 1.0,
+   "unfilled_signals": 4,
+   "risk_rejections": {},
+   "arrival_rejections": {},
+   "by_horizon": {
+    "15m": {
+     "trades": 2,
+     "net": 12.17
+    },
+    "1h": {
+     "trades": 1,
+     "net": -4.1
+    }
+   },
+   "sample_adequate": false
+  }
+ }
+}

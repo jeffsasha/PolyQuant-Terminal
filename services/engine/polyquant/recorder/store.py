@@ -32,10 +32,11 @@ def dumps(o: Any) -> str:
 UPSERT_INSTRUMENT = """
 INSERT INTO instruments (slug, market_id, event_slug, asset, horizon, index_symbol, window_start, window_end,
     status, price_to_beat, settlement_price, fee_coefficient, tick_size, min_qty, up_side_label, down_side_label,
-    description, source, first_seen_at, updated_at)
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$19)
+    description, source, first_seen_at, updated_at, venue_outcome)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$19,$20)
 ON CONFLICT (slug) DO UPDATE SET
     status = EXCLUDED.status,
+    venue_outcome = COALESCE(instruments.venue_outcome, EXCLUDED.venue_outcome),
     price_to_beat = COALESCE(instruments.price_to_beat, EXCLUDED.price_to_beat),
     settlement_price = COALESCE(instruments.settlement_price, EXCLUDED.settlement_price),
     fee_coefficient = EXCLUDED.fee_coefficient,
@@ -208,7 +209,7 @@ class RecorderSink:
                            inst.horizon.value, inst.index_symbol, inst.window_start, inst.window_end, inst.status,
                            inst.price_to_beat, inst.settlement_price, inst.fee_coefficient, inst.tick_size,
                            inst.min_qty, inst.up_side_label, inst.down_side_label, inst.description,
-                           inst.source.value, at)
+                           inst.source.value, at, inst.venue_outcome.value if inst.venue_outcome else None)
         if "settlement_flag" in changes:
             await conn.execute("UPDATE instruments SET settlement_flag = $2 WHERE slug = $1 AND settlement_flag "
                                "IS NULL", inst.slug, int(changes["settlement_flag"][1]))
