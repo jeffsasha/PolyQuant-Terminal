@@ -5,10 +5,13 @@ Every payload carries `source` and `mode` so the UI can never present fixture or
 
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timedelta
 from decimal import Decimal
+from decimal import Decimal as _D
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
+from pydantic import BaseModel, Field
 
 from polyquant import __version__
 from polyquant.config import LIVE_TRADING_ENABLED
@@ -89,8 +92,38 @@ def instrument_view(engine: Engine, inst: Instrument, now: datetime) -> dict:
     }
 
 
-def create_app(engine: Engine) -> FastAPI:
+class PaperOrderRequest(BaseModel):
+    client_order_id: str = Field(min_length=8, max_length=64, pattern=r"^[A-Za-z0-9_.:-]+$")
+    slug: str = Field(max_length=128)
+    outcome: str = Field(pattern="^(UP|DOWN)$")
+    side: str = Field(pattern="^(BUY|SELL)$")
+    qty: _D = Field(gt=0, le=_D("100000"))
+    limit_px: _D = Field(gt=0, lt=1)
+    tif: str = Field(default="IOC", pattern="^(IOC|GTC)$")
+    post_only: bool = False
+    model_prob: _D | None = Field(default=None, ge=0, le=1)
+    requires_reference: bool = True
+
+
+class KillSwitchRequest(BaseModel):
+    active: bool
+    reason: str = Field(min_length=3, max_length=200)
+
+
+def create_app(engine: Engine, paper=None) -> FastAPI:
     app = FastAPI(title="PolyQuant Terminal API", version=__version__, docs_url="/docs", redoc_url=None)
+    token = engine.settings.api_token.get_secret_value() if engine.settings.api_token else None
+
+    def require_token(x_polyquant_token: str | None) -> None:
+        if token is None:
+            raise HTTPException(403, "state-changing paper endpoints are disabled: set API_TOKEN in .env")
+        if not x_polyquant_token or not secrets.compare_digest(x_polyquant_token, token):
+            raise HTTPException(401, "missing or invalid X-PolyQuant-Token")
+
+    def require_paper():
+        if paper is None:
+            raise HTTPException(503, "paper trading is not enabled")
+        return paper
 
     @app.get("/health")
     def health() -> dict:
@@ -135,6 +168,115 @@ def create_app(engine: Engine) -> FastAPI:
                 "up": {"bids": lv(snap.bids), "asks": lv(snap.offers)},
                 # Down is the opposite side of the same book: Down asks come from Up bids (1 - px).
                 "down": {"bids": lv(snap.down_bids()), "asks": lv(snap.down_asks())}}
+
+    # ---- paper trading (PAPER ONLY; no live order path exists) ---------------------------------------
+
+    @app.get("/v1/paper/account")
+    def paper_account() -> dict:
+        return require_paper().account_view()
+
+    @app.get("/v1/paper/orders")
+    async def paper_orders(limit: int = 100) -> dict:
+        return {"orders": await require_paper().ledger.recent_orders(max(1, min(limit, 500)))}
+
+    @app.get("/v1/paper/fills")
+    async def paper_fills(limit: int = 200) -> dict:
+        return {"fills": await require_paper().ledger.fills(max(1, min(limit, 1000)))}
+
+    @app.get("/v1/paper/risk-decisions")
+    async def paper_risk(limit: int = 100, rejected_only: bool = False) -> dict:
+        return {"decisions": await require_paper().ledger.risk_decisions(max(1, min(limit, 500)), rejected_only)}
+
+    @app.get("/v1/paper/pnl")
+    async def paper_pnl() -> dict:
+        p = require_paper()
+        b = await p.ledger.pnl_breakdown()
+        open_keys = {(slug, o.value) for (slug, o) in p.st.positions}
+        closed = [g for g in await p.ledger.closed_groups() if (g["slug"], g["outcome"]) not in open_keys]
+        gross = sum((g["sold"] + g["payout"] - g["bought"] for g in closed), _D(0))
+        fees_closed = sum((g["fees"] for g in closed), _D(0))
+        acct = p.account_view()
+        return {
+            "closed_positions": len(closed),
+            "closed_gross_pnl": str(gross),
+            "closed_fees": str(fees_closed),
+            "closed_net_pnl": str(gross - fees_closed),
+            "equity_pnl": str(_D(acct["equity"]) - _D(acct["starting_capital"])),
+            "fees_total": str(b["fees"]),
+            "spread_cost_total": str(b["spread_cost"]),
+            "slippage_total": str(b["slippage"]),
+            "fills": b["fills"], "maker_fills": b["maker_fills"],
+            "settled_positions": b["settled_positions"], "winning_positions": b["winning_positions"],
+            "note": "closed_* covers positions fully exited or settled; equity_pnl includes open positions marked at "
+                    "best bid (cost basis if no book). Spread cost and slippage are already inside fill prices; they "
+                    "explain gross PnL and must not be subtracted again. Taker rebates (weekly) are not included.",
+        }
+
+    @app.get("/v1/paper/profiles")
+    def paper_profiles() -> dict:
+        from polyquant.paper.execution import PROFILES
+
+        return {"active": require_paper().profile.name,
+                "profiles": {k: {f: str(getattr(v, f)) for f in v.__dataclass_fields__} for k, v in PROFILES.items()}}
+
+    @app.get("/v1/paper/preview")
+    def paper_preview(slug: str, outcome: str, side: str, qty: _D, limit_px: _D) -> dict:
+        from polyquant.domain.models import Outcome as _O
+        from polyquant.paper.execution import PROFILES, instrument_px, sweep
+        from polyquant.paper.models import Side as _S
+
+        p = require_paper()
+        snap = engine.books.latest(slug)
+        inst = engine.registry.get(slug)
+        if snap is None or inst is None:
+            raise HTTPException(404, "no WebSocket book for this instrument")
+        o, sd = _O(outcome), _S(side)
+        now = engine.clock.now()
+        out = {}
+        for name, prof in PROFILES.items():
+            r = sweep(snap, o, sd, qty, limit_px, prof, tick=inst.tick_size or _D("0.01"),
+                      min_qty=inst.min_qty or _D("0.01"))
+            fees = p.fees.order_fills([(f.qty, instrument_px(o, f.px)) for f in r.fills], now, liquidity="taker",
+                                      theta_override=p._theta(inst, now)) if r.fills else []
+            fee = sum((f.charged for f in fees), _D(0))
+            out[name] = {"filled": str(r.filled), "vwap": _s(r.vwap), "notional": str(r.notional), "fee": str(fee),
+                         "all_in_per_contract": _s((r.notional + fee) / r.filled) if r.filled else None,
+                         "best": _s(r.best_px), "mid": _s(r.mid), "latency_ms": prof.latency_ms,
+                         "diagnostic_only": prof.diagnostic_only}
+        return {"slug": slug, "outcome": outcome, "side": side, "qty": str(qty), "limit_px": str(limit_px),
+                "book_transact_time": _t(snap.transact_time), "profiles": out,
+                "note": "estimates against the current book; latency means the real fill sees a later book"}
+
+    @app.post("/v1/paper/orders")
+    async def paper_submit(req: PaperOrderRequest, x_polyquant_token: str | None = Header(default=None)) -> dict:
+        require_token(x_polyquant_token)
+        from polyquant.domain.models import Outcome as _O
+        from polyquant.paper.models import TIF as _TIF
+        from polyquant.paper.models import OrderIntent
+        from polyquant.paper.models import Side as _S
+
+        intent = OrderIntent(client_order_id=req.client_order_id, slug=req.slug, outcome=_O(req.outcome),
+                             side=_S(req.side), qty=req.qty, limit_px=req.limit_px, tif=_TIF(req.tif),
+                             post_only=req.post_only, strategy="manual", model_prob=req.model_prob,
+                             requires_reference=req.requires_reference)
+        order, decision = await require_paper().submit(intent)
+        return {"approved": decision.approved, "reasons": decision.reasons, "details": decision.details,
+                "order": None if order is None else {"id": order.id, "status": order.status.value,
+                                                     "reason": order.reason, "arrive_at": _t(order.arrive_at)}}
+
+    @app.delete("/v1/paper/orders/{order_id}")
+    async def paper_cancel(order_id: str, x_polyquant_token: str | None = Header(default=None)) -> dict:
+        require_token(x_polyquant_token)
+        o = await require_paper().cancel(order_id)
+        if o is None:
+            raise HTTPException(404, "no working order with that id")
+        return {"id": o.id, "status": o.status.value}
+
+    @app.post("/v1/paper/kill-switch")
+    async def paper_kill(req: KillSwitchRequest, x_polyquant_token: str | None = Header(default=None)) -> dict:
+        require_token(x_polyquant_token)
+        await require_paper().set_kill_switch(req.active, req.reason)
+        return {"kill_switch": req.active}
 
     @app.get("/v1/reference")
     def reference(seconds: int = 300) -> dict:

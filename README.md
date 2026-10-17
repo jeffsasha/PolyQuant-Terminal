@@ -16,7 +16,8 @@ profitable.
 | 2a Public-data layer and recorder | **done** (this branch, see `docs/TEST_REPORT_PHASE2A.md`) |
 | 2b Authenticated L2 WebSocket | **done** (see `docs/TEST_REPORT_PHASE2B.md`). Runs automatically when `.env` has a key. |
 | 2c Next.js terminal UI | blocked on Node.js ≥20 being installed |
-| 3–6 Fees, paper execution, risk, strategies, QA | not started |
+| 3 Fees, paper execution, risk, ledger, settlement | **done** (see `docs/TEST_REPORT_PHASE3.md`) |
+| 4–6 Strategies, replay/backtest, QA | not started |
 
 Key verified facts that shape the design (details in `docs/RESEARCH_AUDIT.md`):
 
@@ -92,6 +93,23 @@ scripts/backup-db.sh
 
 Docker: `docker-compose.yml` and `Dockerfile` are provided but **have not been tested** (Docker isn't installed on
 the development machine).
+
+## Paper trading
+
+The engine runs a paper account (default $1,000, conservative execution profile) against the live WS book. Order
+endpoints need `API_TOKEN` in `.env`:
+
+| Endpoint | What |
+|---|---|
+| `GET /v1/paper/account` | Cash, reserved, equity (positions at best bid), daily PnL, halts, positions, working orders |
+| `GET /v1/paper/preview?slug=&outcome=UP&side=BUY&qty=&limit_px=` | Fill and fee estimate under all four profiles |
+| `POST /v1/paper/orders` (token) | `{client_order_id, slug, outcome, side, qty, limit_px, tif: IOC\|GTC, post_only, model_prob}` |
+| `DELETE /v1/paper/orders/{id}` (token) | Cancel a working order |
+| `POST /v1/paper/kill-switch` (token) | `{active, reason}`: persistent emergency stop; cancels working entries |
+| `GET /v1/paper/orders`, `/fills`, `/pnl`, `/risk-decisions?rejected_only=true`, `/profiles` | Audit views |
+
+Every order goes through the central risk engine. Every decision, including rejections with all their reasons,
+is stored in `risk_decisions`.
 
 ## Tests
 

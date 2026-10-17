@@ -58,6 +58,9 @@ class Instrument:
     down_side_label: str
     description: str
     source: Source = Source.GATEWAY
+    # Venue-declared result once RESOLVED, from outcomePrices ["1","0"] (Up/long paid) or ["0","1"] (Down paid).
+    # Served by the uncached instrument endpoint, unlike the CDN-cached /settlement flag.
+    venue_outcome: Outcome | None = None
 
     def seconds_to_close(self, now: datetime) -> float:
         return (self.window_end - now).total_seconds()

@@ -115,6 +115,37 @@ api.polymarket.us/v1/ws/markets ──► venue/ws_markets.MarketsStream ──�
   values raise `bbo_uncorroborated`.
 - **Clock:** `ClockSkewMonitor` derives a lower bound on local clock lag from `transactTime` and alerts above 250 ms.
 
+## 5b. Paper trading (Phase 3)
+
+```
+OrderIntent ──► CentralRiskManager ──► PaperExecutionEngine ──► PostgresLedger (one transaction per event)
+ (strategy or      (all gates, all         PENDING (latency) → sweep at arrival      paper_orders / _events / _fills,
+  operator API)     reasons logged)        → IOC cancel | GTC rests (maker model)     paper_ledger (cash/reserved),
+                                           → FILLED/CANCELLED/REJECTED/EXPIRED        settlements, risk_decisions,
+                                           → settle on the official result            trading_halts, equity days
+```
+
+- **Fills** are simulated only against the authenticated WS book, at the book state when the order *arrives*
+  (decision + profile latency). There are never fills at mid or last trade. Size-aware VWAP sweeps, with
+  depth haircuts and adverse ticks per profile. Fills are rejected if the WS feed is stale at arrival.
+- **Up/Down on one book:** BUY Down consumes Up bids (1 − px), SELL Down hits Up asks (1 − px).
+- **Maker model:** a touch is not a fill unless the queue ahead is shown to be consumed. A trade-through fills
+  according to the profile. Stress fills only on a 2-tick trade-through, and only half.
+- **Fees:** versioned schedule (fees/schedule.py) with banker's rounding and the per-order cumulative cap, using
+  the market's `feeCoefficient` if it is higher. Maker rebate by tier (Tier 1 = 0 from 2026-10-19 13:00 ET).
+  Taker rebates are periodic and never netted per trade.
+- **Capital:** a BUY reserves qty × limit + worst-case fee (max p(1−p) for fills at or below the limit). It is
+  released proportionally on fills and fully at the end.
+- **Settlement:** from venue-declared results: `outcomePrices` on the uncached instrument once RESOLVED, and/or the
+  CDN-cached `/settlement` flag. Every available source must agree with the price rule (close ≥ open → Up).
+  Any disagreement leaves the position open and raises `settlement_conflict`. Live: the flag lagged ~5 min, while
+  `outcomePrices` was available ~18 s after window end.
+- **Restart:** state is rebuilt from the tables. In-flight orders are cancelled, because their simulated outcome
+  is unknowable. Resting orders go to the back of the queue. Halts persist.
+- **Assumptions** (venue semantics not documented): Down price = 1 − Up price, matching the venue's
+  `shortQuote`. Buying an outcome costs its price. No long/short netting: opposite-side entries are rejected.
+  No naked sells.
+
 ## 6. Data quality and staleness
 
 `DataHealth` tracks, for each feed: last `source_ts`, last `recv_at`, a rolling

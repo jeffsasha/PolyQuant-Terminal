@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable, Iterator
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
-from polyquant.domain.models import BBOSnapshot, Horizon, IndexPoint, Instrument, Source
+from polyquant.domain.models import BBOSnapshot, Horizon, IndexPoint, Instrument, Outcome, Source
 from polyquant.domain.timeutil import from_unix, parse_utc
 
 UP_DOWN = "ASSET_PRICE_MARKET_TYPE_UP_DOWN"
@@ -74,6 +75,10 @@ def parse_instrument(market: dict, *, event_slug: str | None = None,
     if len(longs) != 1 or len(shorts) != 1:
         raise ParseError(f"{slug}: expected exactly one long and one short side, got {len(longs)}/{len(shorts)}")
 
+    venue_outcome = None
+    if market.get("status") == "MARKET_STATUS_RESOLVED":
+        venue_outcome = _resolved_outcome(market.get("outcomePrices"), longs[0].get("description"), slug)
+
     return Instrument(
         slug=slug,
         market_id=str(market.get("id")),
@@ -93,7 +98,23 @@ def parse_instrument(market: dict, *, event_slug: str | None = None,
         down_side_label=shorts[0].get("description") or "No",
         description=market.get("description") or "",
         source=source,
+        venue_outcome=venue_outcome,
     )
+
+
+def _resolved_outcome(outcome_prices, long_label: str | None, slug: str) -> Outcome | None:
+    """["1","0"] → long (Up) paid; ["0","1"] → short (Down) paid. Anything else → None (not definitive)."""
+    try:
+        prices = json.loads(outcome_prices) if isinstance(outcome_prices, str) else outcome_prices
+        a, b = (str(x) for x in prices)
+    except (TypeError, ValueError):
+        return None
+    norm = {("1", "0"): Outcome.UP, ("0", "1"): Outcome.DOWN}
+    key = (a.rstrip("0").rstrip(".") or "0", b.rstrip("0").rstrip(".") or "0")
+    out = norm.get(key)
+    if out is not None and long_label not in (None, "Yes"):
+        raise ParseError(f"{slug}: unexpected long-side label {long_label!r}; refusing to map outcomePrices")
+    return out
 
 
 def iter_event_markets(payload: dict) -> Iterator[tuple[str | None, dict]]:

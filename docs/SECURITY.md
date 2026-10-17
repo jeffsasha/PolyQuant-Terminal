@@ -56,6 +56,13 @@ balances) are never opened. Tests assert both rules. TLS uses certifi's CA bundl
    confirmation. See IMPLEMENTATION_PLAN §"Live-trading requirements not yet
    approved".
 
+## 3a. Paper API
+
+State-changing endpoints (`POST /v1/paper/orders`, `DELETE /v1/paper/orders/{id}`, `POST /v1/paper/kill-switch`)
+require `X-PolyQuant-Token` equal to `API_TOKEN` (constant-time compare). With no `API_TOKEN` they return 403. Requests
+are schema-validated (price in (0, 1), quantity bounds, id charset). The API binds to 127.0.0.1. These endpoints
+act only on the paper ledger. There is still no code path to a venue order endpoint (static test).
+
 ## 4. Uncertain outcomes (applies to the future live adapter and to the paper engine)
 
 A timed-out submission is never blindly retried. Capital is reserved while an

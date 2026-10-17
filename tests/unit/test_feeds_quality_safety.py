@@ -156,16 +156,21 @@ async def test_live_execution_engine_refuses_everything():
 
 
 def test_no_order_endpoints_in_package():
+    """No venue order path anywhere: no order endpoints, no SDK order calls, no order intents, and the only SDK
+    import allowed is the request-signing helper used by the read-only markets WebSocket."""
     offenders = []
-    pattern = re.compile(r"/v1/orders|\.orders\.|orders\.create|create_order|close_position")
+    pattern = re.compile(r"/v1/orders?\b|client\.orders|\.orders\.(create|cancel|modify|preview|close_position)|"
+                         r"create_order|ORDER_INTENT_|ws/private")
     for py in PKG.rglob("*.py"):
         if py.name == "live.py":
             continue
         for n, line in enumerate(py.read_text().splitlines(), 1):
             if pattern.search(line):
                 offenders.append(f"{py.relative_to(PKG)}:{n}: {line.strip()}")
+            m = re.match(r"\s*(from|import)\s+(polymarket_us[\w.]*)", line)
+            if m and m.group(2) != "polymarket_us.auth":
+                offenders.append(f"{py.relative_to(PKG)}:{n}: SDK import {m.group(2)}")
     assert not offenders, offenders
-
 
 def test_secrets_are_redacted_in_logs(caplog):
     import base64

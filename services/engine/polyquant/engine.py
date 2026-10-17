@@ -58,6 +58,42 @@ class Engine:
                               stale_after_s=settings.bbo_stale_after_s,
                               on_snapshot=self.books.reconcile_bbo if self.stream else None)
         self._last_window_seen: dict[Horizon, str | None] = {}
+        self._extra_loops: list[tuple[str, float, Callable[[], Awaitable[object]]]] = []
+
+    def add_loop(self, name: str, interval_s: float, step: Callable[[], Awaitable[object]]) -> None:
+        self._extra_loops.append((name, interval_s, step))
+
+    # ---- market view for the paper engine (polyquant.paper.engine.MarketView) ---------------------------
+
+    def instrument(self, slug: str):
+        return self.registry.get(slug)
+
+    def phase(self, slug: str, now):
+        inst = self.registry.get(slug)
+        return None if inst is None else phase_of(inst, now)
+
+    def book(self, slug: str):
+        return self.books.latest(slug)
+
+    def book_stale(self, slug: str) -> bool:
+        from polyquant.marketdata.books import book_feed_name
+
+        name = book_feed_name(slug)
+        return self.health.is_stale(name) if name in self.health.feeds else True
+
+    def ws_age_ms(self, now) -> float | None:
+        if self.stream is None or self.stream.last_frame_at is None or not self.stream.connected:
+            return None
+        return (now - self.stream.last_frame_at).total_seconds() * 1000
+
+    def index_stale(self) -> bool:
+        return self.health.is_stale("index")
+
+    def clock_alert(self) -> bool:
+        return self.skew.alerting
+
+    def settlement_flag(self, slug: str):
+        return self.registry.settlement_flags.get(slug)
 
     # ---- websocket callbacks -----------------------------------------------------------------------
 
@@ -147,6 +183,8 @@ class Engine:
         ]
         if self.stream is not None:
             tasks.append(asyncio.create_task(self.stream.run(stop)))
+        for name, interval, step in self._extra_loops:
+            tasks.append(asyncio.create_task(self._loop(name, interval, step, stop)))
         try:
             await stop.wait()
         finally:

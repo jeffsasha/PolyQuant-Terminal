@@ -52,6 +52,22 @@ async def cmd_run(settings: Settings, *, api: bool, duration_s: float | None) ->
     gateway = GatewayClient(max_rps=settings.gateway_max_rps, timeout_s=settings.http_timeout_s)
     engine = Engine(settings, gateway, recorder)
     engine.reference.resume_from(await latest_index_ts(pool, settings.asset))
+    paper = None
+    if settings.paper_enabled:
+        from polyquant.fees.schedule import FeeSchedule
+        from polyquant.paper.engine import PaperExecutionEngine
+        from polyquant.paper.ledger import PostgresLedger
+        from polyquant.paper.risk import CentralRiskManager, RiskConfig
+
+        paper = PaperExecutionEngine(PostgresLedger(pool, settings.paper_account), engine, engine.sink, engine.clock,
+                                     fees=FeeSchedule(maker_tier=settings.maker_fee_tier),
+                                     risk=CentralRiskManager(RiskConfig(
+                                         starting_capital=settings.paper_starting_capital)),
+                                     profile=settings.paper_profile, day_tz=settings.paper_day_tz)
+        await paper.start()
+        engine.add_loop("paper", settings.paper_step_interval_s, paper.step)
+        log.info("paper trading on: account %s, profile %s, equity %s", settings.paper_account, paper.profile.name,
+                 paper.equity())
 
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
@@ -67,7 +83,8 @@ async def cmd_run(settings: Settings, *, api: bool, duration_s: float | None) ->
 
         from polyquant.api.app import create_app
 
-        server = uvicorn.Server(uvicorn.Config(create_app(engine), host=settings.api_host, port=settings.api_port,
+        app = create_app(engine, paper)
+        server = uvicorn.Server(uvicorn.Config(app, host=settings.api_host, port=settings.api_port,
                                                log_level="warning", lifespan="off"))
         server.install_signal_handlers = lambda: None  # we own signals
         server_task = asyncio.create_task(server.serve())

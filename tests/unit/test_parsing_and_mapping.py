@@ -117,3 +117,12 @@ def test_index_points_parse_sorted_decimal():
     assert all(isinstance(p.value, Decimal) for p in pts)
     assert [p.ts for p in pts] == sorted(p.ts for p in pts)
     assert {p.tick_count for p in pts} == {60}
+
+
+def test_venue_outcome_from_outcome_prices():
+    assert parse_instrument(load("market_15m_resolved_up.json")).venue_outcome is Outcome.UP
+    assert parse_instrument(load("market_15m_resolved_down.json")).venue_outcome is Outcome.DOWN
+    assert parse_instrument(load("market_15m_open.json")).venue_outcome is None  # not resolved → never inferred
+    raw = load("market_15m_resolved_up.json")
+    raw["market"]["outcomePrices"] = '["0.5","0.5"]'  # not definitive
+    assert parse_instrument(raw).venue_outcome is None

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Final
 
 from pydantic import Field, SecretStr
@@ -53,6 +54,17 @@ class Settings(BaseSettings):
 
     api_host: str = "127.0.0.1"
     api_port: int = 8787
+    # Required for state-changing paper endpoints (orders, cancel, kill switch). Unset = those endpoints are disabled.
+    api_token: SecretStr | None = None
+
+    # Paper trading (Phase 3). There is no live mode; see LIVE_TRADING_ENABLED above.
+    paper_enabled: bool = True
+    paper_account: str = "paper-main"
+    paper_profile: str = "conservative"  # base | conservative | stress (optimistic is diagnostic only)
+    paper_starting_capital: Decimal = Decimal("1000")
+    paper_step_interval_s: float = 0.25
+    paper_day_tz: str = "America/New_York"
+    maker_fee_tier: int = 1
 
     @property
     def has_credentials(self) -> bool:
