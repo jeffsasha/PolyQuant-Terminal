@@ -38,3 +38,41 @@ jobs:
       - run: ruff check .
       - run: pytest -q
       - run: pip-audit --skip-editable
+  terminal-backend:
+    # The autonomous paper terminal (terminal/). Its tests refuse any database except polyquant_test.
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: polyquant
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: polyquant_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U polyquant" --health-interval 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: terminal
+    env:
+      TEST_DATABASE_URL: postgresql://polyquant:ci-only@127.0.0.1:5432/polyquant_test
+      PYTHONPATH: services:tests/unit
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.13" }
+      - run: pip install --require-hashes -r requirements-dev.lock
+      - run: python -m pytest -q --tb=short
+  terminal-web:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: terminal/apps/web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: "24" }
+      - run: corepack enable && corepack prepare pnpm@10.34.7 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run build

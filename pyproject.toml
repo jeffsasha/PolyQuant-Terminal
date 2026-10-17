@@ -42,6 +42,7 @@ markers = [
 ]
 
 [tool.ruff]
+extend-exclude = ["terminal"]  # separate project with its own CI job and style
 line-length = 120
 target-version = "py312"
 src = ["services/engine", "tests"]
