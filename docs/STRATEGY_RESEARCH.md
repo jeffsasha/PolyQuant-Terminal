@@ -33,6 +33,18 @@ average of BRTI** sampled at `t−1s` (RESEARCH_AUDIT §1.3). Implications:
 - **Next hypothesis:** the market likely prices spot ahead of the 60 s average. Test external spot as a feature
   (Strategy A) against the market mid on the growing recorded-book sample.
 
+## Pre-registration: Strategy A vs B (written 2026-10-17, before any A result was computed)
+
+- **Feature:** Kraken BTC/USD trades (BRTI constituent), 1 s last-trade bars, forward-filled. Drift = exact expected
+  move of the 60-sample average given the current spot vs the spot path still inside the average (fair_prob.py).
+- **Primary hypothesis H1:** A1 = `L7200_k120_t4_drift1_spot` has lower log loss than B1 = `L7200_k120_t4_drift1`
+  on the untouched test split (same chronological, embargoed protocol). Success = paired market-block bootstrap
+  90 % CI of log loss(B1) − log loss(A1) entirely above 0. Exactly these two models are evaluated on test. A
+  development-selected A variant (weights 0.5/1.0, Gaussian/t4) is reported as secondary.
+- **Secondary H2:** on decision points with recorded books (30 s grid), A's log loss is no worse than the market
+  mid's. Reported with market count; no conclusion below 30 markets.
+- **Not changed after seeing results:** feature definition, split, checkpoints, model family, success criteria.
+
 ## 2. Strategy B — fair probability (baseline first)
 
 Baseline model, which is interpretable:
