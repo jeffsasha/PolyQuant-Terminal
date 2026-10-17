@@ -34,9 +34,9 @@ class Runtime:
         # Authenticated market stream: books arrive in memory; a stream book is recorded once per version when used.
         self.stream=None; self.book_origin={}; self.stream_raw={}; self.recorded_versions={}
         self.stream_rejected=0; self.stream_frames=0
-    def event(self,kind,payload,market_id=None,source_at=None):
+    def event(self,kind,payload,market_id=None,source_at=None,received_at=None):
         self.sequence+=1; at=utcnow()
-        event=MarketEvent(str(uuid.uuid4()),market_id,kind,source_at,at,at,self.sequence,payload)
+        event=MarketEvent(str(uuid.uuid4()),market_id,kind,source_at,received_at or at,at,self.sequence,payload)
         try:
             self.recorder.append(event)
             if self.recorder.events>=60: self.store.save_manifest(self.recorder.seal())
@@ -87,6 +87,7 @@ class Runtime:
                     for identity in list(self.markets):
                         if self.markets[identity].end<utcnow() and identity not in held:
                             self.markets.pop(identity,None); self.books.pop(identity,None)
+                            for cache in (self.book_origin,self.stream_raw,self.recorded_versions): cache.pop(identity,None)
                             self.errors.pop('book:'+identity,None)
                     self.last_discovery=utcnow(); self.errors.pop('discovery',None)
                 try:
@@ -111,11 +112,12 @@ class Runtime:
         book=self.books.get(identity); at=utcnow()
         if not book or self.book_origin.get(identity)!='stream' or not self.stream_live(at) or not book.fresh(at):
             return None
-        if after is not None and book.received_at<after: return None
+        # Arrival: observed after the modeled arrival by both our receive time and the venue's source time.
+        if after is not None and (book.received_at<after or book.source_at<after): return None
         return book
     def record_stream_book(self,identity,book):
         if self.recorded_versions.get(identity)!=book.version:
-            self.event('book',self.stream_raw.get(identity,{}),identity,book.source_at)
+            self.event('book',self.stream_raw.get(identity,{}),identity,book.source_at,received_at=book.received_at)
             self.recorded_versions[identity]=book.version
     async def capture_book(self,identity,after=None):
         if not self.collection: raise StorageHalt('Collection is halted')
@@ -146,7 +148,12 @@ class Runtime:
             if self.collection:
                 for market in list(self.markets.values()):
                     if not market.start<=utcnow()<market.end: continue
-                    if self.stream_book(market.id) is not None: continue  # fresh stream book: no REST read needed
+                    streamed=self.stream_book(market.id)
+                    if streamed is not None:
+                        # Fresh stream book: no REST read; keep continuous recorder coverage (once per version).
+                        try: self.record_stream_book(market.id,streamed)
+                        except StorageHalt: pass
+                        continue
                     try: await self.capture_book(market.id)
                     except Exception as error: self.errors['book:'+market.id]=type(error).__name__
             await asyncio.sleep(5)
@@ -331,15 +338,20 @@ class Runtime:
         except Exception as error:
             # One malformed frame never tears down the connection or replaces a valid book.
             self.stream_rejected+=1; self.errors['stream_frame']=type(error).__name__; return
+        if book.source_at is None:  # without a source time it could never be fresh: never replace a valid book
+            self.stream_rejected+=1; self.errors['stream_frame']='MISSING_SOURCE_TIME'; return
         previous=self.books.get(market.id)
-        if previous and previous.source_at and book.source_at and book.source_at<previous.source_at:
+        if previous and previous.source_at and book.source_at<previous.source_at:
             self.stream_rejected+=1; self.errors['stream_frame']='OUT_OF_ORDER'; return
         self.books[market.id]=book; self.book_origin[market.id]='stream'; self.stream_raw[market.id]=frame
     def on_stream_status(self,status,detail):
         if status in ('CONNECTED','SUBSCRIBED'):
             self.stream_status='CONNECTED'; self.errors.pop('stream',None)
+        elif status=='BAD_FRAME':
+            self.stream_rejected+=1; self.errors['stream_frame']=detail.get('error','BAD_FRAME')
         elif status in ('DISCONNECTED','IDLE_RECONNECT','ERROR'):
-            self.stream_status='DISCONNECTED'; self.gaps+=1
+            if self.stream_status!='DISCONNECTED': self.gaps+=1  # one gap per disconnect
+            self.stream_status='DISCONNECTED'
             self.errors['stream']=detail.get('error',status)
     def stream_targets(self):
         now=utcnow()
@@ -354,7 +366,9 @@ class Runtime:
         self.stream_status='CONNECTING'
         async def sync_targets():
             while self.running:
-                self.stream.set_slugs(self.stream_targets()); await asyncio.sleep(2)
+                try: self.stream.set_slugs(self.stream_targets())
+                except Exception as error: self.errors['stream_targets']=type(error).__name__
+                await asyncio.sleep(2)
         sync=asyncio.create_task(sync_targets())
         try: await self.stream.run(lambda:self.running)
         finally:
