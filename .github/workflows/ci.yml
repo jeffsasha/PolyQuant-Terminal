@@ -4,6 +4,7 @@ on:
   pull_request:
 permissions:
   contents: read
+  pull-requests: read  # gitleaks-action lists the PR's commits to scan them
 jobs:
   secrets:
     runs-on: ubuntu-latest
