@@ -12,6 +12,12 @@ Model (interpretable baseline; docs/STRATEGY_RESEARCH.md §2):
       E[S̄_T − S̄_t] = b (τ − τ(τ+1)/(2w)) for τ < w,  b(w−1)/2 for τ ≥ w   (exact, discrete).
 - P(Up) = P(d + Δ ≥ 0), d = S̄_t − priceToBeat, with Δ Gaussian or Student-t (same variance).
 
+Strategy A (external spot as a leading feature): instead of extrapolating the slope, use the actual external spot
+path x (Kraken BTC/USD, a BRTI constituent). With future spot flat at x_t, the average's expected move is
+    E[S̄_T − S̄_t] = x_t − mean(x_{t−w+1..t})                        for τ ≥ w
+                 = (1/w) Σ_{u=t−w+1}^{t−w+τ} (x_t − x_u)             for τ < w
+Only differences of x enter, so a constant Kraken–BRTI basis cancels.
+
 Trading rule: buy the side whose model probability exceeds its all-in executable cost (conservative sweep incl.
 fees) by at least `min_edge`. No claim of edge is made by this code; see the calibration report.
 """
@@ -55,6 +61,28 @@ def drift_ma_change(tau: float, slope: float, w: float = W) -> float:
     return slope * (tau - tau * (tau + 1) / (2.0 * w))
 
 
+def spot_drift(x_path: np.ndarray, tau: float, w: int = int(W)) -> float:
+    """Expected move of the w-sample average given the last w per-second spot values x_path (oldest first, last =
+    current) and flat future spot. See module docstring."""
+    if tau <= 0 or len(x_path) < w:
+        return 0.0
+    x = x_path[-w:]
+    xt = x[-1]
+    if tau >= w:
+        return float(xt - np.mean(x))
+    k = int(tau)
+    return float(np.sum(xt - x[:k]) / w)
+
+
+def forward_filled(ts: np.ndarray, vals: np.ndarray, start: int, end: int) -> np.ndarray | None:
+    """Per-second values on [start, end] carrying the last trade forward; None if nothing at or before start."""
+    if len(ts) == 0 or ts[0] > start:
+        return None
+    grid = np.arange(start, end + 1)
+    idx = np.searchsorted(ts, grid, side="right") - 1
+    return vals[idx]
+
+
 def estimate_sigma2(values: np.ndarray, lag: int, w: float = W) -> float | None:
     """Per-second variance of spot from a 1 s series of the w-sample moving average (mean-zero estimator)."""
     if lag < w or len(values) <= 2 * lag:
@@ -72,13 +100,16 @@ class ModelParams:
     lag_s: int = 120
     dist: str = "gauss"  # gauss | t4
     drift_weight: float = 0.0  # 0 = driftless (B0), 1 = MA-lag drift (B1)
+    drift_source: str = "slope"  # slope (Strategy B) | spot (Strategy A: external spot path)
+    spot_max_age_s: int = 30  # external spot older than this at decision time → model unavailable
     slope_window_s: int = 30
     sigma_floor: float = 0.5  # $/sqrt(s) floor: avoids certainty from a quiet lookback
     p_clip: float = 0.001
 
     @property
     def name(self) -> str:
-        return f"L{self.lookback_s}_k{self.lag_s}_{self.dist}_drift{self.drift_weight:g}"
+        src = "" if self.drift_source == "slope" else f"_{self.drift_source}"
+        return f"L{self.lookback_s}_k{self.lag_s}_{self.dist}_drift{self.drift_weight:g}{src}"
 
 
 @dataclass(frozen=True)
@@ -113,7 +144,17 @@ class FairProbabilityModel:
         sigma = max(math.sqrt(s2), self.p.sigma_floor)
         sd = math.sqrt(var_ma_change(tau, sigma * sigma))
         drift = 0.0
-        if self.p.drift_weight:
+        if self.p.drift_weight and self.p.drift_source == "spot":
+            if snap.spot is None:
+                return None
+            sts, svals = snap.spot.window(t_last - 300, t_last)
+            if len(sts) == 0 or t_last - int(sts[-1]) > self.p.spot_max_age_s:
+                return None  # no fresh external spot: Strategy A is unavailable rather than silently degraded
+            path = forward_filled(sts, svals, t_last - int(W) + 1, t_last)
+            if path is None:
+                return None
+            drift = self.p.drift_weight * spot_drift(path, tau)
+        elif self.p.drift_weight:
             past = snap.series.value_at(t_last - self.p.slope_window_s)
             if past is not None:
                 drift = self.p.drift_weight * drift_ma_change(tau, (s_now - past) / self.p.slope_window_s)

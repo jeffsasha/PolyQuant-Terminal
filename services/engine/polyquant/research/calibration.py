@@ -89,7 +89,8 @@ def chronological_split(markets: list[LabelledMarket], fractions=(0.6, 0.2, 0.2)
 
 
 def build_records(markets: list[LabelledMarket], ts: np.ndarray, vals: np.ndarray, params: ModelParams,
-                  checkpoints: dict[Horizon, tuple[int, ...]] = CHECKPOINTS) -> tuple[list[Record], int]:
+                  checkpoints: dict[Horizon, tuple[int, ...]] = CHECKPOINTS,
+                  spot: tuple[np.ndarray, np.ndarray] | None = None) -> tuple[list[Record], int]:
     model = FairProbabilityModel(params)
     recs: list[Record] = []
     skipped = 0
@@ -100,7 +101,8 @@ def build_records(markets: list[LabelledMarket], ts: np.ndarray, vals: np.ndarra
             if now <= inst.window_start:
                 continue
             snap = MarketSnapshot(now=now, instrument=PITInstrument.from_instrument(inst, now),
-                                  series=PointInTimeSeries(ts, vals, to_unix(now)))
+                                  series=PointInTimeSeries(ts, vals, to_unix(now)),
+                                  spot=PointInTimeSeries(spot[0], spot[1], to_unix(now)) if spot else None)
             out = model.predict(snap)
             if out is None:
                 skipped += 1
@@ -167,6 +169,33 @@ def bootstrap_ci(recs: list[Record], stat: Callable[[list[Record]], float], *, n
     return float(np.quantile(vals, alpha / 2)), float(np.quantile(vals, 1 - alpha / 2))
 
 
+def paired_logloss_diff_ci(a: list[Record], b: list[Record], *, n: int = 2000, seed: int = 13,
+                           alpha: float = 0.10) -> dict:
+    """Log loss(b) − log loss(a) on the decision points both models scored (positive = a better), with a paired
+    bootstrap over markets."""
+    ka = {(r.slug, r.seconds_left): r for r in a}
+    kb = {(r.slug, r.seconds_left): r for r in b}
+    keys = sorted(ka.keys() & kb.keys())
+    if not keys:
+        return {"n": 0}
+
+    def ll(r: Record) -> float:
+        return -(math.log(r.p) if r.y else math.log(1 - r.p))
+
+    by: dict[str, list[float]] = {}
+    for k in keys:
+        by.setdefault(k[0], []).append(ll(kb[k]) - ll(ka[k]))
+    slugs = list(by)
+    point = float(np.mean([d for v in by.values() for d in v]))
+    rng = np.random.default_rng(seed)
+    boots = []
+    for _ in range(n):
+        pick = rng.integers(0, len(slugs), len(slugs))
+        boots.append(float(np.mean([d for i in pick for d in by[slugs[i]]])))
+    return {"n": len(keys), "markets": len(slugs), "diff": point,
+            "ci": (float(np.quantile(boots, alpha / 2)), float(np.quantile(boots, 1 - alpha / 2)))}
+
+
 def logloss_improvement(recs: list[Record]) -> float:
     """Coin-flip log loss minus model log loss (positive = model better)."""
     return math.log(2) - log_loss(recs)
@@ -198,17 +227,17 @@ def weekly_folds(markets: list[LabelledMarket]) -> list[list[LabelledMarket]]:
 
 
 def walk_forward(markets: list[LabelledMarket], ts: np.ndarray, vals: np.ndarray,
-                 variants: list[ModelParams]) -> list[dict]:
+                 variants: list[ModelParams], spot: tuple[np.ndarray, np.ndarray] | None = None) -> list[dict]:
     """For fold k ≥ 1: select on markets that ended before fold k starts, then evaluate on fold k."""
     folds = weekly_folds(markets)
     results = []
     for k in range(1, len(folds)):
         fold_start = min(m.inst.window_start for m in folds[k])
         history = [m for f in folds[:k] for m in f if m.inst.window_end <= fold_start]
-        dev = {v.name: build_records(history, ts, vals, v)[0] for v in variants}
+        dev = {v.name: build_records(history, ts, vals, v, spot=spot)[0] for v in variants}
         chosen = select_variant(dev)
         params = next(v for v in variants if v.name == chosen)
-        test, _ = build_records(folds[k], ts, vals, params)
+        test, _ = build_records(folds[k], ts, vals, params, spot=spot)
         results.append({"fold": k, "fold_start": fold_start.isoformat(), "selected": chosen,
                         "train_markets": len(history), **summary(test)})
     return results

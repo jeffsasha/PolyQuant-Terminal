@@ -16,6 +16,7 @@ from polyquant.marketdata.books import BookService
 from polyquant.marketdata.discovery import DiscoveryService, InstrumentRefresher, InstrumentRegistry
 from polyquant.marketdata.quality import ClockSkewMonitor, DataHealth
 from polyquant.marketdata.reference import ReferenceService
+from polyquant.spot.kraken import KrakenTradeStream
 from polyquant.venue.gateway import GatewayClient
 from polyquant.venue.ws_markets import MarketsStream
 
@@ -54,6 +55,13 @@ class Engine:
                                         on_frame=self._on_ws_frame, on_event=self._on_ws_event, clock=self.clock,
                                         idle_timeout_s=settings.ws_idle_timeout_s)
             self._ws_feed = self.health.register("ws", settings.ws_idle_timeout_s)
+        self.spot_buffer: dict[int, float] = {}  # unix second -> last trade px (≈2 h, for live strategies)
+        self.spot_stream: KrakenTradeStream | None = None
+        if settings.spot_enabled:
+            self._spot_feed = self.health.register("spot:kraken", settings.spot_stale_after_s)
+            self.spot_stream = KrakenTradeStream(self._on_spot_bars,
+                                                 lambda k, d: self.sink.quality_event("spot", k, d, self.clock.now()),
+                                                 self.clock)
         self.bbo = BBOService(gateway, self.registry, self.sink, self.clock, self.health,
                               stale_after_s=settings.bbo_stale_after_s,
                               on_snapshot=self.books.reconcile_bbo if self.stream else None)
@@ -94,6 +102,15 @@ class Engine:
 
     def settlement_flag(self, slug: str):
         return self.registry.settlement_flags.get(slug)
+
+    def _on_spot_bars(self, bars) -> None:
+        for b in bars:
+            self.spot_buffer[int(b.ts.timestamp())] = float(b.last_px)
+            self._spot_feed.mark(b.recv_at, b.ts, (b.recv_at - b.ts).total_seconds() * 1000)
+        if len(self.spot_buffer) > 9000:
+            for k in sorted(self.spot_buffer)[: len(self.spot_buffer) - 7200]:
+                del self.spot_buffer[k]
+        self.sink.spot_bars(bars)
 
     # ---- websocket callbacks -----------------------------------------------------------------------
 
@@ -183,6 +200,8 @@ class Engine:
         ]
         if self.stream is not None:
             tasks.append(asyncio.create_task(self.stream.run(stop)))
+        if self.spot_stream is not None:
+            tasks.append(asyncio.create_task(self.spot_stream.run(stop)))
         for name, interval, step in self._extra_loops:
             tasks.append(asyncio.create_task(self._loop(name, interval, step, stop)))
         try:

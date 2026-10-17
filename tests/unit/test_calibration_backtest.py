@@ -95,7 +95,7 @@ def test_select_variant_uses_lowest_dev_log_loss():
 def test_walk_forward_only_trains_on_prior_markets(monkeypatch):
     calls = []
 
-    def fake_build(ms, ts, vals, params, checkpoints=cal.CHECKPOINTS):
+    def fake_build(ms, ts, vals, params, checkpoints=cal.CHECKPOINTS, spot=None):
         calls.append([m.inst for m in ms])
         return [rec(m.inst.slug, 0.6, 1) for m in ms], 0
 

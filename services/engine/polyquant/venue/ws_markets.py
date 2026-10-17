@@ -142,17 +142,17 @@ class MarketsStream:
 
     async def _read(self, ws, stop: asyncio.Event) -> None:
         stop_task = asyncio.ensure_future(stop.wait())
+        pending: set[asyncio.Future] = set()
         try:
             while not stop.is_set():
                 if self._resubscribe.is_set():
                     await self._apply_subscriptions()
                 recv = asyncio.ensure_future(ws.recv())
                 resub = asyncio.ensure_future(self._resubscribe.wait())
+                pending = {recv, resub}
                 done, _ = await asyncio.wait({recv, resub, stop_task}, timeout=self._idle_timeout,
                                              return_when=asyncio.FIRST_COMPLETED)
                 if recv not in done:
-                    recv.cancel()
-                    resub.cancel()
                     if stop_task in done:
                         return
                     if resub in done:
@@ -162,8 +162,7 @@ class MarketsStream:
                         self._on_event("idle_reconnect", {"idle_s": self._idle_timeout})
                         return
                     continue
-                resub.cancel()
-                raw = recv.result()
+                raw = recv.result()  # raises ConnectionClosed → reconnect path in run()
                 recv_at = self._clock.now()
                 if isinstance(raw, bytes):
                     raw = raw.decode("utf-8")
@@ -176,4 +175,7 @@ class MarketsStream:
                 self.last_frame_at = recv_at
                 self._on_frame(frame, recv_at)
         finally:
-            stop_task.cancel()
+            for f in (*pending, stop_task):
+                f.cancel()
+                if f.done() and not f.cancelled():
+                    f.exception()  # retrieve, so a close during shutdown is never logged as unhandled

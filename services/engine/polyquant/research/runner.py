@@ -217,3 +217,134 @@ def _backtest_md(r: dict) -> str:
         lines.append(f"- {name}: risk {p['risk_rejections']}, arrival {p['arrival_rejections']}, "
                      f"unfilled {p['unfilled_signals']}")
     return "\n".join(lines) + "\n"
+
+
+# ---- Strategy A vs B (pre-registered in docs/STRATEGY_RESEARCH.md) -----------------------------------------
+
+B1 = ModelParams(lookback_s=7200, dist="t4", drift_weight=1.0)
+A1 = ModelParams(lookback_s=7200, dist="t4", drift_weight=1.0, drift_source="spot")
+A_VARIANTS = [ModelParams(lookback_s=7200, dist=d, drift_weight=w, drift_source="spot")
+              for d in ("gauss", "t4") for w in (0.5, 1.0)]
+
+
+async def run_strategy_a(pool, out_dir: Path) -> dict:
+    from polyquant.domain.models import Horizon
+    from polyquant.research.calibration import paired_logloss_diff_ci
+    from polyquant.research.data import load_spot
+
+    instruments = await load_instruments(pool, until=datetime.now(UTC) - timedelta(minutes=5))
+    markets, label_stats = label_markets(instruments)
+    sts, svals = await load_spot(pool)
+    if len(sts) == 0:
+        raise RuntimeError("no external spot data: run `polyquant backfill-spot` first")
+    spot = (sts, svals)
+    covered_from = datetime.fromtimestamp(int(sts[0]) + 3 * 3600, UTC)
+    covered_to = datetime.fromtimestamp(int(sts[-1]), UTC)
+    markets = [m for m in markets if covered_from <= m.inst.window_start and m.inst.window_end <= covered_to]
+    parts = chronological_split(markets)
+    t0 = min(m.inst.window_start for m in markets) - timedelta(hours=3)
+    ts, vals = await load_index(pool, start=t0)
+
+    dev_a = {v.name: build_records(parts["dev"], ts, vals, v, spot=spot)[0] for v in A_VARIANTS}
+    sel_a = select_variant(dev_a)
+    sel_params = next(v for v in A_VARIANTS if v.name == sel_a)
+    test_b1, skip_b1 = build_records(parts["test"], ts, vals, B1)
+    test_a1, skip_a1 = build_records(parts["test"], ts, vals, A1, spot=spot)
+    test_sel, _ = build_records(parts["test"], ts, vals, sel_params, spot=spot)
+    val_b1, _ = build_records(parts["val"], ts, vals, B1)
+    val_a = {v.name: build_records(parts["val"], ts, vals, v, spot=spot)[0] for v in A_VARIANTS}
+    primary = paired_logloss_diff_ci(test_a1, test_b1)
+    wf = walk_forward(markets, ts, vals, A_VARIANTS, spot=spot)
+
+    # H2: dense 30 s grid on recorded-book markets: A1, B1, market mid
+    dense = {Horizon.M15: tuple(range(30, 900 - 5, 30)), Horizon.H1: tuple(range(30, 3600 - 5, 30))}
+    cover = {c["slug"] for c in await book_coverage(pool)}
+    bm = [m for m in markets if m.inst.slug in cover]
+    ra, _ = build_records(bm, ts, vals, A1, checkpoints=dense, spot=spot)
+    rb, _ = build_records(bm, ts, vals, B1, checkpoints=dense)
+    rm, ra2, rb2 = [], [], []
+    kb = {(r.slug, r.seconds_left): r for r in rb}
+    for m in bm:
+        tl = BookTimeline(await load_books(pool, m.inst.slug))
+        for r in (x for x in ra if x.slug == m.inst.slug):
+            t = m.inst.window_end - timedelta(seconds=r.seconds_left)
+            b = tl.at(t)
+            if b is None or (t - b.recv_at).total_seconds() > 30 or (r.slug, r.seconds_left) not in kb:
+                continue
+            mid = outcome_mid(b, Outcome.UP)
+            if mid is None:
+                continue
+            rm.append(Record(r.slug, r.horizon, r.window_start, r.seconds_left, min(0.999, max(0.001, float(mid))),
+                             r.y, r.sigma, r.d, r.sd))
+            ra2.append(r)
+            rb2.append(kb[(r.slug, r.seconds_left)])
+    h2 = {"n_points": len(rm), "n_markets": len({r.slug for r in rm}),
+          "market_mid": summary(rm) if rm else None, "A1": summary(ra2) if ra2 else None,
+          "B1": summary(rb2) if rb2 else None,
+          "A1_vs_market": paired_logloss_diff_ci(ra2, rm) if rm else None,
+          "conclusive": len({r.slug for r in rm}) >= 30}
+
+    result = {
+        "generated_at": datetime.now(UTC).isoformat(),
+        "data": {"markets_with_spot": len(markets), **label_stats, "spot_bars": int(len(sts)),
+                 "spot_from": covered_from.isoformat(), "spot_to": covered_to.isoformat(),
+                 "split_markets": {k: len(v) for k, v in parts.items() if not k.startswith("_")},
+                 "cuts": [c.isoformat() for c in parts.get("_cuts", [])]},
+        "primary_H1": {"A1": A1.name, "B1": B1.name, "test_A1": summary(test_a1), "test_B1": summary(test_b1),
+                       "skipped_A1": skip_a1, "skipped_B1": skip_b1, "logloss_B1_minus_A1": primary,
+                       "success": bool(primary.get("n") and primary["ci"][0] > 0)},
+        "secondary": {"selected_A_on_dev": sel_a, "test_selected": summary(test_sel),
+                      "val": {"B1": summary(val_b1), **{k: summary(v) for k, v in val_a.items()}},
+                      "dev": {k: summary(v) for k, v in dev_a.items()}},
+        "walk_forward_A": wf, "H2_market": h2,
+    }
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "strategy_a.json").write_text(json.dumps(result, indent=1, default=str))
+    (out_dir / "strategy_a.md").write_text(_strategy_a_md(result))
+    return result
+
+
+def _strategy_a_md(r: dict) -> str:
+    p, d, h2 = r["primary_H1"], r["data"], r["H2_market"]
+    diff = p["logloss_B1_minus_A1"]
+    lines = ["# Strategy A (external spot) vs B — pre-registered evaluation", "",
+             f"Generated {r['generated_at']}. Markets with Kraken spot coverage: {d['markets_with_spot']} "
+             f"({d['spot_from']} → {d['spot_to']}); {d['spot_bars']:,} Kraken 1 s bars. Split {d['split_markets']}, "
+             f"cuts {d['cuts']}.", "",
+             "## H1 (primary): A1 vs B1 on the untouched test split", "",
+             "| model | n | log loss | Brier | ECE |", "|---|---|---|---|---|",
+             f"| A1 {p['A1']} | {p['test_A1']['n_predictions']} | {_f(p['test_A1']['log_loss'])} | "
+             f"{_f(p['test_A1']['brier'])} | {_f(p['test_A1']['ece'])} |",
+             f"| B1 {p['B1']} | {p['test_B1']['n_predictions']} | {_f(p['test_B1']['log_loss'])} | "
+             f"{_f(p['test_B1']['brier'])} | {_f(p['test_B1']['ece'])} |", ""]
+    if diff.get("n"):
+        lines.append(f"Paired log loss(B1) − log loss(A1) = **{_f(diff['diff'])}** on {diff['n']} points / "
+                     f"{diff['markets']} markets; 90 % CI {_f(diff['ci'][0])} … {_f(diff['ci'][1])}. "
+                     f"**H1 {'SUPPORTED' if p['success'] else 'NOT supported'}** (criterion: CI above 0).")
+    s = r["secondary"]
+    lines += ["", "## Secondary: A variant selected on development data", "",
+              f"Selected: {s['selected_A_on_dev']}; test log loss {_f(s['test_selected']['log_loss'])}, Brier "
+              f"{_f(s['test_selected']['brier'])}.", "", "| variant | dev log loss | val log loss |", "|---|---|---|"]
+    for k in s["dev"]:
+        lines.append(f"| {k} | {_f(s['dev'][k]['log_loss'])} | {_f(s['val'][k]['log_loss'])} |")
+    lines.append(f"| B1 (reference) | — | {_f(s['val']['B1']['log_loss'])} |")
+    lines += ["", "## Walk-forward (A variants re-selected on prior data)", "",
+              "| fold | start | selected | n | log loss |", "|---|---|---|---|---|"]
+    for f in r["walk_forward_A"]:
+        lines.append(f"| {f['fold']} | {f['fold_start'][:10]} | {f['selected']} | {f['n_predictions']} | "
+                     f"{_f(f['log_loss'])} |")
+    lines += ["", "## H2 (secondary): vs market mid on recorded books (30 s grid)", ""]
+    if h2["market_mid"]:
+        v = h2["A1_vs_market"]
+        lines += [f"{h2['n_points']} decision points across **{h2['n_markets']} markets** "
+                  f"({'conclusive sample' if h2['conclusive'] else 'NOT conclusive: < 30 markets'}). Points within a "
+                  f"market are highly correlated.", "",
+                  "| | log loss | Brier |", "|---|---|---|",
+                  f"| market mid | {_f(h2['market_mid']['log_loss'])} | {_f(h2['market_mid']['brier'])} |",
+                  f"| A1 | {_f(h2['A1']['log_loss'])} | {_f(h2['A1']['brier'])} |",
+                  f"| B1 | {_f(h2['B1']['log_loss'])} | {_f(h2['B1']['brier'])} |", "",
+                  f"Paired log loss(market) − log loss(A1) = {_f(v['diff'])} (90 % CI {_f(v['ci'][0])} … "
+                  f"{_f(v['ci'][1])}); positive would favour A1."]
+    else:
+        lines.append("No recorded-book decision points with spot coverage yet.")
+    return "\n".join(lines) + "\n"

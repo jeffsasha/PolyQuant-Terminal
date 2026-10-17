@@ -197,11 +197,16 @@ async def cmd_research(settings: Settings, *, what: str, out: str) -> int:
     from pathlib import Path
 
     from polyquant.recorder.db import create_pool
-    from polyquant.research.runner import run_backtest, run_calibration
+    from polyquant.research.runner import run_backtest, run_calibration, run_strategy_a
 
     pool = await create_pool(settings.database_url)
     try:
-        if what == "calibrate":
+        if what == "strategy-a":
+            r = await run_strategy_a(pool, Path(out))
+            p = r["primary_H1"]
+            print(f"H1 {'SUPPORTED' if p['success'] else 'NOT supported'}: {p['logloss_B1_minus_A1']}; "
+                  f"report: {out}/strategy_a.md")
+        elif what == "calibrate":
             r = await run_calibration(pool, Path(out))
             t = r["test"]
             print(f"selected {r['selected_variant']}; test log loss {t['log_loss']:.4f} vs coin-flip "
@@ -213,6 +218,28 @@ async def cmd_research(settings: Settings, *, what: str, out: str) -> int:
                 print(f"{name:12s} trades={p['trades']:3d} net={p['net_pnl']:+.2f} fees={p['fees']:.2f}")
             print(f"report: {out}/backtest.md")
     finally:
+        await pool.close()
+    return 0
+
+
+async def cmd_backfill_spot(settings: Settings, *, since: str, until: str | None) -> int:
+    from polyquant.recorder.db import create_pool, migrate
+    from polyquant.recorder.store import RecorderSink
+    from polyquant.spot.kraken import KrakenRest, backfill
+
+    start = datetime.fromisoformat(since).replace(tzinfo=UTC) if "T" not in since else datetime.fromisoformat(since)
+    end = datetime.fromisoformat(until) if until else datetime.now(UTC) - timedelta(seconds=5)
+    pool = await create_pool(settings.database_url)
+    async with pool.acquire() as conn:
+        await migrate(conn)
+    rec = RecorderSink(pool)
+    rest = KrakenRest()
+    try:
+        n = await backfill(rest, rec.spot_bars, since=start, until=end, flush=rec.flush)
+        await rec.flush()
+        print(f"kraken 1s bars: {n}; recorder wrote {rec.written}, dropped {rec.dropped}")
+    finally:
+        await rest.aclose()
         await pool.close()
     return 0
 
@@ -232,7 +259,10 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--since", required=True, help="UTC date or ISO datetime, e.g. 2026-09-22")
     b.add_argument("--until", default=None)
     b.add_argument("--what", choices=("all", "instruments", "index"), default="all")
-    for name in ("calibrate", "backtest"):
+    bs = sub.add_parser("backfill-spot", help="backfill Kraken BTC/USD 1 s bars (Strategy A feature)")
+    bs.add_argument("--since", required=True)
+    bs.add_argument("--until", default=None)
+    for name in ("calibrate", "backtest", "strategy-a"):
         rp = sub.add_parser(name, help=f"research: {name} the fair-probability baseline")
         rp.add_argument("--out", default="reports/phase4")
     args = p.parse_args(argv)
@@ -245,8 +275,10 @@ def main(argv: list[str] | None = None) -> int:
         coro = cmd_run(settings, api=not args.no_api, duration_s=args.duration)
     elif args.cmd == "status":
         coro = cmd_status(settings)
-    elif args.cmd in ("calibrate", "backtest"):
+    elif args.cmd in ("calibrate", "backtest", "strategy-a"):
         coro = cmd_research(settings, what=args.cmd, out=args.out)
+    elif args.cmd == "backfill-spot":
+        coro = cmd_backfill_spot(settings, since=args.since, until=args.until)
     elif args.cmd == "backfill":
         coro = cmd_backfill(settings, since=args.since, until=args.until, what=args.what)
     else:

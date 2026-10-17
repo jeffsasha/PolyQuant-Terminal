@@ -65,3 +65,15 @@ async def book_coverage(pool: asyncpg.Pool) -> list[dict]:
         rows = await conn.fetch("SELECT slug, min(recv_at) first, max(recv_at) last, count(*) n FROM book_snapshots"
                                 " GROUP BY slug ORDER BY min(recv_at)")
     return [dict(r) for r in rows]
+
+
+async def load_spot(pool: asyncpg.Pool, *, source: str = "kraken", start: datetime | None = None,
+                    end: datetime | None = None) -> tuple[np.ndarray, np.ndarray]:
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT extract(epoch from ts)::bigint AS t, last_px FROM external_spot WHERE source=$1"
+            " AND ($2::timestamptz IS NULL OR ts >= $2) AND ($3::timestamptz IS NULL OR ts <= $3) ORDER BY ts",
+            source, start, end)
+    ts = np.fromiter((r["t"] for r in rows), dtype=np.int64, count=len(rows))
+    vals = np.fromiter((float(r["last_px"]) for r in rows), dtype=np.float64, count=len(rows))
+    return ts, vals

@@ -95,6 +95,32 @@ scripts/backup-db.sh
 Docker: `docker-compose.yml` and `Dockerfile` are provided but **have not been tested** (Docker isn't installed on
 the development machine).
 
+## Continuous recorder (macOS)
+
+Order books only exist for the time the recorder runs, so it should run continuously. A launchd user agent (no
+admin rights) keeps it up: it starts the project-local Postgres if needed, restarts on crash, and prevents idle sleep
+while running (`PQ_PREVENT_SLEEP=0` to disable). Closing a laptop lid still stops recording.
+
+```bash
+scripts/recorder-agent.sh install
+```
+
+```bash
+scripts/recorder-agent.sh status
+```
+
+Also `logs`, `stop`, `start` and `uninstall`. Logs go to `~/Library/Logs/polyquant/recorder.log`. Expect roughly
+1.5–2 GB/day of database growth with full-depth books (`BOOK_RECORD_LEVELS` caps it). It records the official index,
+venue books and trades, REST BBO cross-checks, and Kraken BTC/USD 1 s spot bars (Strategy A's feature).
+
+After a gap (machine asleep), backfill what the venue keeps:
+
+```bash
+.venv/bin/polyquant backfill --since 2026-10-17 && .venv/bin/polyquant backfill-spot --since 2026-10-17
+```
+
+Order books cannot be backfilled.
+
 ## Paper trading
 
 The engine runs a paper account (default $1,000, conservative execution profile) against the live WS book. Order
@@ -124,6 +150,10 @@ is stored in `risk_decisions`.
 
 ```bash
 .venv/bin/polyquant backtest
+```
+
+```bash
+.venv/bin/polyquant strategy-a
 ```
 
 These write `reports/phase4/calibration.md` (chronological split, untouched test set, walk-forward, model vs

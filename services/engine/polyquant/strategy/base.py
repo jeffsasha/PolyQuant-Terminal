@@ -96,6 +96,7 @@ class MarketSnapshot:
     instrument: PITInstrument
     series: PointInTimeSeries
     book: BookSnapshot | None = None
+    spot: PointInTimeSeries | None = None  # external spot, last trade px per active second (Strategy A)
     held_up: Decimal = Decimal(0)
     held_down: Decimal = Decimal(0)
 

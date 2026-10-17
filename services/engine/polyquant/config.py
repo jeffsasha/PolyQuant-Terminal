@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     clock_skew_alert_ms: float = 250.0
     book_record_levels: int = 0  # 0 = full depth (measured ~1.4 GB/day of level data for 3 active markets)
 
+    # External spot (Strategy A feature): Kraken BTC/USD public trades, 1 s bars. Public data, no key.
+    spot_enabled: bool = True
+    spot_stale_after_s: float = 60.0  # Kraken BTC trades are sparse (~1 active second in 4)
+
     # Authenticated markets WebSocket (read-only market data). Used only when credentials are present.
     ws_enabled: bool = True
     ws_idle_timeout_s: float = 30.0

@@ -38,6 +38,7 @@ class EventSink(Protocol):
     def bbo(self, snap: BBOSnapshot) -> None: ...
     def book(self, snap: Any) -> None: ...  # marketdata.book.BookSnapshot (full validated L2 book)
     def trade(self, trade: TradePrint) -> None: ...
+    def spot_bars(self, bars: list) -> None: ...  # spot.kraken.SpotBar
     def quality_event(self, feed: str, kind: str, detail: dict[str, Any], at: datetime) -> None: ...
 
 
@@ -93,6 +94,10 @@ class FanoutSink:
         for s in self._sinks:
             s.trade(trade)
 
+    def spot_bars(self, bars) -> None:
+        for s in self._sinks:
+            s.spot_bars(bars)
+
     def quality_event(self, feed, kind, detail, at) -> None:
         for s in self._sinks:
             s.quality_event(feed, kind, detail, at)
@@ -113,6 +118,7 @@ class MemorySink:
         self.bbos: list[BBOSnapshot] = []
         self.books: list = []
         self.trades: list[TradePrint] = []
+        self.spot: list = []
         self.quality: list[tuple[str, str, dict, datetime]] = []
 
     def _trim(self, xs: list) -> None:
@@ -138,6 +144,10 @@ class MemorySink:
     def trade(self, trade) -> None:
         self.trades.append(trade)
         self._trim(self.trades)
+
+    def spot_bars(self, bars) -> None:
+        self.spot.extend(bars)
+        self._trim(self.spot)
 
     def quality_event(self, feed, kind, detail, at) -> None:
         self.quality.append((feed, kind, detail, at))

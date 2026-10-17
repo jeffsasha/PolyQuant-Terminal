@@ -80,6 +80,13 @@ VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 ON CONFLICT (trade_id) DO NOTHING
 """
 
+INSERT_SPOT = """
+INSERT INTO external_spot (source, ts, last_px, first_px, high_px, low_px, n_trades, volume, recv_at)
+SELECT * FROM unnest($1::text[], $2::timestamptz[], $3::numeric[], $4::numeric[], $5::numeric[], $6::numeric[],
+                     $7::int[], $8::numeric[], $9::timestamptz[])
+ON CONFLICT (source, ts) DO NOTHING
+"""
+
 INSERT_QUALITY = "INSERT INTO data_quality_events (at, feed, kind, detail) VALUES ($1, $2, $3, $4)"
 
 
@@ -120,6 +127,10 @@ class RecorderSink:
 
     def trade(self, trade: TradePrint) -> None:
         self._put(("trade", trade))
+
+    def spot_bars(self, bars: list) -> None:
+        if bars:
+            self._put(("spot", list(bars)))
 
     def quality_event(self, feed: str, kind: str, detail: dict, at: datetime) -> None:
         self._put(("quality", at, feed, kind, detail))
@@ -199,6 +210,11 @@ class RecorderSink:
                     await self._write_book(conn, item[1])
                 elif kind == "trade":
                     await self._write_trade(conn, item[1])
+                elif kind == "spot":
+                    b = item[1]
+                    await conn.execute(INSERT_SPOT, [x.source for x in b], [x.ts for x in b], [x.last_px for x in b],
+                                       [x.first_px for x in b], [x.high_px for x in b], [x.low_px for x in b],
+                                       [x.n_trades for x in b], [x.volume for x in b], [x.recv_at for x in b])
                 elif kind == "quality":
                     _, at, feed, k, detail = item
                     await conn.execute(INSERT_QUALITY, at, feed, k, dumps(detail))
@@ -251,6 +267,6 @@ async def counts(pool: asyncpg.Pool) -> dict[str, int]:
     out = {}
     async with pool.acquire() as conn:
         for t in ("instruments", "instrument_events", "index_points", "bbo_snapshots", "book_snapshots", "trades",
-                  "data_quality_events"):
+                  "external_spot", "data_quality_events"):
             out[t] = await conn.fetchval(f"SELECT count(*) FROM {t}")  # noqa: S608 - fixed table names
     return out

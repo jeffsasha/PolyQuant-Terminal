@@ -33,7 +33,7 @@ async def test_full_write_path(pool, clock):
     await rec.flush()
     c = await counts(pool)
     assert c == {"instruments": 1, "instrument_events": 1, "index_points": 60, "bbo_snapshots": 1,
-                 "book_snapshots": 0, "trades": 0, "data_quality_events": 1}
+                 "book_snapshots": 0, "trades": 0, "external_spot": 0, "data_quality_events": 1}
     async with pool.acquire() as conn:
         row = await conn.fetchrow("SELECT price_to_beat, fee_coefficient, horizon FROM instruments")
         assert row["price_to_beat"] == Decimal("81487.13") and row["horizon"] == "15m"
