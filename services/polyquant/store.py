@@ -120,7 +120,7 @@ class Store:
         with self.connect() as c: c.execute('INSERT INTO decisions(id,account_id,market_id,strategy,payload) VALUES(%s,%s,%s,%s,%s)',(identity,account_id,market_id,strategy,Jsonb(jsonable(payload))))
         return identity
     def history(self,table,limit=100):
-        if table not in ['orders','fills','positions','decisions','audit','datasets','equity_snapshots']: raise ValueError('Invalid history type')
+        if table not in ['orders','fills','positions','decisions','audit','datasets','equity_snapshots','settlements']: raise ValueError('Invalid history type')
         with self.connect() as c: return c.execute(f'SELECT * FROM {table} ORDER BY '+('created_at DESC' if table!='positions' else 'id DESC')+' LIMIT %s',(min(limit,500),)).fetchall()
     def performance(self):
         with self.connect() as c:
@@ -181,4 +181,4 @@ class Store:
 
     def held_instruments(self):
         with self.connect() as c:
-            return c.execute("SELECT DISTINCT ON (v.id) v.raw FROM instrument_versions v JOIN positions p ON p.market_id=v.id WHERE (p.status='OPEN' AND p.qty>0) OR (p.status='SETTLED' AND p.settled_at>now()-interval '24 hours') ORDER BY v.id,v.created_at DESC").fetchall()
+            return c.execute("SELECT DISTINCT ON (v.id) v.raw FROM instrument_versions v JOIN positions p ON p.market_id=v.id WHERE (p.status='OPEN' AND p.qty>0) OR p.status='SETTLED' ORDER BY v.id,v.created_at DESC").fetchall()

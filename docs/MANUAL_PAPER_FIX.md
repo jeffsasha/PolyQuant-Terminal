@@ -11,3 +11,6 @@ Public GET experiment: ordinary and no-cache-header book calls returned CF HIT/A
 Implement in order: regression tests; manual account/risk and repeatable order/position ledger; fresh GET adapter + bounded arrival worker; authenticated preview/place/status/cancel and authoritative settlement where verified; working English controls and clear unavailable states; fixture API/order lifecycle checks and actual production-book browser buy/close in both cadences; fresh independent review and local restart.
 
 Acceptance: observe actual new paper order IDs, arrival book hashes/timestamps, partial/full fills or honest limit cancellation, cash/fees/positions, sale/settlement and restart persistence. Test a closed-market and stale-book rejection and strategy-gate non-bypass. Do not call a test of successful rejection a successful paper-trading test. BRTI facts/inferences remain separately documented by primary-source research.
+
+
+Follow-up: a separate Verification (paper) account preserves user-account risk budgets during lifecycle tests. Both discretionary accounts retain the same hard limits. Final independent-review fixes and evidence are recorded in [follow-up verification](PAPER_TRADING_FOLLOWUP_VERIFICATION.md).

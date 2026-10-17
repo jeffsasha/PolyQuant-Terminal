@@ -1,12 +1,12 @@
 from decimal import Decimal as D
-from .types import RiskDecision
+from .types import RiskDecision,DISCRETIONARY_IDS
 from .fees import FeeModel
 
 
 class RiskManager:
     def evaluate(self,intent,account,market,book,reference,config,at):
         reasons=[]; selling=intent.side.startswith('SELL_')
-        discretionary=intent.account_id=='manual' and intent.strategy=='manual_discretionary'
+        discretionary=intent.account_id in DISCRETIONARY_IDS and intent.strategy=='manual_discretionary'
         if intent.side not in ['BUY_UP','BUY_DOWN','SELL_UP','SELL_DOWN']: reasons.append('INVALID_SIDE')
         if not intent.qty.is_finite() or not intent.limit.is_finite() or intent.qty<=0 or not 0<intent.limit<1:
             return RiskDecision(False,('INVALID_ORDER_VALUES',))

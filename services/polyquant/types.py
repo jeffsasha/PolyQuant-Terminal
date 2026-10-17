@@ -4,7 +4,8 @@ from decimal import Decimal,InvalidOperation
 import hashlib
 import json
 
-ACCOUNT_IDS=('manual','probability','momentum','book')
+DISCRETIONARY_IDS=('manual','verification')
+ACCOUNT_IDS=DISCRETIONARY_IDS+('probability','momentum','book')
 
 
 def decimal(value) -> Decimal:

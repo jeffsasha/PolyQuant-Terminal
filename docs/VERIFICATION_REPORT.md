@@ -1,5 +1,7 @@
 # Local verification — October 16, 2026
 
+Historical recorder delivery report. Manual paper trading and settlement have since been implemented; see [current follow-up verification](PAPER_TRADING_FOLLOWUP_VERIFICATION.md).
+
 This is a runnable **local paper-only collection and research terminal**, with reference-dependent entries deliberately blocked. It is not a claim that the entire approved engineering/research release has passed.
 
 ## Observed evidence

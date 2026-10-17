@@ -93,7 +93,7 @@ def stop_process(name):
                 if not owned_process(pid,name): break
                 time.sleep(.1)
             else: raise RuntimeError('Owned service did not stop; database remains running')
-    pidfile.unlink()
+    pidfile.unlink(missing_ok=True)
 
 
 def spawn(name,args,cwd):

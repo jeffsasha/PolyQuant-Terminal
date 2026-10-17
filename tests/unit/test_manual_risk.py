@@ -22,3 +22,10 @@ def test_discretionary_cannot_bypass_actual_safety_or_strategy_gates():
     assert 'REFERENCE_RECONCILIATION_FAILED' in risk.evaluate(automatic,AccountState('probability'),market,book,ReferenceSnapshot(),config,now).reasons
     spoof=replace(intent,account_id='probability')
     assert 'REFERENCE_RECONCILIATION_FAILED' in risk.evaluate(spoof,AccountState('probability'),market,book,ReferenceSnapshot(),config,now).reasons
+
+def test_verification_trades_use_the_same_hard_limits_in_an_isolated_account():
+    now,market,book,_=context()
+    intent=OrderIntent('qa-order','verification',market.id,'BUY_UP',D('1'),D('.52'),'manual_discretionary')
+    result=RiskManager().evaluate(intent,AccountState('verification'),market,book,ReferenceSnapshot(),ExperimentConfig(),now)
+    assert result.allowed
+    assert 'PER_TRADE_LOSS_LIMIT' in RiskManager().evaluate(replace(intent,qty=D('20')),AccountState('verification'),market,book,ReferenceSnapshot(),ExperimentConfig(),now).reasons

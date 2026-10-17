@@ -9,7 +9,7 @@ from .config import Settings
 from .store import Store
 from .runtime import Runtime
 from .auth import Sessions,verify_password
-from .types import OrderIntent,decimal,jsonable,utcnow
+from .types import OrderIntent,decimal,jsonable,utcnow,DISCRETIONARY_IDS
 from .replay import Replay
 
 class Login(BaseModel):
@@ -17,7 +17,7 @@ class Login(BaseModel):
     password:str=Field(max_length=256)
 class AccountCommand(BaseModel):
     model_config=ConfigDict(extra='forbid')
-    account_id:Literal['manual','probability','momentum','book']='manual'
+    account_id:Literal['manual','verification','probability','momentum','book']='manual'
 class PaperTicket(AccountCommand):
     id:str=Field(min_length=8,max_length=100)
     market_id:str=Field(max_length=80)
@@ -126,11 +126,14 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
             qty=decimal(payload.qty); price=decimal(payload.limit)
             if qty<=0 or qty>1000000 or not 0<price<1: raise ValueError('Invalid quantity or price')
         except ValueError as error: raise HTTPException(422,str(error))
-        strategy='manual_discretionary' if payload.account_id=='manual' else 'manual'
+        strategy='manual_discretionary' if payload.account_id in DISCRETIONARY_IDS else 'manual'
         return OrderIntent(payload.id,payload.account_id,payload.market_id,payload.side,qty,price,strategy,None,payload.scenario)
     @app.post('/paper/preview')
     async def preview(payload:PaperTicket,value=Depends(authenticated)):
-        return await app.state.runtime.preview_order(intent(payload))
+        order_intent=intent(payload)
+        result=await app.state.runtime.preview_order(order_intent)
+        if not result['allowed']: app.state.runtime.engine.reject(order_intent,result['reasons'],'PREVIEW')
+        return result
     @app.post('/paper/orders')
     async def order(payload:PaperTicket,value=Depends(authenticated)):
         try: return await app.state.runtime.place_order(intent(payload))

@@ -44,3 +44,15 @@ def test_arrival_cannot_consume_a_snapshot_captured_before_arrival(store):
     clock.advance(now+timedelta(seconds=1));engine.process_due()
     assert not store.state('probability').positions
     assert store.get_order(order.id)['reason']=='ARRIVAL_BOOK_NOT_OBSERVED'
+
+
+def test_settled_markets_remain_on_correction_watch_after_24h(store):
+    from polyquant.types import MarketTerms
+    now,market,book,_=context()
+    raw={'id':market.id,'slug':market.slug,'active':True,'closed':False,'status':'MARKET_STATUS_OPEN','assetPriceTerms':{'marketType':'ASSET_PRICE_MARKET_TYPE_UP_DOWN','asset':{'symbol':'btc','assetClass':'ASSET_CLASS_CRYPTO'},'indexSymbol':'BRTI','horizon':'15m','windowStart':market.start.isoformat(),'windowEnd':market.end.isoformat(),'priceToBeat':{'value':'80000','currency':'USD'}}}
+    store.save_instrument(MarketTerms.from_raw(raw))
+    buy=OrderIntent('correction-watch','manual',market.id,'BUY_UP',D('1'),D('.5'),'manual_discretionary')
+    store.reserve(buy,D('.52'));store.commit_execution(buy.id,ExecutionResult((Fill(D('.5'),D('1'),D('.02')),),'FILLED'))
+    store.settle_market(market.id,'UP','first-official',final=True)
+    with store.connect() as c:c.execute("UPDATE positions SET settled_at=now()-interval '2 days'")
+    assert store.held_instruments()

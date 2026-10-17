@@ -49,8 +49,7 @@ class PaperExecutionEngine:
     def submit(self,intent):
         decision=self.preview(intent)
         if not decision.allowed:
-            if 'DAILY_LOSS_LIMIT' in decision.reasons: self.store.halt(intent.account_id,'DAILY_LOSS_LIMIT')
-            self.store.decision(intent.account_id,intent.market_id,intent.strategy,{'action':'REJECTED','reasons':decision.reasons,'intent':intent})
+            self.reject(intent,decision.reasons)
             return decision
         delay=SCENARIOS[intent.scenario][0]
         ok=self.store.reserve(intent,decision.maximum_cost,self.clock.now()+timedelta(seconds=delay),
@@ -59,6 +58,9 @@ class PaperExecutionEngine:
             from .types import RiskDecision
             return RiskDecision(False,('DUPLICATE_OR_CONCURRENT_RISK_REJECTION',))
         return decision
+    def reject(self,intent,reasons,phase='ADMISSION'):
+        if 'DAILY_LOSS_LIMIT' in reasons: self.store.halt(intent.account_id,'DAILY_LOSS_LIMIT')
+        self.store.decision(intent.account_id,intent.market_id,intent.strategy,{'action':'REJECTED','phase':phase,'reasons':reasons,'intent':intent})
     def process_due(self,at=None,order_ids=None):
         at=at or self.clock.now(); results=[]
         for row in self.store.pending_due(at):
@@ -74,6 +76,7 @@ class PaperExecutionEngine:
                             pending=tuple(p for p in account.pending if p['id']!=row['id']))
             admission=self.risk.evaluate(intent,account,market,book,self.reference(),ExperimentConfig(),at)
             if not admission.allowed:
+                self.reject(intent,admission.reasons,'ARRIVAL')
                 self.store.cancel(intent.id,'ARRIVAL_'+','.join(admission.reasons)); continue
             key=(intent.account_id,intent.market_id,book.version)
             used=self.consumed.setdefault(key,{})

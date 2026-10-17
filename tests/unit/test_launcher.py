@@ -39,3 +39,14 @@ def test_stop_recovers_only_the_verified_workspace_listener(tmp_path,monkeypatch
     launcher.stop_process('backend')
     assert stopped==[77]
     assert not (tmp_path/'backend.pid').exists()
+
+
+def test_stop_recovers_owned_listener_when_pid_file_is_missing(tmp_path,monkeypatch):
+    monkeypatch.setattr(launcher,'DATA',tmp_path)
+    alive=[True];stopped=[]
+    monkeypatch.setattr(launcher,'owned_process',lambda pid,name:pid==77 and alive[0])
+    monkeypatch.setattr(launcher,'listener_pids',lambda name:[77])
+    def kill(pid,signal):stopped.append(pid);alive[0]=False
+    monkeypatch.setattr(launcher.os,'kill',kill)
+    launcher.stop_process('backend')
+    assert stopped==[77]

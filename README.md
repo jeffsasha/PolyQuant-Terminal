@@ -1,6 +1,6 @@
 # PolyQuant Terminal
 
-English local research terminal for **Polymarket US BTC 15m and 1h**. Real public production data, three independent $1,000 paper accounts, and no real order gateway.
+English local research terminal for **Polymarket US BTC 15m and 1h**. Real public production data, independent $1,000 paper accounts, and no real order gateway.
 
 ## Run on this Mac
 
@@ -11,7 +11,7 @@ cd PolyQuant-Terminal/terminal
 python3 scripts/local.py start
 ```
 
-Open **http://127.0.0.1:3000**. Use **127.0.0.1**, because the mutation Origin check is configured for that exact address. There is no username field. Read the generated local password:
+Open **http://127.0.0.1:3000**. Both **127.0.0.1** and **localhost** are accepted as exact local Origins. There is no username field. Read the generated local password:
 
 ```sh
 cat .local/login-password.txt
@@ -25,34 +25,41 @@ python3 scripts/local.py stop
 
 This stops only project-owned web/API processes and this workspace's database. Database files, paper balances, halts, and recordings remain in `.local/`. Do not delete that directory to fix a startup problem. Private local service logs are `.local/backend.log`, `.local/web.log`, and `.local/postgres.log`.
 
-## Current operating state
+## Paper trading with production data
 
-**Reference-dependent strategies remain disabled in code.** Five public BRTI history reconstructions failed to reproduce the official contract thresholds. `REFERENCE_VALIDATED=true` cannot bypass this gate, and `LIVE_TRADING_ENABLED=true` refuses startup. Resume clears eligible manual paper halts; it cannot activate a reference-dependent strategy.
+Select **Discretionary paper** for your manual paper account. The **Verification (paper)** account contains explicitly labeled production-data test trades and has separate money and risk. The Probability, Momentum and Order Book research accounts retain their own balances and remain disabled while models and reference data are unvalidated. No account returns are combined.
 
-The terminal collects real US contract definitions, available public order books, official US BRTI history, and separately labeled Coinbase BTC-USD spot candles. Public REST responses can be cached or unavailable. A displayed quote is not proof that it is fresh enough to trade. Source age, cache age, transport errors, and missing books are visible. No missing prices or fills are synthesized.
+1. Click **UP** or **DOWN** on the BTC 15m or 1h contract to populate the paper ticket.
+2. Set contracts, limit price and execution scenario. Click **Inspect costs & risk**. This fetches a fresh production book and shows costs, estimated depth and risk reasons.
+3. If eligible, click **Place paper order**. **Orders** shows its ID/status; **Fills** shows executed price, quantity, fee and source-book hash. A preview is not a fill: arrival obtains a new snapshot and can cancel safely if data or liquidity is unavailable.
+4. In **Positions**, click **Prepare exit**, inspect the sale ticket, then **Place paper order**. Closed/settled history and audit details remain visible. Unfilled IOC quantity cancels. There is no assumed maker queue fill.
 
-The authenticated US market socket is **not verified** until you configure your credentials. Later, add only the following variables to the backend `.env` locally, then restart the services. Never use `NEXT_PUBLIC_` for secrets or paste credentials into chat.
+Risk stays enforced: 0.5% maximum possible trade loss including fees, 5% combined exposure, 2.5% per cadence, two positions, one per cadence, 2% daily loss, and a 30-minute cooldown after three consecutive losses. New entries stop in the final two minutes of 15m contracts and final five minutes of 1h contracts. Manual discretionary tickets do not claim a fitted model probability or net edge; all financial/data gates still apply.
+
+**Emergency stop** and **Pause paper account** persist for the selected account. **Resume paper account** cannot clear a same-day daily loss lock or unresolved persistence fault. No feed fault invents a close. Preview edits or contract rollover invalidate prior approval; rejected previews are recorded without placing an order.
+
+## Reference investigation and production feed
+
+**Reference-dependent strategies remain disabled in code.** Follow-up evidence found that 1S BRTI history is inconsistent with coarser buckets and the documentation's reconstruction example. An already-averaged 1S series is a plausible explanation, not a confirmed replacement specification. Read [BRTI follow-up research](docs/BRTI_FOLLOWUP_RESEARCH.md).
+
+Manual trading uses production US books and official contract definitions. Public responses can be cached, unavailable, or rate limited. Fresh order reads use distinct cache keys, keep actual source/receive/cache timestamps, and retain the two-second freshness rule. The fallback uses at most one public GET/second, observes Retry-After and exponential cooldowns, and fails visibly during cooldown. Display polling is slower than an authenticated stream; inspect/order arrival refreshes again. Never interpret a stale displayed quote as tradable.
+
+Official paper settlement requires **MARKET_STATUS_RESOLVED**, a matching slug, and a valid binary payout from the official settlement endpoint. Missing/404/ambiguous outcomes remain pending. BTC spot or reconstructed BRTI never supplies a guessed payout. Settled markets stay on correction watch, rechecked roughly every five minutes while running and after restart; compensating postings preserve prior history.
+
+Coinbase BTC-USD candles are separately labeled spot context. Smart Money remains unavailable without a verified US performance feed. **Recordings → Verify recording** checks event causality and integrity; it is not a profitability backtest.
+
+The authenticated US market socket is unverified until credentials are configured. Later, add the following variables to the backend `.env` locally and restart. Never use NEXT_PUBLIC_ for secrets or paste them into chat:
 
 ```dotenv
 POLYMARKET_US_KEY_ID=
 POLYMARKET_US_SECRET_KEY=
 ```
 
-The backend imports only the official market-data socket; its REST transport allows fixed production **GET** routes. The execution engine has no exchange credentials or order client. The web process is started without backend credentials.
+Only market-data socket code is used. The production REST transport allows fixed **GET** routes only; the paper engine has no exchange order client. `LIVE_TRADING_ENABLED=true` refuses startup, and the web process receives no backend credentials.
 
-## What to inspect
+## Verification and limits
 
-- Select Probability, Momentum, or Order Book to inspect isolated account state. Returns are never added across accounts.
-- Inspect **Data health** for the failed reference gate and production feed limitations.
-- Select a contract and use **Inspect costs & risk** for a paper risk preview. **Record paper attempt** persists the rejection reason. New reference-dependent entries are blocked.
-- **Emergency stop** persists a halt for the selected paper account and cancels its pending orders. Positions remain held. **Resume paper account** cannot clear a same-day daily loss lock or unresolved storage fault.
-- **Recordings** lists checksummed raw captures. Replay is currently an integrity/causality diagnostic, not a profitability backtester.
-
-## Verification and limitations
-
-See [Verification report](docs/VERIFICATION_REPORT.md), [Acceptance criteria](docs/ACCEPTANCE.md), and [Reference discrepancy](docs/REFERENCE_DATA_DISCREPANCY.md).
-
-The local interface is runnable, but the complete engineering/research acceptance matrix is not passed. Models are unfitted; reference-dependent automation is blocked; authoritative automatic settlement is not enabled; authenticated streaming, a 24-hour run, load testing, and Docker deployment remain unverified. No positive strategy-return claim is made. Smart Money research is deferred without a verified US account-performance feed.
+See [paper-trading follow-up verification](docs/PAPER_TRADING_FOLLOWUP_VERIFICATION.md), the earlier [verification report](docs/VERIFICATION_REPORT.md), and [acceptance criteria](docs/ACCEPTANCE.md). The local manual paper path is separate from the full strategy release: fitted models, full engine replay, authenticated stream reliability, 24-hour/load observation, Docker and remote CI/PR gates remain incomplete. There is no positive strategy-profitability claim.
 
 ## Rebuild and test
 

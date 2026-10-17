@@ -1,4 +1,6 @@
-import asyncio,contextlib,time,uuid
+import asyncio,contextlib,time,uuid,math
+from .venue.transport import RateLimitCooldown
+from datetime import timedelta
 from collections import deque
 from decimal import Decimal as D
 from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot,ACCOUNT_IDS,MarketTerms
@@ -22,7 +24,7 @@ class Runtime:
         self.events=deque(maxlen=2000); self.sequence=0; self.connection_epoch=str(uuid.uuid4())
         self.errors={}; self.tasks=[]; self.running=True; self.collection=True; self.latency_ms=None
         self.last_discovery=None; self.last_update=None; self.strategies=[ProbabilityStrategy(),MomentumStrategy(),BookStrategy()]
-        self.book_locks={}; self.command_locks={}; self.settlement=SettlementProvider(self.venue.transport,store)
+        self.book_locks={}; self.command_locks={}; self.settlement_checks={}; self.settlement=SettlementProvider(self.venue.transport,store)
         self.started_at=utcnow(); self.stream_status='NOT_CONFIGURED'; self.last_stream=None; self.gaps=0
     def event(self,kind,payload,market_id=None,source_at=None):
         self.sequence+=1; at=utcnow()
@@ -117,7 +119,9 @@ class Runtime:
         try: book=await self.capture_book(intent.market_id)
         except Exception as error:
             self.errors['book:'+intent.market_id]=type(error).__name__
-            return {'allowed':False,'reasons':['BOOK_REFRESH_FAILED'],'maximum_cost':None,'estimate':None}
+            limited=isinstance(error,RateLimitCooldown) or getattr(getattr(error,'response',None),'status_code',None)==429
+            retry=math.ceil(max(0,getattr(getattr(self.venue,'transport',None),'blocked_until',0)-time.monotonic()))
+            return {'allowed':False,'reasons':['VENUE_RATE_LIMITED' if limited else 'BOOK_REFRESH_FAILED'],'maximum_cost':None,'estimate':None,'retry_after':retry}
         decision=self.engine.preview(intent); result=jsonable(decision)
         result.update({'order_id':intent.id,'book_version':book.version,'source_at':book.source_at.isoformat() if book.source_at else None,'estimate':None})
         if book.fresh(utcnow()):
@@ -134,7 +138,7 @@ class Runtime:
             preview=await self.preview_order(intent)
             if preview['allowed']: decision=self.engine.submit(intent)
             else:
-                self.store.decision(intent.account_id,intent.market_id,intent.strategy,{'action':'REJECTED','reasons':preview['reasons'],'intent':intent})
+                self.engine.reject(intent,preview['reasons'])
                 return {**preview,'status':'REJECTED'}
             order=self.store.get_order(intent.id)
             return {**jsonable(decision),'order_id':intent.id,'status':order['status'] if order else 'REJECTED'}
@@ -158,11 +162,15 @@ class Runtime:
             for row in self.store.held_instruments():
                 market=MarketTerms.from_raw(row['raw'])
                 if market.end>utcnow(): continue
+                if self.settlement_checks.get(market.id,market.end)>utcnow(): continue
                 try:
                     status=await self.settlement.reconcile(market)
+                    self.settlement_checks[market.id]=utcnow()+timedelta(seconds=300 if status=='SETTLED' else 10)
                     if status=='SETTLED': self.errors.pop('settlement:'+market.id,None)
                     else: self.errors['settlement:'+market.id]=status
-                except Exception as error: self.errors['settlement:'+market.id]=type(error).__name__
+                except Exception as error:
+                    self.errors['settlement:'+market.id]=type(error).__name__
+                    self.settlement_checks[market.id]=utcnow()+timedelta(seconds=30)
             await asyncio.sleep(10)
     async def strategy_loop(self):
         while self.running:
@@ -236,6 +244,7 @@ class Runtime:
         accounts=[jsonable(self.store.state(name,self.marks())) for name in ACCOUNT_IDS]
         return jsonable({'mode':'PAPER','environment':'production','server_time':now,'started_at':self.started_at,
             'collection':self.collection,'engine_state':'REFERENCE_BLOCKED','reference_validated':False,
+            'rest_cooldown_seconds':math.ceil(max(0,getattr(getattr(self.venue,'transport',None),'blocked_until',0)-time.monotonic())),
             'manual_trading_ready':self.collection and not self.store.state('manual').halts and any(book.fresh(now) for book in self.books.values()),
             'reference':self.reference,'spot':self.spot,'markets':markets,'accounts':accounts,
             'http_latency_ms':self.latency_ms,'last_update':self.last_update,'stream_status':self.stream_status,
@@ -243,6 +252,7 @@ class Runtime:
             'decisions':self.store.history('decisions',60),'orders':self.store.history('orders',60),
             'fills':self.store.fills(100),'datasets':self.store.history('datasets',60),
             'equity_history':self.store.history('equity_snapshots',120),
+            'position_history':self.store.history('positions',100),'settlements':self.store.history('settlements',100),
             'performance':self.store.performance(),
             'research':{'status':'INSUFFICIENT_EVIDENCE','calibration':None,
                         'message':'Models are unfitted. Reference reconciliation must pass before reference-dependent strategies activate.'}})
