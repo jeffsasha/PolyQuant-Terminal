@@ -14,7 +14,7 @@ profitable.
 |---|---|
 | 0–1 Spec review, research, architecture | done: see `docs/` |
 | 2a Public-data layer and recorder | **done** (this branch, see `docs/TEST_REPORT_PHASE2A.md`) |
-| 2b Authenticated L2 WebSocket | next. Needs your read-only API key in `.env` |
+| 2b Authenticated L2 WebSocket | **done** (see `docs/TEST_REPORT_PHASE2B.md`). Runs automatically when `.env` has a key. |
 | 2c Next.js terminal UI | blocked on Node.js ≥20 being installed |
 | 3–6 Fees, paper execution, risk, strategies, QA | not started |
 
@@ -24,7 +24,10 @@ Key verified facts that shape the design (details in `docs/RESEARCH_AUDIT.md`):
   average. Its value at T−1s equals `priceToBeat` / `settlementPrice` exactly (49/49 resolved markets checked).
   `polyquant verify-references` re-checks this, and so does the running recorder.
 - Up/Down is **one instrument**: long = Up, short = Down. Down ask = 1 − Up bid.
-- The public L2 book is **not** available for crypto markets. BBO only, until 2b.
+- The public L2 book is **not** available for crypto markets. The authenticated WebSocket sends **full books** on
+  every change (no deltas, no sequence numbers) and is live ~1.3 s after a window opens.
+- **REST `/bbo` is Cloudflare-cached for up to 30 s.** It is used only to cross-check the WS book, never as an
+  executable quote.
 - The public gateway rate-limits (HTML 429) well below the documented 25 req/s. The budget is set to 2 req/s.
 
 ## Run it (macOS, verified)
@@ -47,6 +50,13 @@ scripts/dev-db.sh start
 cp .env.example .env
 ```
 
+Optional, for the L2 WebSocket: add your read-only Polymarket US key without it appearing on screen or in shell
+history:
+
+```bash
+read -r "KID?Key ID: " && read -rs "SEC?Secret key: " && echo && (umask 077 && printf 'POLYMARKET_US_KEY_ID=%s\nPOLYMARKET_US_SECRET_KEY=%s\n' "$KID" "$SEC" >> .env) && unset KID SEC && echo saved
+```
+
 ```bash
 .venv/bin/polyquant db-migrate
 ```
@@ -61,7 +71,8 @@ also serves a read-only API on `http://127.0.0.1:8787`:
 | Endpoint | What |
 |---|---|
 | `/health` | Feed freshness, latency p50/p95, gateway stats, `mode: PAPER` |
-| `/v1/markets` | Current and next 15m/1h windows: phase, countdown, official `priceToBeat`, distance from the reference, Up/Down bid/ask |
+| `/v1/markets` | Current and next 15m/1h windows: phase, countdown, official `priceToBeat`, distance from the reference, WS book summary (Up/Down bid/ask, sizes, microprice, imbalance), `quote_source` |
+| `/v1/markets/{slug}/book?levels=20` | Full L2 ladder from the WebSocket, as Up and as Down |
 | `/v1/reference?seconds=300` | Recent official index points |
 | `/v1/alerts` | Recent data-quality events (stale feeds, gaps, revisions, rule mismatches) |
 

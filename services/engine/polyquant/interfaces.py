@@ -10,7 +10,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Protocol
 
-from polyquant.domain.models import BBOSnapshot, Horizon, IndexPoint, Instrument
+from polyquant.domain.models import BBOSnapshot, Horizon, IndexPoint, Instrument, TradePrint
 
 
 class MarketDataProvider(Protocol):
@@ -36,6 +36,8 @@ class EventSink(Protocol):
     def instrument_changed(self, inst: Instrument, changes: dict[str, Any], observed_at: datetime) -> None: ...
     def index_points(self, points: list[IndexPoint]) -> None: ...
     def bbo(self, snap: BBOSnapshot) -> None: ...
+    def book(self, snap: Any) -> None: ...  # marketdata.book.BookSnapshot (full validated L2 book)
+    def trade(self, trade: TradePrint) -> None: ...
     def quality_event(self, feed: str, kind: str, detail: dict[str, Any], at: datetime) -> None: ...
 
 
@@ -83,6 +85,14 @@ class FanoutSink:
         for s in self._sinks:
             s.bbo(snap)
 
+    def book(self, snap) -> None:
+        for s in self._sinks:
+            s.book(snap)
+
+    def trade(self, trade) -> None:
+        for s in self._sinks:
+            s.trade(trade)
+
     def quality_event(self, feed, kind, detail, at) -> None:
         for s in self._sinks:
             s.quality_event(feed, kind, detail, at)
@@ -101,6 +111,8 @@ class MemorySink:
         self.instrument_events: list[tuple[Instrument, dict, datetime]] = []
         self.points: list[IndexPoint] = []
         self.bbos: list[BBOSnapshot] = []
+        self.books: list = []
+        self.trades: list[TradePrint] = []
         self.quality: list[tuple[str, str, dict, datetime]] = []
 
     def _trim(self, xs: list) -> None:
@@ -118,6 +130,14 @@ class MemorySink:
     def bbo(self, snap) -> None:
         self.bbos.append(snap)
         self._trim(self.bbos)
+
+    def book(self, snap) -> None:
+        self.books.append(snap)
+        self._trim(self.books)
+
+    def trade(self, trade) -> None:
+        self.trades.append(trade)
+        self._trim(self.trades)
 
     def quality_event(self, feed, kind, detail, at) -> None:
         self.quality.append((feed, kind, detail, at))

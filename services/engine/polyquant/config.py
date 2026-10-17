@@ -34,7 +34,18 @@ class Settings(BaseSettings):
     instrument_refresh_interval_s: float = 5.0
 
     index_stale_after_s: float = 5.0
-    bbo_stale_after_s: float = 10.0
+    # REST /bbo is CDN-cached for up to 30 s (RESEARCH_AUDIT §1.4), so its data is routinely 0-30 s old.
+    bbo_stale_after_s: float = 40.0
+    # The WS sends only on change (no heartbeats observed), so a quiet book is not by itself a fault.
+    book_stale_after_s: float = 30.0
+    clock_skew_alert_ms: float = 250.0
+    book_record_levels: int = 0  # 0 = full depth (measured ~1.4 GB/day of level data for 3 active markets)
+
+    # Authenticated markets WebSocket (read-only market data). Used only when credentials are present.
+    ws_enabled: bool = True
+    ws_idle_timeout_s: float = 30.0
+    # With the WebSocket active, REST BBO is polled only to reconcile against the WS book.
+    bbo_reconcile_interval_s: float = 5.0
     discovery_stale_after_s: float = 180.0
 
     horizons: tuple[str, ...] = ("15m", "1h")

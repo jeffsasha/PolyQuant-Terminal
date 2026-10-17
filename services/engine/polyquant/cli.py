@@ -41,12 +41,13 @@ async def cmd_run(settings: Settings, *, api: bool, duration_s: float | None) ->
     from polyquant.venue.gateway import GatewayClient
 
     assert LIVE_TRADING_ENABLED is False
-    log.info("PolyQuant starting in PAPER mode (live trading disabled in code). Credentials present: %s",
-             settings.has_credentials)
+    log.info("PolyQuant starting in PAPER mode (live trading disabled in code). Credentials present: %s; "
+             "markets WebSocket: %s", settings.has_credentials,
+             "on" if settings.has_credentials and settings.ws_enabled else "off (REST BBO only)")
     pool = await create_pool(settings.database_url)
     async with pool.acquire() as conn:
         await migrate(conn)
-    recorder = RecorderSink(pool)
+    recorder = RecorderSink(pool, book_levels=settings.book_record_levels)
     recorder.start()
     gateway = GatewayClient(max_rps=settings.gateway_max_rps, timeout_s=settings.http_timeout_s)
     engine = Engine(settings, gateway, recorder)

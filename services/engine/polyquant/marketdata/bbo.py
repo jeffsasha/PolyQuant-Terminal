@@ -22,7 +22,7 @@ def bbo_feed_name(slug: str) -> str:
 
 class BBOService:
     def __init__(self, gateway: GatewayClient, registry: InstrumentRegistry, sink: EventSink, clock: Clock,
-                 health: DataHealth, *, stale_after_s: float) -> None:
+                 health: DataHealth, *, stale_after_s: float, on_snapshot=None) -> None:
         self._gw = gateway
         self._registry = registry
         self._sink = sink
@@ -31,6 +31,7 @@ class BBOService:
         self._stale_after = stale_after_s
         self._latest: dict[str, BBOSnapshot] = {}
         self._cursor = 0
+        self._on_snapshot = on_snapshot  # e.g. BookService.reconcile_bbo
 
     def latest(self, slug: str) -> BBOSnapshot | None:
         return self._latest.get(slug)
@@ -60,7 +61,10 @@ class BBOService:
             resp = await self._gw.bbo(slug)
             if not resp.ok:
                 raise GatewayError(f"bbo HTTP {resp.status}: {resp.data}", resp.status)
-            snap = parse_bbo(resp.data, sent_at=resp.sent_at, recv_at=resp.recv_at)
+            c = resp.cache
+            snap = parse_bbo(resp.data, sent_at=resp.sent_at, recv_at=resp.recv_at,
+                             data_as_of=c.data_as_of(resp.recv_at) if c else None,
+                             cache_status=c.status if c else None, cache_age_s=c.age_s if c else None)
         except (GatewayError, ParseError) as exc:
             feed.error(str(exc))
             log.warning("bbo %s failed: %s", slug, exc)
@@ -72,7 +76,11 @@ class BBOService:
             self._sink.quality_event("bbo", "crossed_book", {"slug": slug, "bid": str(snap.best_bid),
                                                              "ask": str(snap.best_ask)}, snap.recv_at)
         self._latest[slug] = snap
-        # BBO has no quote timestamp; freshness is measured by request round trip (docs/ARCHITECTURE.md §4).
-        feed.mark(snap.recv_at, snap.last_trade_ts, snap.rtt_ms)
+        # BBO has no quote timestamp and is CDN-cached for up to 30 s: freshness is the data's age (from
+        # Last-Modified/Age), not the request round trip, and the feed is marked as of when the data was produced.
+        as_of = snap.data_as_of or snap.recv_at
+        feed.mark(as_of, snap.last_trade_ts, (snap.recv_at - as_of).total_seconds() * 1000)
         self._sink.bbo(snap)
+        if self._on_snapshot is not None:
+            self._on_snapshot(snap)
         return snap

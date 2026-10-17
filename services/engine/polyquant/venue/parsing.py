@@ -102,8 +102,9 @@ def iter_event_markets(payload: dict) -> Iterator[tuple[str | None, dict]]:
             yield event.get("slug"), market
 
 
-def parse_bbo(payload: dict, *, sent_at: datetime, recv_at: datetime,
-              source: Source = Source.GATEWAY) -> BBOSnapshot:
+def parse_bbo(payload: dict, *, sent_at: datetime, recv_at: datetime, source: Source = Source.GATEWAY,
+              data_as_of: datetime | None = None, cache_status: str | None = None,
+              cache_age_s: int | None = None) -> BBOSnapshot:
     md = payload.get("marketData")
     if not isinstance(md, dict) or not md.get("marketSlug"):
         raise ParseError("bbo payload without marketData.marketSlug")
@@ -132,6 +133,9 @@ def parse_bbo(payload: dict, *, sent_at: datetime, recv_at: datetime,
         recv_at=recv_at,
         source=source,
         raw=md,
+        data_as_of=data_as_of,
+        cache_status=cache_status,
+        cache_age_s=cache_age_s,
     )
 
 

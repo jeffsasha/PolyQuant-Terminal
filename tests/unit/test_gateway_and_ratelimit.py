@@ -150,3 +150,27 @@ async def test_rate_limiter_low_priority_is_not_starved():
     await asyncio.gather(*hogs, return_exceptions=True)
     assert served_low_at and served_low_at[0] <= 3.0 + 2.0  # promoted after max_wait, served within a couple slots
     assert rl.promotions >= 1
+
+
+@respx.mock
+async def test_cdn_cache_metadata_is_captured():
+    """Live finding: /bbo is served from Cloudflare with max-age=30; the body can be ~30 s old."""
+    respx.get(f"{BASE}/v1/markets/x/bbo").respond(200, json={"marketData": {"marketSlug": "x"}}, headers={
+        "cf-cache-status": "HIT", "age": "7", "cache-control": "public, max-age=30",
+        "last-modified": "Sat, 17 Oct 2026 08:07:49 GMT"})
+    async with client() as gw:
+        resp = await gw.bbo("x")
+    c = resp.cache
+    assert c.cached and c.age_s == 7 and c.status == "HIT"
+    from datetime import UTC, datetime
+
+    assert c.last_modified == datetime(2026, 10, 17, 8, 7, 49, tzinfo=UTC)
+    assert c.data_as_of(resp.recv_at) == c.last_modified
+
+
+@respx.mock
+async def test_uncached_response_data_as_of_is_receive_time():
+    respx.get(f"{BASE}/v1/market/slug/x").respond(200, json={}, headers={"cf-cache-status": "DYNAMIC"})
+    async with client() as gw:
+        resp = await gw.market_by_slug("x")
+    assert not resp.cache.cached and resp.cache.data_as_of(resp.recv_at) == resp.recv_at

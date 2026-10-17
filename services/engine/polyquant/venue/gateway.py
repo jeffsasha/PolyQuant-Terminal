@@ -13,8 +13,9 @@ import json
 import logging
 import random
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from email.utils import parsedate_to_datetime
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -42,11 +43,45 @@ class GatewayError(RuntimeError):
 
 
 @dataclass(frozen=True, slots=True)
+class CacheInfo:
+    """CDN caching metadata. Live finding: /bbo, /settlement and /events are served by Cloudflare with
+    `cache-control: public, max-age=30`, so a response can describe the market as it was up to ~30 s earlier."""
+
+    status: str | None  # cf-cache-status: HIT | MISS | DYNAMIC | EXPIRED | ...
+    age_s: int | None
+    last_modified: datetime | None  # origin time of the cached body (1 s precision)
+
+    @property
+    def cached(self) -> bool:
+        return (self.status or "").upper() in {"HIT", "STALE", "UPDATING", "REVALIDATED"}
+
+    def data_as_of(self, recv_at: datetime) -> datetime:
+        """Best estimate of when the body was produced by the origin."""
+        if self.last_modified is not None:
+            return self.last_modified
+        if self.age_s is not None:
+            return recv_at - timedelta(seconds=self.age_s)
+        return recv_at
+
+    @classmethod
+    def from_headers(cls, headers: httpx.Headers) -> CacheInfo:
+        age = headers.get("age")
+        lm = headers.get("last-modified")
+        try:
+            last_modified = parsedate_to_datetime(lm).astimezone(UTC) if lm else None
+        except (TypeError, ValueError):
+            last_modified = None
+        return cls(status=headers.get("cf-cache-status"), age_s=int(age) if age and age.isdigit() else None,
+                   last_modified=last_modified)
+
+
+@dataclass(frozen=True, slots=True)
 class GatewayResponse:
     status: int
     data: Any
     sent_at: datetime
     recv_at: datetime
+    cache: CacheInfo | None = None
 
     @property
     def ok(self) -> bool:
@@ -156,7 +191,7 @@ class GatewayClient:
                 data = self._decode(resp, path)
                 if 200 <= resp.status_code < 300:
                     self.stats.ok += 1
-                return GatewayResponse(resp.status_code, data, sent_at, recv_at)
+                return GatewayResponse(resp.status_code, data, sent_at, recv_at, CacheInfo.from_headers(resp.headers))
 
             if attempt == self._max_attempts:
                 raise GatewayError(f"GET {path} gave HTTP {resp.status_code} after {attempt} attempts",

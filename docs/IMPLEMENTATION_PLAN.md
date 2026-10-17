@@ -8,7 +8,7 @@ Performance → Reliability → UI → Optimisation.
 | 0 | Spec review | Owner approval | ✅ 2026-10-17 |
 | 1 | Research and architecture docs; repo scaffold; CI with secret scanning | Docs merged; CI green | ✅ this branch |
 | 2a | Public-data layer: discovery and rollover, official index poller, BBO poller, data health, Postgres recorder, read-only API | Recorder runs unattended; tests green; live smoke run recorded | ✅ this branch (see README for results) |
-| 2b | Authenticated markets WS (SDK) → local L2 book, integrity checks, WS-vs-REST reconciliation | Book matches REST BBO ≥99.9% of samples over 24 h | needs read-only key |
+| 2b | Authenticated markets WS → local L2 book, integrity checks, WS-vs-REST reconciliation | Revised (REST is CDN-cached, see RESEARCH_AUDIT §1.4a): 0 invalid frames; ≥99% of REST BBO values corroborated by WS history once history is sufficient; 24 h soak | ✅ implemented and live-tested (≤12 min runs); 24 h soak pending |
 | 2c | Next.js terminal UI on real data (header, BTC chart, 15m/1h panels, book, data-health) | Playwright e2e; no fixture data reachable in prod build | needs Node ≥20 locally |
 | 3 | Fee engine (versioned, Decimal, banker's rounding, cumulative cap); paper execution (long/short sweep on one book, maker queue model, 4 profiles, latency, 5 s stopgap rejection); central risk engine; ledger; settlement; restart recovery | 20 required test classes pass; restart-recovery test | — |
 | 4 | Strategy framework; B baseline calibration on public history; A as an incremental feature; C once data exists; replay engine; walk-forward reports | Reports with conservative profile and bootstrap CIs | — |

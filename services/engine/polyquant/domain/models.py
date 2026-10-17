@@ -121,6 +121,14 @@ class BBOSnapshot:
     recv_at: datetime
     source: Source = Source.GATEWAY
     raw: dict = field(default_factory=dict, compare=False, repr=False)
+    # CDN cache metadata (RESEARCH_AUDIT §1.4): the body may describe the book as of `data_as_of`, up to ~30 s ago.
+    data_as_of: datetime | None = None
+    cache_status: str | None = None
+    cache_age_s: int | None = None
+
+    @property
+    def data_age_s(self) -> float | None:
+        return None if self.data_as_of is None else (self.recv_at - self.data_as_of).total_seconds()
 
     # Up = long side of the instrument.
     @property
@@ -159,3 +167,21 @@ class BBOSnapshot:
     @property
     def rtt_ms(self) -> float:
         return (self.recv_at - self.sent_at).total_seconds() * 1000
+
+
+@dataclass(frozen=True, slots=True)
+class TradePrint:
+    """One venue trade from the markets WebSocket. `quantity` is recorded as sent; the venue labels it with a
+    currency (USD), so whether it is contracts or notional is unverified (docs/RESEARCH_AUDIT.md §1.6)."""
+
+    trade_id: str | None
+    slug: str
+    price: Decimal
+    quantity: Decimal
+    quantity_unit: str | None
+    trade_time: datetime
+    maker_side: str | None
+    taker_side: str | None
+    recv_at: datetime
+    source: Source = Source.WS
+    raw: dict = field(default_factory=dict, compare=False, repr=False)

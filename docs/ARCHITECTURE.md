@@ -94,6 +94,27 @@ If the bucket starves, the index poller has priority because the reference
 matters most. Phase 2b moves BBO and L2 to the authenticated WS, which frees
 the REST budget.
 
+## 5a. Authenticated markets WebSocket (Phase 2b)
+
+```
+api.polymarket.us/v1/ws/markets ──► venue/ws_markets.MarketsStream ──► marketdata/books.BookService ──► sink
+   (Ed25519 handshake via SDK        reconnect + resubscribe,           validate → replace L2Book,      (recorder:
+    create_auth_headers)             idle watchdog, msg allowlist        trades, skew, reconcile          book_snapshots,
+                                                                                                          trades)
+```
+
+- **Subscriptions:** current and next window per horizon (≤4 slugs), MARKET_DATA + TRADE. Re-synced every second
+  by the rollover loop, so the next window's book is live from its first frame (T+1.3 s observed).
+- **Book model:** each frame is a full book (RESEARCH_AUDIT §1.6). It is validated (sorted, unique, qty > 0, price
+  in (0, 1), not crossed, `transactTime` not older than the current book) and then replaces the book. Invalid
+  frames are rejected and logged; the previous book is kept.
+- **Quote source:** `/v1/markets` exposes `quote_source = ws | rest | none`. The WS book is preferred whenever its
+  feed is fresh.
+- **Reconciliation:** REST BBO is polled every 5 s (`BBO_RECONCILE_INTERVAL_S`) and compared with the WS top at the
+  REST body's production time (`Last-Modified`). It reports strict match and corroborated rates; uncorroborated
+  values raise `bbo_uncorroborated`.
+- **Clock:** `ClockSkewMonitor` derives a lower bound on local clock lag from `transactTime` and alerts above 250 ms.
+
 ## 6. Data quality and staleness
 
 `DataHealth` tracks, for each feed: last `source_ts`, last `recv_at`, a rolling

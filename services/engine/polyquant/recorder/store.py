@@ -14,7 +14,7 @@ from typing import Any
 import asyncpg
 
 from polyquant.clock import Clock, SystemClock
-from polyquant.domain.models import BBOSnapshot, IndexPoint, Instrument
+from polyquant.domain.models import BBOSnapshot, IndexPoint, Instrument, TradePrint
 
 log = logging.getLogger(__name__)
 
@@ -61,8 +61,22 @@ WHERE p.value <> i.value
 
 INSERT_BBO = """
 INSERT INTO bbo_snapshots (slug, sent_at, recv_at, best_bid, best_ask, bid_depth, ask_depth, bid_shares, ask_shares,
-    last_trade_px, current_px, shares_traded, open_interest, state, last_trade_ts, source, raw)
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+    last_trade_px, current_px, shares_traded, open_interest, state, last_trade_ts, source, raw, data_as_of,
+    cache_status, cache_age_s)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+"""
+
+INSERT_BOOK = """
+INSERT INTO book_snapshots (slug, transact_time, recv_at, state, best_bid, best_ask, n_bids, n_offers, bids, offers,
+    source)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+"""
+
+INSERT_TRADE = """
+INSERT INTO trades (trade_id, slug, trade_time, recv_at, price, quantity, quantity_unit, maker_side, taker_side, source,
+    raw)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+ON CONFLICT (trade_id) DO NOTHING
 """
 
 INSERT_QUALITY = "INSERT INTO data_quality_events (at, feed, kind, detail) VALUES ($1, $2, $3, $4)"
@@ -70,11 +84,12 @@ INSERT_QUALITY = "INSERT INTO data_quality_events (at, feed, kind, detail) VALUE
 
 class RecorderSink:
     def __init__(self, pool: asyncpg.Pool, *, clock: Clock | None = None, max_queue: int = 50_000,
-                 batch_size: int = 500) -> None:
+                 batch_size: int = 500, book_levels: int = 0) -> None:
         self._pool = pool
         self._clock = clock or SystemClock()
         self._queue: asyncio.Queue = asyncio.Queue(maxsize=max_queue)
         self._batch_size = batch_size
+        self._book_levels = book_levels or None  # None = record full depth
         self.dropped = 0
         self.written = 0
         self.write_errors = 0
@@ -98,6 +113,12 @@ class RecorderSink:
 
     def bbo(self, snap: BBOSnapshot) -> None:
         self._put(("bbo", snap))
+
+    def book(self, snap) -> None:
+        self._put(("book", snap))
+
+    def trade(self, trade: TradePrint) -> None:
+        self._put(("trade", trade))
 
     def quality_event(self, feed: str, kind: str, detail: dict, at: datetime) -> None:
         self._put(("quality", at, feed, kind, detail))
@@ -173,6 +194,10 @@ class RecorderSink:
                     await self._write_index(conn, item[1])
                 elif kind == "bbo":
                     await self._write_bbo(conn, item[1])
+                elif kind == "book":
+                    await self._write_book(conn, item[1])
+                elif kind == "trade":
+                    await self._write_trade(conn, item[1])
                 elif kind == "quality":
                     _, at, feed, k, detail = item
                     await conn.execute(INSERT_QUALITY, at, feed, k, dumps(detail))
@@ -203,7 +228,17 @@ class RecorderSink:
         await conn.execute(INSERT_BBO, s.slug, s.sent_at, s.recv_at, s.best_bid, s.best_ask, s.bid_depth,
                            s.ask_depth, s.bid_shares, s.ask_shares, s.last_trade_px, s.current_px,
                            s.shares_traded, s.open_interest, s.state, s.last_trade_ts, s.source.value,
-                           dumps(s.raw))
+                           dumps(s.raw), s.data_as_of, s.cache_status, s.cache_age_s)
+
+    async def _write_book(self, conn, b) -> None:
+        await conn.execute(INSERT_BOOK, b.slug, b.transact_time, b.recv_at, b.state, b.best_bid, b.best_ask,
+                           len(b.bids), len(b.offers),
+                           dumps([[str(lv.px), str(lv.qty)] for lv in b.bids[: self._book_levels]]),
+                           dumps([[str(lv.px), str(lv.qty)] for lv in b.offers[: self._book_levels]]), b.source.value)
+
+    async def _write_trade(self, conn, t: TradePrint) -> None:
+        await conn.execute(INSERT_TRADE, t.trade_id, t.slug, t.trade_time, t.recv_at, t.price, t.quantity,
+                           t.quantity_unit, t.maker_side, t.taker_side, t.source.value, dumps(t.raw))
 
 
 async def latest_index_ts(pool: asyncpg.Pool, asset: str) -> datetime | None:
@@ -214,6 +249,7 @@ async def latest_index_ts(pool: asyncpg.Pool, asset: str) -> datetime | None:
 async def counts(pool: asyncpg.Pool) -> dict[str, int]:
     out = {}
     async with pool.acquire() as conn:
-        for t in ("instruments", "instrument_events", "index_points", "bbo_snapshots", "data_quality_events"):
+        for t in ("instruments", "instrument_events", "index_points", "bbo_snapshots", "book_snapshots", "trades",
+                  "data_quality_events"):
             out[t] = await conn.fetchval(f"SELECT count(*) FROM {t}")  # noqa: S608 - fixed table names
     return out

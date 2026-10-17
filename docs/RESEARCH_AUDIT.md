@@ -74,6 +74,54 @@ the documented JSON body. The client therefore:
 - treats any 429, whether JSON or HTML, as a back-off signal (≥1 s, exponential, with jitter);
 - never retries non-idempotent requests.
 
+### 1.6 Authenticated markets WebSocket — empirical characterisation (2026-10-17, 07:44–07:51 UTC)
+
+Captured with `scripts/ws_capture.py` (MARKET_DATA + TRADE on the current/next BTC 15m and 1h markets; 5,487 book
+frames and 1,500 trades in 6 min). Auth: Ed25519 headers on the handshake (`GET /v1/ws/markets`), as in the SDK.
+
+| Question (undocumented) | Observed |
+|---|---|
+| Snapshot or delta? | **Every MARKET_DATA frame is the complete book.** Consecutive frames carry all ~40–50 levels with 0–2 changed; removed levels simply disappear. The local book is replaced per frame (no delta reconstruction, no drift). |
+| Sequence numbers | **None.** `transactTime` (ns, UTC) was strictly increasing per market: 0 out-of-order in 5,487 frames, 2 equal timestamps. Used as the ordering guard (older frames are rejected; equal ones accepted). |
+| Heartbeats | **None observed** in 6 min although the SDK defines a `heartbeat` frame. Frames are sent only on change (~10/s on active markets; max gap 1.7 s active, 10 s on an expiring market). |
+| Level validity | 5,487/5,487 frames sorted best-first, unique prices, qty > 0, never crossed. |
+| Before open | No frames for an upcoming market until it opens. |
+| At window open | **First book at T+1.28 s** (07:45 window). REST BBO 404s for 40 s to 2.7 min (§1.2), so the WS is the only usable source at open. |
+| At window close | Old book: `MARKET_STATE_CLOSED` with empty sides at T+0.01 s, then `MARKET_STATE_EXPIRED` at T+10 s. |
+| Trades | Fields `id`, `price`, `quantity`, `tradeTime`, `state`, `maker`/`taker` side. **`quantity` carries `currency: "USD"`.** Whether it is contracts or notional is unverified, so it is stored raw with its unit. Trades are de-duplicated on `id`. |
+| Frame rate / storage | ~15 frames/s over 3 markets; 95–98 % change the book; full-depth level data ≈ 1.4 GB/day. `BOOK_RECORD_LEVELS` caps stored depth if needed. |
+
+**Clock finding:** `recv_at − transactTime` was mostly *negative* (p50 −13 to −45 ms, min −93 ms). This is impossible
+with a correct local clock. `sntp` showed the dev Mac **~120 ms slow** (time.apple.com +0.122 s, time.google.com
++0.119 s). The engine now reports a lower bound on local clock lag from venue timestamps (`/health` → `clock`) and
+raises `skew_high` above 250 ms. All latency figures from this machine are biased by this offset.
+
+**SDK limitations found:** `MarketsWebSocket` has no reconnect and uses the system CA store, which a python.org
+Python build lacks (`CERTIFICATE_VERIFY_FAILED`). The engine keeps the SDK's signing
+(`polymarket_us.auth.create_auth_headers`) and manages the socket itself: certifi TLS, reconnect with jittered
+back-off, automatic resubscription, an idle watchdog (30 s), and an allowlist that only permits MARKET_DATA/TRADE
+subscribe and unsubscribe messages.
+
+### 1.4a CDN caching of gateway responses (found 2026-10-17 via reconciliation)
+
+| Endpoint | `cf-cache-status` | `cache-control` |
+|---|---|---|
+| `/v1/market/slug/{slug}` (priceToBeat, settlementPrice, status) | DYNAMIC (not cached) | — |
+| `/v1/asset-prices/history` (official index) | DYNAMIC (not cached) | — |
+| `/v1/markets/{slug}/bbo` | **HIT** | `public, max-age=30` |
+| `/v1/markets/{slug}/settlement` | **HIT** | `public, max-age=30` |
+| `/v1/events` | MISS/HIT | `public, max-age=30` |
+
+**REST BBO is up to ~30 s old** (measured data age at receipt: p50 10.5 s, max 30.5 s; 68/68 samples were cache
+HITs). Comparing REST BBO with the WS book at the REST body's `Last-Modified` time also showed the REST *origin*
+occasionally reflecting the book 3–9 s before that. Consequences:
+
+- REST BBO is not an executable quote. With the WS active it is used only to cross-check the WS book.
+  REST-only mode quotes are labelled with their data age, and Phase 3 must not fill against them.
+- Phase 2a's "BBO freshness = request round trip" was wrong. It now uses data age (`Last-Modified`/`Age`).
+- The settlement flag and event lists can lag by ≤30 s. Settlement *prices* (DYNAMIC endpoint) do not.
+- Cache-busting query parameters are deliberately **not** used, to respect the venue's caching.
+
 ### 1.5 Fees (docs.polymarket.us/fees, read 2026-10-17)
 
 See `services/engine/polyquant/fees/` (Phase 3) and SPEC_REVIEW F10. The
@@ -112,11 +160,12 @@ Phase 4. No candidate is adopted without the same source-level review.
 
 | Feature | Status | Plan |
 |---|---|---|
-| Public L2 book for crypto markets | **Not available** | Authenticated WS (Phase 2b, needs read-only key) |
-| WS sequence numbers / heartbeats / snapshot-vs-delta | **Undocumented** | Empirically characterise in 2b. Defensive integrity checks. |
+| Public L2 book for crypto markets | **Not available publicly** | ✅ Authenticated WS gives full books (§1.6) |
+| WS sequence numbers / heartbeats / snapshot-vs-delta | ✅ Characterised (§1.6): full snapshots, no seq numbers, no heartbeats seen | `transactTime` ordering guard, validation, REST reconciliation, idle watchdog |
 | Historical L2 / BBO | **Not offered** | Record our own from day one (this phase) |
 | Raw (unsmoothed) BRTI ticks | **Not available publicly** | Model on the 60s-average series. Correct vol for smoothing. |
-| `bidShares` / `askShares` semantics | **Unverified** | Record raw values, compare with WS L2 in 2b |
+| `bidShares` / `askShares` semantics | **Unverified** | Raw values recorded; compare with WS L2 depth sums in analysis |
+| Trade `quantity` unit (labelled USD) | **Unverified** | Stored raw with unit; resolve before using trades in fill models |
 | Public trader-level data (Smart Money) | **Not available on US** | Strategy E = UNAVAILABLE |
 | API key permission scopes (read-only) | **Unverified** | Check at polymarket.us/developer when you create the key |
 | Order preview side-effects | Implied none, not stated | Phase 3 cross-check only, never in a hot path |

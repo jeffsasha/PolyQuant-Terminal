@@ -23,6 +23,24 @@ This is a financial system. The first release is **paper only**.
 **GET only**. Any other method raises `ForbiddenRequest` before a socket is
 opened. A test enforces this.
 
+### 2.1 Markets WebSocket (Phase 2b)
+
+`venue/ws_markets.py` connects only to `wss://api.polymarket.us/v1/ws/markets` and signs the handshake with the
+SDK's `create_auth_headers` (`GET /v1/ws/markets`). `_send` refuses anything except `subscribe` and
+`unsubscribe` for `SUBSCRIPTION_TYPE_MARKET_DATA` / `SUBSCRIPTION_TYPE_TRADE`. Private channels (orders, positions,
+balances) are never opened. Tests assert both rules. TLS uses certifi's CA bundle explicitly.
+
+### 2.2 Credential handling lessons (2026-10-17)
+
+- The key file must be plain text named exactly `.env`. A rich-text file (`KEY API.env`, RTF) was not loadable and
+  was not covered by `.gitignore`. It was never committed. `.gitignore` now also covers `*.env` and `*.rtf`.
+- While checking that file's format, a diagnostic `awk` printed a fragment of the secret into the development
+  session transcript. The owner said they would revoke that key, and a new one is now in `.env` (revocation not
+  verified by us). **Rule since then:** credentials are verified
+  only by loading them through `Settings` and printing booleans and lengths, never raw file lines.
+- Recommended way to create `.env`: a `read -s` prompt (README), so the secret never appears on screen or in
+  shell history.
+
 ## 3. Live-trading boundary (defence in depth)
 
 1. **Code.** No module imports the SDK's `orders` resource or calls an order

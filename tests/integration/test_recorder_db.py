@@ -33,7 +33,7 @@ async def test_full_write_path(pool, clock):
     await rec.flush()
     c = await counts(pool)
     assert c == {"instruments": 1, "instrument_events": 1, "index_points": 60, "bbo_snapshots": 1,
-                 "data_quality_events": 1}
+                 "book_snapshots": 0, "trades": 0, "data_quality_events": 1}
     async with pool.acquire() as conn:
         row = await conn.fetchrow("SELECT price_to_beat, fee_coefficient, horizon FROM instruments")
         assert row["price_to_beat"] == Decimal("81487.13") and row["horizon"] == "15m"
@@ -116,3 +116,52 @@ async def test_backpressure_drops_are_counted(pool, clock):
     for _ in range(5):
         rec.quality_event("x", "y", {}, clock.now())
     assert rec.dropped == 3
+
+
+def _ws_rows(name):
+    import json
+    from pathlib import Path
+
+    from polyquant.domain.timeutil import parse_utc
+
+    p = Path(__file__).resolve().parents[1] / "fixtures" / "ws" / name
+    return [(json.loads(x, parse_float=Decimal)["frame"], parse_utc(json.loads(x)["recv_at"]))
+            for x in p.read_text().splitlines()]
+
+
+def _instrument_for(slug, template="market_1h_open.json"):
+    raw = load(template)
+    raw["market"]["slug"] = slug
+    return parse_instrument(raw)
+
+
+async def test_book_snapshots_and_trades_recorded_with_dedupe_and_level_cap(pool, clock):
+    from polyquant.marketdata.books import BookService
+    from polyquant.marketdata.quality import DataHealth
+
+    rec = RecorderSink(pool, clock=clock, book_levels=5)
+    reg = InstrumentRegistry(rec, clock)
+    slug_1h = "cpc-btc-updown-1h-2026-10-17-0700z"
+    reg.upsert(_instrument_for(slug_1h))
+    trades = _ws_rows("trades.jsonl")
+    for f, _ in trades:
+        s = f["trade"]["marketSlug"]
+        if reg.get(s) is None:
+            reg.upsert(_instrument_for(s, "market_15m_open.json"))
+    svc = BookService(rec, clock, DataHealth(rec))
+    svc.track([slug_1h])
+    for f, r in _ws_rows("book_1h_sequence.jsonl"):
+        svc.on_frame(f, r)
+    for f, r in trades + trades[:3]:  # re-sent trades must not duplicate
+        svc.on_frame(f, r)
+    await rec.flush()
+    async with pool.acquire() as conn:
+        n_books = await conn.fetchval("SELECT count(*) FROM book_snapshots")
+        row = await conn.fetchrow("SELECT n_bids, n_offers, jsonb_array_length(bids) nb, jsonb_array_length(offers) no,"
+                                  " best_bid, source FROM book_snapshots ORDER BY id LIMIT 1")
+        n_trades = await conn.fetchval("SELECT count(*) FROM trades")
+        unit = await conn.fetchval("SELECT DISTINCT quantity_unit FROM trades")
+    assert 0 < n_books <= 40
+    assert row["n_bids"] == 40 and row["nb"] == 5 and row["no"] == 5  # full counts kept, levels capped
+    assert row["best_bid"] == Decimal("0.89") and row["source"] == "ws"
+    assert n_trades == 8 and unit == "USD"

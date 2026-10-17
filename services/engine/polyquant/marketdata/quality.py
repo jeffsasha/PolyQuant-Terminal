@@ -90,3 +90,43 @@ class DataHealth:
 
     def snapshot(self, now: datetime) -> list[dict]:
         return [fh.snapshot(now) for fh in self.feeds.values()]
+
+
+class ClockSkewMonitor:
+    """Estimates how far the local clock lags the venue, from (recv_at - source_ts) samples.
+
+    One-way delay is never negative, so any negative sample proves the local clock is behind the venue by at least
+    that much. The reported figure is therefore a lower bound on local lag (live finding: ~90+ ms on the dev Mac,
+    whose clock NTP showed ~120 ms slow). Latency figures should be read with this offset in mind.
+    """
+
+    def __init__(self, sink: EventSink, *, threshold_ms: float = 250.0, keep: int = 2000) -> None:
+        self._sink = sink
+        self._threshold = threshold_ms
+        self._samples: deque = deque(maxlen=keep)
+        self.alerting = False
+
+    def observe(self, recv_at: datetime, source_ts: datetime) -> None:
+        self._samples.append((recv_at - source_ts).total_seconds() * 1000)
+
+    @property
+    def local_lag_lower_bound_ms(self) -> float | None:
+        if not self._samples:
+            return None
+        return max(0.0, -min(self._samples))
+
+    def evaluate(self, now: datetime) -> None:
+        lag = self.local_lag_lower_bound_ms
+        if lag is None:
+            return
+        bad = lag > self._threshold
+        if bad != self.alerting:
+            self.alerting = bad
+            self._sink.quality_event("clock", "skew_high" if bad else "skew_ok",
+                                     {"local_lag_lower_bound_ms": lag, "threshold_ms": self._threshold}, now)
+
+    def snapshot(self) -> dict:
+        xs = list(self._samples)
+        return {"local_lag_lower_bound_ms": self.local_lag_lower_bound_ms,
+                "raw_latency_ms_p50": median(xs) if xs else None, "samples": len(xs),
+                "threshold_ms": self._threshold, "alerting": self.alerting}
