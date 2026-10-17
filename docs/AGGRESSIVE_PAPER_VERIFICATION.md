@@ -1,5 +1,12 @@
 # Aggressive paper sizing verification
 
+> **Update 2026-10-17 (later the same day):** this document's "zero aggressive fills / original $1,000" observation is
+> superseded. After this report, RUN was pressed and the aggressive bot traded autonomously at 07:41 and 07:52 UTC
+> (two BUY DOWN entries, both settled as losses: −$24.61 and −$198.69), which tripped the 20% daily-loss entry halt.
+> The authenticated market stream was then configured and verified, and a further autonomous entry was observed.
+> See [STREAM_BOT_VERIFICATION.md](STREAM_BOT_VERIFICATION.md).
+
+
 October 17, 2026. Extends `4092438` with the explicitly approved isolated aggressive simulation. [Frozen policy](AGGRESSIVE_PAPER_SIZING.md): adaptive quantities, 70% deployment target, 80% total entry cap, 35% cadence targets, 40% entry/cadence caps, 20% daily-loss new-entry halt. Original conservative account/version/settings remain separate. No live, BRTI-model or copy-trading activation.
 
 ## Tests and build
