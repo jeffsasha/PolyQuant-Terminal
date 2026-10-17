@@ -176,3 +176,38 @@ def test_ws_module_never_references_order_or_private_channels():
     src = (Path(__file__).resolve().parents[2] / "services/engine/polyquant/venue/ws_markets.py").read_text()
     for banned in ("ws/private", "orders", "SUBSCRIPTION_TYPE_ORDER", "SUBSCRIPTION_TYPE_POSITION"):
         assert banned not in src
+
+
+async def test_resubscribe_never_starts_a_concurrent_recv():
+    """Regression (found live): a resubscribe while recv() was pending started a second recv → 1011 disconnect."""
+    class StrictWS(FakeWS):
+        def __init__(self):
+            super().__init__()
+            self.pending = 0
+            self.max_pending = 0
+
+        async def recv(self):
+            self.pending += 1
+            self.max_pending = max(self.max_pending, self.pending)
+            try:
+                return await super().recv()
+            finally:
+                self.pending -= 1
+
+    ws = StrictWS()
+    frames = []
+    stream = MarketsStream(KEY_ID, SECRET_B64, on_frame=lambda f, r: frames.append(f), on_event=lambda k, d: None,
+                           connect=FakeConnect())
+    stream._ws = ws
+    stream.set_slugs(["a"])
+    stop = asyncio.Event()
+    task = asyncio.create_task(stream._read(ws, stop))
+    await asyncio.sleep(0.02)
+    for i in range(3):
+        stream.set_slugs(["a", f"b{i}"])
+        await asyncio.sleep(0.02)
+    ws.incoming.put_nowait('{"marketData":{"marketSlug":"a"}}')
+    await until(lambda: frames)
+    stop.set()
+    await asyncio.wait_for(task, 2)
+    assert ws.max_pending == 1
