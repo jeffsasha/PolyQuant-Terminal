@@ -49,7 +49,10 @@ def database():
             f.write("\nlisten_addresses='127.0.0.1'\nport=55432\nunix_socket_directories='"+str(DATA).replace("'","''")+"'\n")
     status=subprocess.run([str(PG/'pg_ctl'),'-D',str(DATA/'postgres'),'status'],stdout=subprocess.DEVNULL)
     if status.returncode:
-        subprocess.run([str(PG/'pg_ctl'),'-D',str(DATA/'postgres'),'-l',str(DATA/'postgres.log'),'start'],check=True,stdout=subprocess.DEVNULL)
+        # macOS: the postmaster refuses to start ("became multithreaded") without a valid locale in its environment.
+        pg_env={**os.environ,'LC_ALL':os.environ.get('LC_ALL') or 'C'}
+        subprocess.run([str(PG/'pg_ctl'),'-D',str(DATA/'postgres'),'-l',str(DATA/'postgres.log'),'start'],check=True,
+                       stdout=subprocess.DEVNULL,env=pg_env)
     e=env(); e['PGPASSWORD']=(DATA/'pg-password').read_text().strip()
     query=subprocess.run([str(PG/'psql'),'-h','127.0.0.1','-p','55432','-U','polyquant','-d','postgres','-Atc',
                           "SELECT datname FROM pg_database WHERE datname IN ('polyquant','polyquant_test')"],env=e,capture_output=True,text=True,check=True).stdout

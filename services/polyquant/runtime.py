@@ -30,6 +30,9 @@ class Runtime:
         self.book_strategy=ExperimentalBookStrategy(self.bot_account_id); self.bot_signals={}
         self.bot_tick_lock=asyncio.Lock()
         self.started_at=utcnow(); self.stream_status='NOT_CONFIGURED'; self.last_stream=None; self.gaps=0
+        # Authenticated market stream: books arrive in memory; a stream book is recorded once per version when used.
+        self.stream=None; self.book_origin={}; self.stream_raw={}; self.recorded_versions={}
+        self.stream_rejected=0; self.stream_frames=0
     def event(self,kind,payload,market_id=None,source_at=None):
         self.sequence+=1; at=utcnow()
         event=MarketEvent(str(uuid.uuid4()),market_id,kind,source_at,at,at,self.sequence,payload)
@@ -97,17 +100,43 @@ class Runtime:
             except Exception as error:
                 self.errors['discovery']=type(error).__name__; self.gaps+=1
             await asyncio.sleep(10)
-    async def capture_book(self,identity):
+    def stream_live(self,at=None):
+        at=at or utcnow()
+        return bool(self.stream and self.stream.connected and self.stream.last_frame_at and
+                    (at-self.stream.last_frame_at).total_seconds()<=5)
+    def stream_book(self,identity,after=None):
+        """A stream book usable now: live connection, the unchanged two-second freshness rule on the book's own
+        source and receive times, and (for arrivals) received after the modeled arrival."""
+        book=self.books.get(identity); at=utcnow()
+        if not book or self.book_origin.get(identity)!='stream' or not self.stream_live(at) or not book.fresh(at):
+            return None
+        if after is not None and book.received_at<after: return None
+        return book
+    def record_stream_book(self,identity,book):
+        if self.recorded_versions.get(identity)!=book.version:
+            self.event('book',self.stream_raw.get(identity,{}),identity,book.source_at)
+            self.recorded_versions[identity]=book.version
+    async def capture_book(self,identity,after=None):
         if not self.collection: raise StorageHalt('Collection is halted')
         market=self.markets.get(identity)
         if not market: raise ValueError('Market not discovered')
+        book=self.stream_book(identity,after)
+        if book is None and after is not None and self.stream_live():
+            # Arrival needs a book observed after the modeled arrival: wait briefly for the next stream frame.
+            deadline=time.monotonic()+1.0
+            while book is None and time.monotonic()<deadline:
+                await asyncio.sleep(.05); book=self.stream_book(identity,after)
+        if book is not None:
+            self.record_stream_book(identity,book)
+            self.errors.pop('book:'+identity,None)
+            return book
         async with self.book_locks.setdefault(identity,asyncio.Lock()):
             started=time.monotonic()
             book,raw=await self.venue.book(market,fresh=True)
             self.event('book',raw,identity,book.source_at)
             previous=self.books.get(identity)
             if not previous or (book.source_at and (not previous.source_at or book.source_at>=previous.source_at)):
-                self.books[identity]=book
+                self.books[identity]=book; self.book_origin[identity]='rest'
             self.latency_ms=round((time.monotonic()-started)*1000,1)
             self.errors.pop('book:'+identity,None)
             return self.books.get(identity,book)
@@ -116,6 +145,7 @@ class Runtime:
             if self.collection:
                 for market in list(self.markets.values()):
                     if not market.start<=utcnow()<market.end: continue
+                    if self.stream_book(market.id) is not None: continue  # fresh stream book: no REST read needed
                     try: await self.capture_book(market.id)
                     except Exception as error: self.errors['book:'+market.id]=type(error).__name__
             await asyncio.sleep(5)
@@ -150,7 +180,8 @@ class Runtime:
         due=self.store.pending_due(utcnow())
         for identity in dict.fromkeys(row['market_id'] for row in due):
             selected=[row['id'] for row in due if row['market_id']==identity]
-            try: await self.capture_book(identity)
+            arrival=max(row['arrival_at'] for row in due if row['market_id']==identity)
+            try: await self.capture_book(identity,after=arrival)
             except Exception as error:
                 self.errors['arrival:'+identity]=type(error).__name__
                 for order in selected: self.store.cancel(order,'ARRIVAL_BOOK_REFRESH_FAILED')
@@ -286,46 +317,46 @@ class Runtime:
             await asyncio.sleep(30)
     def marks(self,account_id):
         return self.engine.liquidation_marks(self.store.state(account_id))
+    def on_stream_frame(self,frame,received_at):
+        data=frame.get('marketData')
+        if not isinstance(data,dict): return  # trades, acknowledgements and heartbeats carry no book
+        market=next((m for m in self.markets.values() if m.slug==data.get('marketSlug')),None)
+        if market is None: return
+        self.stream_frames+=1; self.last_stream=received_at
+        from .market_data import normalize_book
+        try: book=normalize_book(market.id,frame,{},received_at)
+        except Exception as error:
+            # One malformed frame never tears down the connection or replaces a valid book.
+            self.stream_rejected+=1; self.errors['stream_frame']=type(error).__name__; return
+        previous=self.books.get(market.id)
+        if previous and previous.source_at and book.source_at and book.source_at<previous.source_at:
+            self.stream_rejected+=1; self.errors['stream_frame']='OUT_OF_ORDER'; return
+        self.books[market.id]=book; self.book_origin[market.id]='stream'; self.stream_raw[market.id]=frame
+    def on_stream_status(self,status,detail):
+        if status in ('CONNECTED','SUBSCRIBED'):
+            self.stream_status='CONNECTED'; self.errors.pop('stream',None)
+        elif status in ('DISCONNECTED','IDLE_RECONNECT','ERROR'):
+            self.stream_status='DISCONNECTED'; self.gaps+=1
+            self.errors['stream']=detail.get('error',status)
+    def stream_targets(self):
+        now=utcnow()
+        # Open markets plus the next windows starting within a minute, so books exist from the first second.
+        return [m.slug for m in self.markets.values() if m.end>now and (m.start-now).total_seconds()<=60]
     async def stream_loop(self):
         import os
         key=os.environ.get('POLYMARKET_US_KEY_ID'); secret=os.environ.get('POLYMARKET_US_SECRET_KEY')
         if not key or not secret: return
-        # Import only the official market-data socket, never an SDK order client.
-        from polymarket_us.websocket.markets import MarketsWebSocket
-        delay=1
-        while self.running:
-            socket=None
-            try:
-                selected={m.slug:m for m in self.markets.values() if m.end>utcnow()}
-                if not selected: await asyncio.sleep(3); continue
-                queue=asyncio.Queue(maxsize=256)
-                socket=MarketsWebSocket(key_id=key,secret_key=secret)
-                def receive(frame):
-                    try: queue.put_nowait(frame)
-                    except asyncio.QueueFull: self.errors['stream']='BACKLOG'; self.stream_status='BACKLOG'
-                socket.on('message',receive); socket.on('close',lambda:receive({'_closed':True}))
-                socket.on('error',lambda error:receive({'_error':type(error).__name__}))
-                await socket.connect(); await socket.subscribe_market_data('polyquant-books',list(selected))
-                await socket.subscribe_trades('polyquant-trades',list(selected))
-                self.stream_status='CONNECTED'; delay=1
-                while self.running:
-                    frame=await asyncio.wait_for(queue.get(),timeout=20)
-                    if '_closed' in frame or '_error' in frame: raise ConnectionError('Market stream disconnected')
-                    if self.stream_status=='BACKLOG': raise ConnectionError('Stream backlog; snapshot resync required')
-                    self.last_stream=utcnow()
-                    if set(selected)!={m.slug for m in self.markets.values() if m.end>utcnow()}: break
-                    data=frame.get('marketData')
-                    if data and data.get('marketSlug') in selected:
-                        from .market_data import normalize_book
-                        market=selected[data['marketSlug']]; book=normalize_book(market.id,frame,{},utcnow())
-                        self.event('book',frame,market.id,book.source_at); self.books[market.id]=book
-                    elif frame.get('trade'): self.event('trade',frame)
-            except asyncio.CancelledError: raise
-            except Exception as error:
-                self.stream_status='DISCONNECTED'; self.errors['stream']=type(error).__name__; self.gaps+=1
-            finally:
-                if socket: await socket.close()
-            await asyncio.sleep(delay); delay=min(delay*2,30)
+        from .venue.stream import MarketStream
+        self.stream=MarketStream(key,secret,self.on_stream_frame,self.on_stream_status,utcnow)
+        self.stream_status='CONNECTING'
+        async def sync_targets():
+            while self.running:
+                self.stream.set_slugs(self.stream_targets()); await asyncio.sleep(2)
+        sync=asyncio.create_task(sync_targets())
+        try: await self.stream.run(lambda:self.running)
+        finally:
+            sync.cancel()
+            with contextlib.suppress(asyncio.CancelledError): await sync
     def snapshot(self):
         now=utcnow(); markets=[]
         for market in sorted(self.markets.values(),key=lambda m:m.horizon):
@@ -334,7 +365,8 @@ class Runtime:
                   'threshold':market.threshold,'status':market.status,'tick':market.tick,'minimum_qty':market.minimum_qty,
                   'signal':'NO TRADE','model_probability':None,'net_edge':None,'imbalance':features.get('imbalance') if features else None,
                   'book':jsonable(book) if book else None,'book_fresh':book.fresh(now) if book else False,
-                  'source_age_seconds':(now-book.source_at).total_seconds() if book and book.source_at else None}
+                  'source_age_seconds':(now-book.source_at).total_seconds() if book and book.source_at else None,
+                  'book_origin':self.book_origin.get(market.id)}
             markets.append(item)
         accounts=[]
         for name in ACCOUNT_IDS:
@@ -350,6 +382,9 @@ class Runtime:
             'manual_trading_ready':self.collection and not self.store.state('manual').halts and any(book.fresh(now) for book in self.books.values()),
             'reference':self.reference,'spot':self.spot,'markets':markets,'accounts':accounts,
             'http_latency_ms':self.latency_ms,'last_update':self.last_update,'stream_status':self.stream_status,
+            'stream':{'live':self.stream_live(now),'frames':self.stream_frames,'rejected_frames':self.stream_rejected,
+                      'connects':self.stream.connects if self.stream else 0,
+                      'subscribed':list(self.stream.active) if self.stream else []},
             'last_stream':self.last_stream,'gap_count':self.gaps,'errors':self.errors,'recorder':self.recorder.status(),
             'decisions':self.store.history('decisions',60),'orders':self.store.history('orders',60),
             'fills':self.store.fills(100),'datasets':self.store.history('datasets',60),
