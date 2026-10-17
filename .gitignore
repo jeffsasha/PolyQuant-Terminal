@@ -14,3 +14,7 @@ dist/
 build/
 *.egg-info/
 backups/
+captures/
+*.env
+*.rtf
+.DS_Store
