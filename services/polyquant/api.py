@@ -9,7 +9,7 @@ from .config import Settings
 from .store import Store
 from .runtime import Runtime
 from .auth import Sessions,verify_password
-from .types import OrderIntent,decimal,jsonable,utcnow,DISCRETIONARY_IDS,BOT_ACCOUNT
+from .types import OrderIntent,decimal,jsonable,utcnow,DISCRETIONARY_IDS,BOT_ACCOUNT,BOT_PROFILES
 from .replay import Replay
 
 class Login(BaseModel):
@@ -17,9 +17,11 @@ class Login(BaseModel):
     password:str=Field(max_length=256)
 class AccountCommand(BaseModel):
     model_config=ConfigDict(extra='forbid')
-    account_id:Literal['manual','verification','probability','momentum','book','book_experiment']='manual'
+    account_id:Literal['manual','verification','probability','momentum','book','book_experiment','book_aggressive']='manual'
 class BotCommand(BaseModel):
     model_config=ConfigDict(extra='forbid')
+class BotRun(BotCommand):
+    account_id:Literal['book_experiment','book_aggressive']='book_aggressive'
 class PaperTicket(AccountCommand):
     id:str=Field(min_length=8,max_length=100)
     market_id:str=Field(max_length=80)
@@ -114,8 +116,8 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
         if not row: raise HTTPException(404,'Decision not found')
         return jsonable(row)
     @app.post('/bot/run')
-    async def run_bot(payload:BotCommand,value=Depends(authenticated)):
-        try:return jsonable(app.state.runtime.run_bot())
+    async def run_bot(payload:BotRun,value=Depends(authenticated)):
+        try:return jsonable(app.state.runtime.run_bot(payload.account_id))
         except ValueError as error:raise HTTPException(409,str(error))
     @app.post('/bot/stop')
     async def stop_bot(payload:BotCommand,value=Depends(authenticated)):
@@ -136,7 +138,7 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
         except ValueError as error: raise HTTPException(409,str(error))
         return {'status':'REFERENCE_BLOCKED','reference_validated':False}
     def intent(payload):
-        if payload.account_id==BOT_ACCOUNT:raise HTTPException(403,'Automation account does not accept manual tickets')
+        if payload.account_id in BOT_PROFILES:raise HTTPException(403,'Automation account does not accept manual tickets')
         try:
             qty=decimal(payload.qty); price=decimal(payload.limit)
             if qty<=0 or qty>1000000 or not 0<price<1: raise ValueError('Invalid quantity or price')

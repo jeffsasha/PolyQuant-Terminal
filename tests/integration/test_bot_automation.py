@@ -7,7 +7,7 @@ from polyquant.types import utcnow
 
 def test_run_stop_both_cadences_and_no_duplicate_orders(store,paper_client):
     c,headers,instances,market=paper_client;r=instances[0]
-    assert c.post('/bot/run',headers=headers,json={}).status_code==200
+    assert c.post('/bot/run',headers=headers,json={'account_id':'book_experiment'}).status_code==200
     hourly=replace(market,id='fixture-1h',slug='fixture-1h',horizon='1h',end=utcnow()+timedelta(minutes=40))
     r.markets[hourly.id]=hourly
     async def tick():
@@ -30,7 +30,7 @@ def test_run_stop_both_cadences_and_no_duplicate_orders(store,paper_client):
 
 def test_bot_stop_during_source_read_and_daily_lock_cannot_be_bypassed(store,paper_client):
     c,headers,instances,market=paper_client;r=instances[0]
-    assert c.post('/bot/run',headers=headers,json={}).status_code==200
+    assert c.post('/bot/run',headers=headers,json={'account_id':'book_experiment'}).status_code==200
     original=r.capture_book
     async def stopping_read(identity):
         book=await original(identity);r.stop_bot();return book
@@ -38,7 +38,7 @@ def test_bot_stop_during_source_read_and_daily_lock_cannot_be_bypassed(store,pap
     c.portal.call(r.bot_tick)
     assert not store.history('orders') and not r.bot_enabled
     store.halt('book_experiment','DAILY_LOSS_LIMIT')
-    assert c.post('/bot/run',headers=headers,json={}).status_code==409
+    assert c.post('/bot/run',headers=headers,json={'account_id':'book_experiment'}).status_code==409
     assert not r.bot_enabled
     payload={'id':'manual-bot-spoof','account_id':'book_experiment','market_id':market.id,'side':'BUY_UP','qty':'1','limit':'0.51'}
     assert c.post('/paper/orders',headers=headers,json=payload).status_code in (403,422)
@@ -47,7 +47,7 @@ def test_bot_stop_during_source_read_and_daily_lock_cannot_be_bypassed(store,pap
 
 def test_automatic_arrivals_fill_and_stop_retains_holdings(store,paper_client):
     c,headers,instances,market=paper_client;r=instances[0]
-    c.post('/bot/run',headers=headers,json={})
+    c.post('/bot/run',headers=headers,json={'account_id':'book_experiment'})
     async def tick():
         for values in r.book_strategy.history.values():
             for i,value in enumerate(values):value['received_at']-=timedelta(seconds=5*(len(values)-i))
@@ -70,10 +70,10 @@ def test_run_failure_cannot_arm_and_emergency_stop_covers_other_account(store,pa
         if action=='EXPERIMENTAL_BOT_RUN':raise OSError('fixture audit failure')
         return original(action,*args,**kwargs)
     monkeypatch.setattr(store,'audit',broken)
-    try:r.run_bot()
+    try:r.run_bot('book_experiment')
     except OSError:pass
     assert not r.bot_enabled,'RUN must not arm before successful audit persistence'
     monkeypatch.setattr(store,'audit',original)
-    assert c.post('/bot/run',headers=headers,json={}).status_code==200
+    assert c.post('/bot/run',headers=headers,json={'account_id':'book_experiment'}).status_code==200
     assert c.post('/paper/stop',headers=headers,json={'account_id':'manual'}).status_code==200
     assert not r.bot_enabled and store.state('book_experiment').halts

@@ -1,9 +1,9 @@
 from datetime import timedelta
 from dataclasses import replace
 from decimal import Decimal as D,ROUND_DOWN
-from .types import Fill,ExecutionResult,ExperimentConfig,OrderIntent,utcnow
+from .types import Fill,ExecutionResult,ExperimentConfig,OrderIntent,utcnow,AGGRESSIVE_ACCOUNT
 from .fees import FeeModel
-from .risk import RiskManager
+from .risk import RiskManager,config_for
 
 SCENARIOS={'optimistic':(0,D('1'),0),'base':(.5,D('1'),0),
            'conservative':(1,D('.5'),1),'stress':(3,D('.25'),3)}
@@ -40,12 +40,28 @@ class PaperExecutionEngine:
         from .clock import Clock
         self.store=store; self.markets=markets; self.books=books; self.reference=reference
         self.clock=clock or Clock(); self.risk=RiskManager(); self.consumed={}
+    def liquidation_marks(self,account,at=None):
+        at=at or self.clock.now();marks={}
+        for p in account.positions:
+            market=self.markets.get(p['market_id']);book=self.books.get(p['market_id'])
+            if not market or not book or not book.fresh(at):continue
+            intent=OrderIntent('valuation-only',account.id,market.id,'SELL_'+p['direction'],p['qty'],market.tick,scenario='conservative')
+            result=sweep(intent,book,market.tick,at)
+            if result.qty==p['qty']:marks[(market.id,p['direction'])]=max(D('0'),result.cost-result.fees)/p['qty']
+        return marks
+    def marked_state(self,account_id,at=None):
+        account=self.store.state(account_id);marks=self.liquidation_marks(account,at)
+        marked=self.store.state(account_id,marks)
+        ready=all((p['market_id'],p['direction']) in marks for p in marked.positions)
+        return replace(marked,valuation_ready=ready)
+    def account_state(self,account_id,at=None):
+        return self.marked_state(account_id,at) if account_id==AGGRESSIVE_ACCOUNT else self.store.state(account_id)
     def preview(self,intent):
         market=self.markets.get(intent.market_id); book=self.books.get(intent.market_id)
         if not market or not book:
             from .types import RiskDecision
             return RiskDecision(False,('MARKET_DATA_UNAVAILABLE',))
-        return self.risk.evaluate(intent,self.store.state(intent.account_id),market,book,self.reference(),ExperimentConfig(),self.clock.now())
+        return self.risk.evaluate(intent,self.account_state(intent.account_id),market,book,self.reference(),config_for(intent.account_id,intent.strategy),self.clock.now())
     def submit(self,intent):
         decision=self.preview(intent)
         if not decision.allowed:
@@ -71,10 +87,10 @@ class PaperExecutionEngine:
                 self.store.cancel(intent.id,'ARRIVAL_BOOK_NOT_OBSERVED'); continue
             if not market or not book or not book.fresh(at) or market.end<=at or self.store.state(intent.account_id).halts:
                 self.store.cancel(intent.id,'ARRIVAL_REVALIDATION_FAILED'); continue
-            account=self.store.state(intent.account_id)
+            account=self.account_state(intent.account_id,at)
             account=replace(account,reserved=account.reserved-row['reserved'],
                             pending=tuple(p for p in account.pending if p['id']!=row['id']))
-            admission=self.risk.evaluate(intent,account,market,book,self.reference(),ExperimentConfig(),at)
+            admission=self.risk.evaluate(intent,account,market,book,self.reference(),config_for(intent.account_id,intent.strategy),at)
             if not admission.allowed:
                 self.reject(intent,admission.reasons,'ARRIVAL')
                 self.store.cancel(intent.id,'ARRIVAL_'+','.join(admission.reasons)); continue

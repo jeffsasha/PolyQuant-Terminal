@@ -3,11 +3,12 @@ from .venue.transport import RateLimitCooldown
 from datetime import timedelta
 from collections import deque
 from decimal import Decimal as D
-from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot,ACCOUNT_IDS,MarketTerms,OrderIntent,BOT_ACCOUNT
+from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot,ACCOUNT_IDS,MarketTerms,OrderIntent,BOT_ACCOUNT,AGGRESSIVE_ACCOUNT,BOT_PROFILES
 from .venue.us import USDataAdapter
 from .reference import ReferenceProvider,SpotProvider
 from .recorder import Recorder,StorageHalt
 from .execution import PaperExecutionEngine,sweep
+from .risk import config_for,size_aggressive,committed_cost
 from .settlement import SettlementProvider
 from .strategies.probability import ProbabilityStrategy
 from .strategies.momentum import MomentumStrategy
@@ -25,7 +26,8 @@ class Runtime:
         self.errors={}; self.tasks=[]; self.running=True; self.collection=True; self.latency_ms=None
         self.last_discovery=None; self.last_update=None; self.strategies=[ProbabilityStrategy(),MomentumStrategy(),BookStrategy()]
         self.book_locks={}; self.command_locks={}; self.settlement_checks={}; self.settlement=SettlementProvider(self.venue.transport,store)
-        self.bot_enabled=False; self.book_strategy=ExperimentalBookStrategy(); self.bot_signals={}
+        self.bot_enabled=False; self.bot_generation=0; self.bot_account_id=AGGRESSIVE_ACCOUNT
+        self.book_strategy=ExperimentalBookStrategy(self.bot_account_id); self.bot_signals={}
         self.bot_tick_lock=asyncio.Lock()
         self.started_at=utcnow(); self.stream_status='NOT_CONFIGURED'; self.last_stream=None; self.gaps=0
     def event(self,kind,payload,market_id=None,source_at=None):
@@ -90,7 +92,7 @@ class Runtime:
                 try:
                     spot=await self.spot_provider.latest(); self.event('spot',spot); self.spot=spot; self.errors.pop('spot',None)
                 except Exception as error: self.errors['spot']=type(error).__name__
-                self.store.roll_days(self.marks())
+                self.store.roll_days(per_account_marks={name:self.marks(name) for name in ACCOUNT_IDS})
             except StorageHalt: pass
             except Exception as error:
                 self.errors['discovery']=type(error).__name__; self.gaps+=1
@@ -175,33 +177,47 @@ class Runtime:
                     self.settlement_checks[market.id]=utcnow()+timedelta(seconds=30)
             await asyncio.sleep(10)
     def bot_status(self):
-        account=self.store.state(BOT_ACCOUNT)
-        return {'account_id':BOT_ACCOUNT,'status':'STOPPED' if not self.bot_enabled else 'HALTED' if account.halts else 'RUNNING',
+        account=self.engine.account_state(self.bot_account_id)
+        profiles=[]
+        for identity,version in BOT_PROFILES.items():
+            strategy=ExperimentalBookStrategy(identity)
+            profiles.append({'account_id':identity,'strategy':version,'config':strategy.config,'config_hash':strategy.config_hash,
+                             'risk':config_for(identity,version)})
+        return {'account_id':self.bot_account_id,'status':'STOPPED' if not self.bot_enabled else 'HALTED' if account.halts else 'RUNNING',
                 'enabled':self.bot_enabled,'validated':False,'strategy':self.book_strategy.version,
                 'config':self.book_strategy.config,'config_hash':self.book_strategy.config_hash,
-                'signals':self.bot_signals,'halts':account.halts,'restart_requires_run':True}
-    def run_bot(self):
+                'signals':self.bot_signals,'halts':account.halts,'restart_requires_run':True,'profiles':profiles,
+                'risk':config_for(self.bot_account_id,self.book_strategy.version),'risk_equity':account.equity,
+                'committed':committed_cost(account),'utilization':committed_cost(account)/account.equity if account.equity>0 else None,
+                'valuation':'CONSERVATIVE_NET_LIQUIDATION_OR_ZERO_RISK_BOUND'}
+    def run_bot(self,account_id=AGGRESSIVE_ACCOUNT):
+        if account_id not in BOT_PROFILES:raise ValueError('Unknown automation profile')
         if not self.collection or self.recorder.halted:raise ValueError('Resolve collection/persistence fault before RUN')
         if self.bot_enabled:
-            if self.store.state(BOT_ACCOUNT).halts:raise ValueError('Bot is halted; STOP and resolve the risk lock before RUN')
+            if self.bot_account_id!=account_id:raise ValueError('STOP before changing automation profile')
+            if self.store.state(account_id).halts:raise ValueError('Bot is halted; STOP and resolve the risk lock before RUN')
             return self.bot_status()
-        self.store.resume(BOT_ACCOUNT)
-        self.book_strategy.history.clear();self.bot_signals.clear()
-        self.store.audit('EXPERIMENTAL_BOT_RUN',BOT_ACCOUNT,{'config':self.book_strategy.config,'config_hash':self.book_strategy.config_hash})
-        self.bot_enabled=True
+        if account_id==AGGRESSIVE_ACCOUNT and not self.engine.account_state(account_id).risk_day_ready:
+            raise ValueError('Risk-day baseline unavailable; wait for reliable portfolio valuation')
+        self.store.resume(account_id)
+        strategy=ExperimentalBookStrategy(account_id)
+        self.store.audit('EXPERIMENTAL_BOT_RUN',account_id,{'config':strategy.config,'config_hash':strategy.config_hash,'risk':config_for(account_id,strategy.version)})
+        self.bot_account_id=account_id;self.book_strategy=strategy;self.bot_signals.clear();self.bot_generation+=1;self.bot_enabled=True
         return self.bot_status()
     def stop_bot(self,reason='BOT_STOPPED'):
-        self.bot_enabled=False
+        self.bot_enabled=False;self.bot_generation+=1
         self.book_strategy.history.clear()
-        self.store.halt(BOT_ACCOUNT,reason)
-        self.store.audit('EXPERIMENTAL_BOT_STOP',BOT_ACCOUNT,{'reason':reason,'positions_retained':True})
+        for identity in BOT_PROFILES:
+            self.store.halt(identity,reason)
+            self.store.audit('EXPERIMENTAL_BOT_STOP',identity,{'reason':reason,'positions_retained':True})
         return self.bot_status()
     async def bot_tick(self):
         async with self.bot_tick_lock:
             if not self.bot_enabled:return
+            generation=self.bot_generation
             for market in list(self.markets.values()):
                 if not market.start<=utcnow()<market.end:continue
-                account=self.store.state(BOT_ACCOUNT)
+                account=self.engine.account_state(self.bot_account_id)
                 reasons=list(account.halts)
                 if account.cooldown_until and utcnow()<account.cooldown_until:reasons.append('LOSS_COOLDOWN')
                 if any(p.get('horizon')==market.horizon for p in account.positions+account.pending):reasons.append('CADENCE_POSITION_LIMIT')
@@ -211,29 +227,41 @@ class Runtime:
                 signal={'action':'NO_TRADE','reasons':reasons,'validated':False,'config_hash':self.book_strategy.config_hash}
                 if not reasons:
                     try:
+                        if self.bot_account_id==AGGRESSIVE_ACCOUNT:
+                            for position in account.positions:
+                                if position['market_id']!=market.id and position['market_id'] in self.markets:
+                                    await self.capture_book(position['market_id'])
+                                    if not self.bot_enabled or generation!=self.bot_generation:return
                         book=await self.capture_book(market.id)
                         # STOP can arrive while the read is in flight. Never reserve after it.
-                        if not self.bot_enabled:return
+                        if not self.bot_enabled or generation!=self.bot_generation:return
                         signal=self.book_strategy.observe(book,utcnow())
                         if signal['action'].startswith('BUY_'):
                             down=signal['action'].endswith('DOWN')
                             price=(1-book.bids[0][0] if down else book.asks[0][0])+market.tick
-                            qty=max(D('1'),market.minimum_qty)//market.minimum_qty*market.minimum_qty
+                            sizing=None
+                            if self.bot_account_id==AGGRESSIVE_ACCOUNT:
+                                account=self.engine.account_state(self.bot_account_id)
+                                sizing=size_aggressive(account,market,book,signal['action'],price)
+                                qty=sizing['qty']
+                            else:qty=max(D('1'),market.minimum_qty)//market.minimum_qty*market.minimum_qty
                             if not D('.05')<=price<=D('.90'):
                                 signal={**signal,'action':'NO_TRADE','reasons':['ENTRY_PRICE_RANGE']}
+                            elif qty<market.minimum_qty:
+                                signal={**signal,'action':'NO_TRADE','reasons':sizing['reasons'],'sizing':sizing}
                             else:
-                                intent=OrderIntent(identity,BOT_ACCOUNT,market.id,signal['action'],qty,price,self.book_strategy.version,None,'conservative')
+                                intent=OrderIntent(identity,self.bot_account_id,market.id,signal['action'],qty,price,self.book_strategy.version,None,'conservative')
                                 decision=self.engine.submit(intent)
                                 signal={**signal,'action':'ORDER_SUBMITTED' if decision.allowed else 'REJECTED',
                                         'side':intent.side,'order_id':identity,'qty':str(qty),'limit':str(price),
-                                        'maximum_cost':str(decision.maximum_cost),'reasons':list(decision.reasons)}
+                                        'maximum_cost':str(decision.maximum_cost),'reasons':list(decision.reasons),'sizing':sizing}
                     except StorageHalt: return
                     except Exception as error:
                         self.book_strategy.history.pop(market.id,None)
                         limited=isinstance(error,RateLimitCooldown) or getattr(getattr(error,'response',None),'status_code',None)==429
                         signal={**signal,'action':'NO_TRADE','reasons':['VENUE_RATE_LIMITED' if limited else 'BOOK_REFRESH_FAILED'],'error':type(error).__name__}
                 self.bot_signals[market.horizon]={'market_id':market.id,'at':utcnow(),**signal}
-                self.store.decision(BOT_ACCOUNT,market.id,self.book_strategy.version,self.bot_signals[market.horizon])
+                self.store.decision(self.bot_account_id,market.id,self.book_strategy.version,self.bot_signals[market.horizon])
             active=set(self.markets)
             self.book_strategy.history={k:v for k,v in self.book_strategy.history.items() if k in active}
     async def bot_loop(self):
@@ -252,16 +280,12 @@ class Runtime:
                         signal=strategy.evaluate(list(self.events),market,self.store.state(strategy.name),ExperimentConfig(),utcnow(),False)
                         self.store.decision(strategy.name,market.id,strategy.name,signal)
                 for name in ACCOUNT_IDS:
-                    account=self.store.state(name,self.marks())
+                    account=self.engine.marked_state(name)
                     with self.store.connect() as c: c.execute('INSERT INTO equity_snapshots(account_id,equity) VALUES(%s,%s)',(name,account.equity))
             except Exception as error: self.errors['strategy']=type(error).__name__
             await asyncio.sleep(30)
-    def marks(self):
-        result={}
-        for identity,book in self.books.items():
-            if book.fresh(utcnow()) and book.bids and book.asks:
-                result[(identity,'UP')]=book.bids[0][0]; result[(identity,'DOWN')]=1-book.asks[0][0]
-        return result
+    def marks(self,account_id):
+        return self.engine.liquidation_marks(self.store.state(account_id))
     async def stream_loop(self):
         import os
         key=os.environ.get('POLYMARKET_US_KEY_ID'); secret=os.environ.get('POLYMARKET_US_SECRET_KEY')
@@ -312,7 +336,14 @@ class Runtime:
                   'book':jsonable(book) if book else None,'book_fresh':book.fresh(now) if book else False,
                   'source_age_seconds':(now-book.source_at).total_seconds() if book and book.source_at else None}
             markets.append(item)
-        accounts=[jsonable(self.store.state(name,self.marks())) for name in ACCOUNT_IDS]
+        accounts=[]
+        for name in ACCOUNT_IDS:
+            account=self.engine.marked_state(name)
+            item=jsonable(account);item['risk_config']=jsonable(config_for(name,BOT_PROFILES.get(name)))
+            item['committed']=str(committed_cost(account))
+            item['utilization']=str(committed_cost(account)/account.equity) if account.equity>0 else None
+            item['valuation']='CONSERVATIVE_NET_LIQUIDATION_OR_ZERO_RISK_BOUND'
+            accounts.append(item)
         return jsonable({'bot':self.bot_status(),'copy_trading':{'status':'UNAVAILABLE_US_IDENTIFIABLE_TRADE_FEED','enabled':False},'mode':'PAPER','environment':'production','server_time':now,'started_at':self.started_at,
             'collection':self.collection,'engine_state':'REFERENCE_BLOCKED','reference_validated':False,
             'rest_cooldown_seconds':math.ceil(max(0,getattr(getattr(self.venue,'transport',None),'blocked_until',0)-time.monotonic())),

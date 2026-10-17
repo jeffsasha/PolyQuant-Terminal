@@ -5,8 +5,9 @@ import uuid
 import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
-from .types import AccountState,ExperimentConfig,jsonable,utcnow,ACCOUNT_IDS
+from .types import AccountState,ExperimentConfig,jsonable,utcnow,ACCOUNT_IDS,BOT_PROFILES
 from .clock import risk_day_id
+from .risk import config_for
 
 
 class Store:
@@ -18,7 +19,7 @@ class Store:
         with self.connect() as c:
             for name in ACCOUNT_IDS:
                 c.execute('INSERT INTO accounts(id,day_id,config) VALUES(%s,%s,%s) ON CONFLICT DO NOTHING',
-                          (name,risk_day_id(utcnow()),Jsonb(jsonable(ExperimentConfig()))))
+                          (name,risk_day_id(utcnow()),Jsonb(jsonable(config_for(name,BOT_PROFILES.get(name))))))
     def acquire_writer(self):
         if self.writer: return True
         c=self.connect(); row=c.execute('SELECT pg_try_advisory_lock(5042026) AS locked').fetchone()
@@ -38,7 +39,7 @@ class Store:
             pending=c.execute("SELECT * FROM orders WHERE account_id=%s AND status='PENDING_ARRIVAL'",(account_id,)).fetchall()
         equity=a['cash']+sum(((marks or {}).get((p['market_id'],p['direction']),D('0'))*p['qty'] for p in positions),D('0'))
         return AccountState(account_id,a['cash'],a['reserved'],equity,a['day_start'],tuple(positions),tuple(pending),
-                            tuple(a['halts']),a['consecutive_losses'],a['cooldown_until'])
+                            tuple(a['halts']),a['consecutive_losses'],a['cooldown_until'],risk_day_ready=a['day_id']==risk_day_id(utcnow()) and not a['risk_baseline_pending'])
     def reserve(self,intent,maximum_cost,arrival_at=None,market=None,validator=None):
         if maximum_cost<0: raise ValueError('Invalid reservation')
         with self.connect() as c:
@@ -167,12 +168,24 @@ class Store:
                 self.update_loss_streak(account_id,c)
                 self.audit('OFFICIAL_SETTLEMENT_APPLIED',account_id,{'market_id':market_id,'outcome':outcome,'revision':revision_id},c)
             c.execute('INSERT INTO settlements(id,market_id,outcome,payload) VALUES(%s,%s,%s,%s)',(revision_id,market_id,outcome,Jsonb(jsonable({'final':True,'provenance':provenance}))))
-    def roll_days(self,marks=None):
+    def roll_days(self,marks=None,per_account_marks=None):
         day=risk_day_id(utcnow())
         for account_id in ACCOUNT_IDS:
-            state=self.state(account_id,marks)
+            account_marks=(per_account_marks or {}).get(account_id,marks) or {}
+            state=self.state(account_id,account_marks)
+            ready=all((p['market_id'],p['direction']) in account_marks for p in state.positions)
             with self.connect() as c:
-                c.execute('UPDATE accounts SET day_start=%s,day_id=%s WHERE id=%s AND day_id<>%s',(state.equity,day,account_id,day))
+                a=c.execute('SELECT * FROM accounts WHERE id=%s FOR UPDATE',(account_id,)).fetchone()
+                if a['day_id']==day:continue
+                if not ready:
+                    if not a['risk_baseline_pending']:
+                        c.execute('UPDATE accounts SET risk_baseline_pending=true WHERE id=%s',(account_id,))
+                        self.audit('RISK_DAY_BASELINE_DEFERRED',account_id,{'risk_day':day,'prior_baseline':a['day_start']},c)
+                    continue
+                # After a source gap, never lower the last known baseline and hide losses.
+                baseline=max(a['day_start'],state.equity) if a['risk_baseline_pending'] else state.equity
+                c.execute('UPDATE accounts SET day_start=%s,day_id=%s,risk_baseline_pending=false WHERE id=%s',(baseline,day,account_id))
+                self.audit('RISK_DAY_BASELINE_SET',account_id,{'risk_day':day,'baseline':baseline,'carried_after_gap':a['risk_baseline_pending']},c)
     def save_instrument(self,market):
         import hashlib,json
         raw=jsonable(market.raw); version=hashlib.sha256(json.dumps(raw,sort_keys=True).encode()).hexdigest()

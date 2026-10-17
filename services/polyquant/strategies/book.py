@@ -19,8 +19,14 @@ class ExperimentalBookStrategy:
             'maximum_spread':'0.05','minimum_entry_price':'0.05','maximum_entry_price':'0.90',
             'target_contracts':'1','scenario':'conservative','exit':'OFFICIAL_SETTLEMENT',
             'attempts_per_market':1,'validated':False}
-    def __init__(self):
+    def __init__(self,account_id='book_experiment'):
         import hashlib,json
+        from ..types import BOT_PROFILES,AGGRESSIVE_ACCOUNT
+        self.account_id=account_id;self.version=BOT_PROFILES[account_id];self.config=dict(type(self).config)
+        if account_id==AGGRESSIVE_ACCOUNT:
+            self.config.update({'version':self.version,'target_contracts':None,'sizing':'ADAPTIVE_FEE_INCLUSIVE',
+                                'target_allocation':'0.70','cadence_target':'0.35','maximum_allocation':'0.80',
+                                'per_trade_loss_cap':'0.40','cadence_cap':'0.40','daily_entry_loss_halt':'0.20'})
         self.config_hash=hashlib.sha256(json.dumps(self.config,sort_keys=True).encode()).hexdigest()
         self.history={}
     def observe(self,book,at):

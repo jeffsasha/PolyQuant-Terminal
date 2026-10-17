@@ -27,15 +27,17 @@ This stops only project-owned web/API processes and this workspace's database. D
 
 ## Autonomous paper bot: RUN / STOP
 
-The default account is **Order-book bot (experimental paper)**, with its own initial $1,000 and independent results. Click **RUN** to evaluate both BTC 15m and 1h and automatically place eligible paper orders. Click **STOP** to disarm and cancel pending entries; existing holdings remain for official settlement. Browser refresh preserves a running backend. Backend restart always requires a new RUN. The header Emergency stop also stops the bot when a different account is selected.
+The default is **Order-book bot (aggressive paper)**, a separately authorized unvalidated simulation with its own initial $1,000. Select **Aggressive paper** in **Bot profile**, then click **RUN** for automatic BTC 15m/1h entries. **STOP** cancels pending entries and retains holdings for official settlement. Browser refresh preserves a running backend; backend restart requires a new RUN. STOP before changing profile. Header Emergency stop stops automation even when another account is selected.
 
-No manual order ticket is needed. Per-interval status shows signal warm-up and waiting/rejection reasons; **Signal log**, **Orders**, **Fills** and **Positions** preserve the details. **Inspect frozen strategy** shows the immutable configuration and hash.
+The aggressive profile automatically sizes to a **70% total target**, normally **35% per cadence**, with **80% total / 40% per-entry and cadence admission caps**, including fee reserves and existing paid fees. Actual quantity is limited by account risk equity, remaining budgets, cash and conservative visible depth. Targets are not compulsory. A **20% daily-loss entry halt** stops additional entries; existing holdings can lose more. Price changes can put already-open positions above the percentage entry cap without triggering a fictional sale.
 
-The explicitly authorized **unvalidated** v1 experiment follows sustained top-three-level quantity imbalance of at least 20% across three distinct fresh snapshots. It buys one contract (subject to venue minimum/increment), uses conservative arrival-time execution and holds to official settlement. Price/spread, full-loss budgets, daily locks, position/cadence limits and cutoffs remain enforced. This heuristic has no calibrated probability, validated edge or expected win rate. Read [frozen rules and control behavior](docs/EXPERIMENTAL_BOT.md).
+The original **Conservative paper** profile/account is preserved: fixed one contract, 0.5% per-entry risk, 5% total exposure, 2% daily entry halt. Its money/results are independent. The selector and account statistics show each profile's actual limits. No returns are combined or balances reset.
 
-Probability, Momentum and Order Book research models stay unfitted/disabled. Only the exact new experimental account/strategy pair receives the authorized exception. Live execution and BRTI-dependent strategies remain disabled.
+Both profiles use the same unvalidated sustained order-book imbalance hypothesis and conservative fresh-arrival IOC simulation. There is no fitted probability, proven edge or expected win rate. See [aggressive sizing and valuation rules](docs/AGGRESSIVE_PAPER_SIZING.md) and [original frozen signal rules](docs/EXPERIMENTAL_BOT.md).
 
-**US copy trading is unavailable with the reviewed documented feeds:** public prints omit source identities and other users’ histories require authorization. The Smart Money panel links the [primary-source feasibility report](docs/US_COPY_TRADING_RESEARCH.md). No international wallets are relabeled as US traders and no high-win-rate ranking is invented.
+**Signal log** preserves signal, sizing budgets and rejection reasons; **Orders**, **Fills** and **Positions** preserve execution and settlement. No manual ticket is needed for the bots. Missing reliable full-position liquidation marks block aggressive entries and are labeled risk bounds, not realized losses.
+
+Live execution, BRTI-dependent/unfitted model strategies and copying remain disabled. [US copy-feed research](docs/US_COPY_TRADING_RESEARCH.md) found no documented public attributable US source-trade feed or performance leaderboard. No international wallets are relabeled as US traders.
 
 ## Optional discretionary paper trading
 

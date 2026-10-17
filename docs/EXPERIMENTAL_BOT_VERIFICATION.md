@@ -1,4 +1,6 @@
-# Experimental bot delivery verification
+# Original conservative bot delivery verification
+
+Historical v1 delivery. The later isolated aggressive sizing profile has separate [current verification](AGGRESSIVE_PAPER_VERIFICATION.md).
 
 October 17, 2026. Scope: the user-authorized unvalidated order-book paper experiment and RUN/STOP controls, extending commit `db28227`. Live execution and BRTI-dependent/unfitted models remain disabled. [Frozen rules](EXPERIMENTAL_BOT.md) describe exactly what the bot does.
 

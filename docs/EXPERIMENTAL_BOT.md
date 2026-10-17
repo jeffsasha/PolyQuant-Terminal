@@ -1,4 +1,6 @@
-# Experimental order-book paper automation
+# Original conservative order-book paper automation
+
+The original v1 profile is preserved. The owner subsequently approved an isolated aggressive adaptive profile; see [current sizing rules](AGGRESSIVE_PAPER_SIZING.md).
 
 Approved scope: autonomous US BTC 15m and 1h paper entries controlled by RUN and STOP; separate account, real production data, no live execution, no BRTI-dependent forecast. The owner explicitly authorized an unvalidated order-book experiment on October 17, 2026. This exception does not activate the three unfitted model accounts.
 

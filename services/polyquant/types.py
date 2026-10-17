@@ -7,7 +7,10 @@ import json
 DISCRETIONARY_IDS=('manual','verification')
 BOT_ACCOUNT='book_experiment'
 BOT_STRATEGY='book-imbalance-experiment-v1'
-ACCOUNT_IDS=DISCRETIONARY_IDS+('probability','momentum','book',BOT_ACCOUNT)
+AGGRESSIVE_ACCOUNT='book_aggressive'
+AGGRESSIVE_STRATEGY='book-imbalance-aggressive-v2'
+BOT_PROFILES={BOT_ACCOUNT:BOT_STRATEGY,AGGRESSIVE_ACCOUNT:AGGRESSIVE_STRATEGY}
+ACCOUNT_IDS=DISCRETIONARY_IDS+('probability','momentum','book',BOT_ACCOUNT,AGGRESSIVE_ACCOUNT)
 
 
 def decimal(value) -> Decimal:
@@ -170,6 +173,8 @@ class AccountState:
     halts:tuple=()
     consecutive_losses:int=0
     cooldown_until:datetime|None=None
+    valuation_ready:bool=True
+    risk_day_ready:bool=True
 
 
 @dataclass(frozen=True)

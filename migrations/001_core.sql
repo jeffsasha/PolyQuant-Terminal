@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS settlements (id text PRIMARY KEY, market_id text NOT 
 CREATE TABLE IF NOT EXISTS equity_snapshots (id bigserial PRIMARY KEY,account_id text NOT NULL,equity numeric(24,8) NOT NULL,created_at timestamptz NOT NULL DEFAULT now());
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS horizon text;
 ALTER TABLE accounts ADD COLUMN IF NOT EXISTS daily_halt_day text;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS risk_baseline_pending boolean NOT NULL DEFAULT false;
 UPDATE accounts SET daily_halt_day=day_id WHERE daily_halt_day IS NULL AND halts ? 'DAILY_LOSS_LIMIT';
 ALTER TABLE positions ADD COLUMN IF NOT EXISTS horizon text;
 ALTER TABLE positions ADD COLUMN IF NOT EXISTS settled_at timestamptz;
