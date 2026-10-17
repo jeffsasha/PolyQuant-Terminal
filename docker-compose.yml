@@ -1,0 +1,27 @@
+# Reproducible local stack. NOTE: not verified on the author's machine (Docker not installed there);
+# the verified path is scripts/dev-db.sh + .venv (see README).
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: polyquant
+      POSTGRES_PASSWORD: polyquant-local-only
+      POSTGRES_DB: polyquant
+    ports: ["127.0.0.1:54329:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U polyquant"]
+      interval: 5s
+      retries: 10
+  engine:
+    build: .
+    depends_on:
+      db: { condition: service_healthy }
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgresql://polyquant:polyquant-local-only@db:5432/polyquant
+      API_HOST: 0.0.0.0
+    ports: ["127.0.0.1:8787:8787"]
+    command: ["polyquant", "run"]
+volumes:
+  pgdata: {}

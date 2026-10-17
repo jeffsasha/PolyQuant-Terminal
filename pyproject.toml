@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "polyquant"
+version = "0.1.0"
+description = "PolyQuant Terminal engine: Polymarket US BTC up/down research and paper trading (paper only)."
+requires-python = ">=3.12"
+license = "LicenseRef-Proprietary"
+dependencies = [
+  "httpx>=0.27,<1",
+  "asyncpg>=0.30,<1",
+  "pydantic>=2.8,<3",
+  "pydantic-settings>=2.4,<3",
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.30,<1",
+  "tzdata>=2024.1",
+  # Official Polymarket US SDK, pinned; used for the authenticated markets WS in Phase 2b only.
+  "polymarket-us==2.4.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=9.0.3,<10", "pytest-asyncio>=1.2,<2", "respx>=0.21,<1", "ruff>=0.6", "pip-audit>=2.7"]
+
+[project.scripts]
+polyquant = "polyquant.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["services/engine/polyquant"]
+
+[tool.pytest.ini_options]
+pythonpath = [".", "services/engine"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+  "db: needs a PostgreSQL database (POLYQUANT_TEST_DATABASE_URL)",
+  "live: calls the real public gateway (opt-in with POLYQUANT_LIVE_TESTS=1)",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["services/engine", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "DTZ"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "DTZ"]
