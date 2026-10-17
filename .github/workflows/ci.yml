@@ -4,18 +4,20 @@ on:
   pull_request:
 permissions:
   contents: read
-  pull-requests: read  # gitleaks-action lists the PR's commits to scan them
 jobs:
   secrets:
-    runs-on: ubuntu-latest
+    # Pinned runner image: ubuntu-latest migrates to Ubuntu 26 from 2026-10-19.
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Official gitleaks image, pinned. Scans the full git history; no Node action, no PR API access needed.
+      - name: gitleaks (full history)
+        run: >-
+          docker run --rm -v "$GITHUB_WORKSPACE:/repo" zricethezav/gitleaks:v8.30.1
+          git /repo --redact --no-banner --exit-code 1
   python:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:17
@@ -29,8 +31,8 @@ jobs:
     env:
       POLYQUANT_TEST_DATABASE_URL: postgresql://polyquant:ci-only@127.0.0.1:5432/polyquant_test
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
       - run: pip install -e ".[dev]"
       - run: ruff check .
