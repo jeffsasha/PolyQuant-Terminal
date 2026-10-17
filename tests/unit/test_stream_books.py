@@ -37,7 +37,8 @@ def runtime(monkeypatch, clock):
     r = object.__new__(Runtime)
     r.collection = True; r.errors = {}; r.events = deque(); r.sequence = 0; r.last_update = None; r.gaps = 0
     r.recorded = []
-    r.event = lambda kind, payload, market_id=None, source_at=None: r.recorded.append((kind, market_id, source_at))
+    r.event = lambda kind, payload, market_id=None, source_at=None, received_at=None: r.recorded.append(
+        (kind, market_id, source_at, received_at))
     r.markets = {'m1': MarketTerms('m1', SLUG, '1h', T0 - timedelta(minutes=10), T0 + timedelta(minutes=50), None)}
     r.books = {}; r.book_origin = {}; r.stream_raw = {}; r.recorded_versions = {}
     r.stream_rejected = 0; r.stream_frames = 0; r.last_stream = None; r.book_locks = {}; r.latency_ms = None
@@ -230,3 +231,86 @@ def test_subscription_change_never_starts_a_concurrent_recv():
     assert ws.max_pending == 1 and frames
     subs = [m for m in ws.sent if 'subscribe' in m]
     assert len(subs) == 4  # initial + three changes, all on the same connection
+
+
+
+# ---- regressions from the independent review ---------------------------------------------------------------------
+
+
+def test_frame_without_source_time_never_replaces_a_valid_book(monkeypatch):
+    c = Clock(T0); r = runtime(monkeypatch, c)
+    push(r, c, 0)
+    good = r.books['m1']
+    f = frame(1, c.now); del f['marketData']['transactTime']
+    r.on_stream_frame(f, c.now)
+    assert r.books['m1'] is good and r.errors['stream_frame'] == 'MISSING_SOURCE_TIME'
+
+
+def test_recorded_stream_book_keeps_its_true_receive_time(monkeypatch):
+    c = Clock(T0); r = runtime(monkeypatch, c)
+    push(r, c, 0)
+    c.now = T0 + timedelta(milliseconds=1500)
+    asyncio.run(r.capture_book('m1'))
+    assert r.recorded[-1][3] == T0  # frame arrival time, not the later time of use
+
+
+def test_arrival_stream_book_needs_source_time_after_arrival(monkeypatch):
+    c = Clock(T0); r = runtime(monkeypatch, c)
+    arrival = T0 + timedelta(milliseconds=500)
+    c.now = arrival + timedelta(milliseconds=100)
+    push(r, c, 0, source_at=T0)  # received after arrival, but the book state is from before it
+    assert r.stream_book('m1', after=arrival) is None
+
+
+def test_bad_frames_are_counted_and_never_drop_the_connection():
+    statuses, frames = [], []
+
+    async def scenario():
+        ws = FakeWS()
+        s = MarketStream('k', 's', lambda f, at: frames.append(f), lambda st, d: statuses.append(st), lambda: T0,
+                         idle_timeout=5)
+        s.ws = ws
+        running = {'on': True}
+        task = asyncio.create_task(s.read(ws, lambda: running['on']))
+        for bad in ('[]', 'null', '"x"', '7', b'\xff\xfe', '{not json'):
+            ws.incoming.put_nowait(bad)
+        ws.incoming.put_nowait(json.dumps(frame(0, T0), default=str))
+
+        async def got():
+            while not frames: await asyncio.sleep(0.01)
+        await asyncio.wait_for(got(), 2)
+        running['on'] = False
+        task.cancel()
+        with __import__('contextlib').suppress(asyncio.CancelledError):
+            await task
+    asyncio.run(scenario())
+    assert statuses.count('BAD_FRAME') == 6 and len(frames) == 1
+
+
+def test_consumer_exception_does_not_drop_the_connection():
+    statuses = []
+
+    def broken(f, at): raise KeyError('consumer bug')
+
+    async def scenario():
+        ws = FakeWS()
+        s = MarketStream('k', 's', broken, lambda st, d: statuses.append(st), lambda: T0, idle_timeout=5)
+        running = {'on': True}
+        task = asyncio.create_task(s.read(ws, lambda: running['on']))
+        ws.incoming.put_nowait(json.dumps(frame(0, T0), default=str))
+        await asyncio.sleep(0.1)
+        running['on'] = False; task.cancel()
+        with __import__('contextlib').suppress(asyncio.CancelledError):
+            await task
+        return task
+    asyncio.run(scenario())
+    assert statuses == ['BAD_FRAME']
+
+
+def test_status_bad_frame_counts_and_one_disconnect_is_one_gap(monkeypatch):
+    c = Clock(T0); r = runtime(monkeypatch, c)
+    r.stream_status = 'CONNECTED'
+    r.on_stream_status('BAD_FRAME', {})
+    r.on_stream_status('ERROR', {'error': 'ConnectionClosedError'})
+    r.on_stream_status('DISCONNECTED', {})
+    assert r.stream_rejected == 1 and r.gaps == 1

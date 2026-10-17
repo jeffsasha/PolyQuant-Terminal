@@ -59,7 +59,9 @@ class MarketStream:
         self.connects = 0
 
     def set_slugs(self, slugs):
-        wanted = tuple(sorted(set(slugs)))[:100]
+        wanted = tuple(sorted(set(slugs)))
+        if len(wanted) > 100:
+            raise ValueError('More than 100 markets in one subscription')
         if wanted != self.desired:
             self.desired = wanted
             self.resubscribe.set()
@@ -95,6 +97,7 @@ class MarketStream:
                     self.ws = ws
                     self.connected = True
                     self.connects += 1
+                    self.last_frame_at = None  # liveness restarts with this connection's first frame
                     self.active = ()
                     self.on_status('CONNECTED', {'connects': self.connects})
                     backoff = 1.0
@@ -142,16 +145,21 @@ class MarketStream:
                 raw = receive.result()
                 receive = None
                 received_at = self.clock()
-                if isinstance(raw, bytes):
-                    raw = raw.decode('utf-8')
                 try:
+                    if isinstance(raw, bytes):
+                        raw = raw.decode('utf-8')
                     frame = json.loads(raw, parse_float=Decimal)
-                except ValueError:
+                    if not isinstance(frame, dict):
+                        raise ValueError('frame is not a JSON object')
+                except ValueError:  # includes UnicodeDecodeError: one bad frame never drops the connection
                     self.on_status('BAD_FRAME', {})
                     continue
                 self.frames += 1
                 self.last_frame_at = received_at
-                self.on_frame(frame, received_at)
+                try:
+                    self.on_frame(frame, received_at)
+                except Exception as error:  # a consumer bug must not tear down market data either
+                    self.on_status('BAD_FRAME', {'error': type(error).__name__})
         finally:
             for future in (receive, resub):
                 if future is None:
