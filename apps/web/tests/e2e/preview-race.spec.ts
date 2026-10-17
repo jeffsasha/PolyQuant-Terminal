@@ -9,7 +9,7 @@ test('fixture: edited and rolled-over tickets cannot reuse an earlier preview',a
  let blocked=true;let release=()=>{};let placed=0;
  await page.route('**/api/paper/preview',async route=>{if(blocked)await new Promise<void>(resolve=>{release=resolve;});await route.fulfill({json:{allowed:true,reasons:[],maximum_cost:'0.52',order_id:'fixture-preview',estimate:null}});});
  await page.route('**/api/paper/orders',route=>{placed++;return route.fulfill({json:{allowed:false}});});
- await page.goto('/');await expect(page.getByTestId('paper-mode')).toHaveText('PAPER');
+ await page.goto('/');await expect(page.getByTestId('paper-mode')).toHaveText('PAPER');await page.getByLabel('Paper account').selectOption('manual');
  await page.getByRole('button',{name:'Inspect costs & risk →'}).click();await expect(page.getByRole('button',{name:'Inspect costs & risk →'})).toBeDisabled();
  await page.getByLabel('Contracts',{exact:true}).fill('2');blocked=false;release();
  await expect(page.getByRole('button',{name:'Inspect costs & risk →'})).toBeEnabled();await expect(page.getByRole('button',{name:'Place paper order',exact:true})).toHaveCount(0);

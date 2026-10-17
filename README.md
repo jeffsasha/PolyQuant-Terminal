@@ -1,6 +1,6 @@
 # PolyQuant Terminal
 
-English local research terminal for **Polymarket US BTC 15m and 1h**. Real public production data, independent $1,000 paper accounts, and no real order gateway.
+English autonomous paper terminal for **Polymarket US BTC 15m and 1h**. Real public production data, independent $1,000 paper accounts, and no real order gateway.
 
 ## Run on this Mac
 
@@ -25,7 +25,19 @@ python3 scripts/local.py stop
 
 This stops only project-owned web/API processes and this workspace's database. Database files, paper balances, halts, and recordings remain in `.local/`. Do not delete that directory to fix a startup problem. Private local service logs are `.local/backend.log`, `.local/web.log`, and `.local/postgres.log`.
 
-## Paper trading with production data
+## Autonomous paper bot: RUN / STOP
+
+The default account is **Order-book bot (experimental paper)**, with its own initial $1,000 and independent results. Click **RUN** to evaluate both BTC 15m and 1h and automatically place eligible paper orders. Click **STOP** to disarm and cancel pending entries; existing holdings remain for official settlement. Browser refresh preserves a running backend. Backend restart always requires a new RUN. The header Emergency stop also stops the bot when a different account is selected.
+
+No manual order ticket is needed. Per-interval status shows signal warm-up and waiting/rejection reasons; **Signal log**, **Orders**, **Fills** and **Positions** preserve the details. **Inspect frozen strategy** shows the immutable configuration and hash.
+
+The explicitly authorized **unvalidated** v1 experiment follows sustained top-three-level quantity imbalance of at least 20% across three distinct fresh snapshots. It buys one contract (subject to venue minimum/increment), uses conservative arrival-time execution and holds to official settlement. Price/spread, full-loss budgets, daily locks, position/cadence limits and cutoffs remain enforced. This heuristic has no calibrated probability, validated edge or expected win rate. Read [frozen rules and control behavior](docs/EXPERIMENTAL_BOT.md).
+
+Probability, Momentum and Order Book research models stay unfitted/disabled. Only the exact new experimental account/strategy pair receives the authorized exception. Live execution and BRTI-dependent strategies remain disabled.
+
+**US copy trading is unavailable with the reviewed documented feeds:** public prints omit source identities and other users’ histories require authorization. The Smart Money panel links the [primary-source feasibility report](docs/US_COPY_TRADING_RESEARCH.md). No international wallets are relabeled as US traders and no high-win-rate ranking is invented.
+
+## Optional discretionary paper trading
 
 Select **Discretionary paper** for your manual paper account. The **Verification (paper)** account contains explicitly labeled production-data test trades and has separate money and risk. The Probability, Momentum and Order Book research accounts retain their own balances and remain disabled while models and reference data are unvalidated. No account returns are combined.
 

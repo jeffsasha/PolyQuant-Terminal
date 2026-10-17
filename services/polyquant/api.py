@@ -9,7 +9,7 @@ from .config import Settings
 from .store import Store
 from .runtime import Runtime
 from .auth import Sessions,verify_password
-from .types import OrderIntent,decimal,jsonable,utcnow,DISCRETIONARY_IDS
+from .types import OrderIntent,decimal,jsonable,utcnow,DISCRETIONARY_IDS,BOT_ACCOUNT
 from .replay import Replay
 
 class Login(BaseModel):
@@ -17,7 +17,9 @@ class Login(BaseModel):
     password:str=Field(max_length=256)
 class AccountCommand(BaseModel):
     model_config=ConfigDict(extra='forbid')
-    account_id:Literal['manual','verification','probability','momentum','book']='manual'
+    account_id:Literal['manual','verification','probability','momentum','book','book_experiment']='manual'
+class BotCommand(BaseModel):
+    model_config=ConfigDict(extra='forbid')
 class PaperTicket(AccountCommand):
     id:str=Field(min_length=8,max_length=100)
     market_id:str=Field(max_length=80)
@@ -102,16 +104,28 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
     def reference_report(value=Depends(authenticated)):
         path=Path(__file__).resolve().parents[2]/'docs/BRTI_FOLLOWUP_RESEARCH.md'
         return Response(path.read_text(),media_type='text/plain')
+    @app.get('/research/copy-trading')
+    def copy_report(value=Depends(authenticated)):
+        path=Path(__file__).resolve().parents[2]/'docs/US_COPY_TRADING_RESEARCH.md'
+        return Response(path.read_text(),media_type='text/plain')
     @app.get('/decisions/{identity}')
     def decision(identity:str,value=Depends(authenticated)):
         with store.connect() as c: row=c.execute('SELECT * FROM decisions WHERE id=%s',(identity,)).fetchone()
         if not row: raise HTTPException(404,'Decision not found')
         return jsonable(row)
+    @app.post('/bot/run')
+    async def run_bot(payload:BotCommand,value=Depends(authenticated)):
+        try:return jsonable(app.state.runtime.run_bot())
+        except ValueError as error:raise HTTPException(409,str(error))
+    @app.post('/bot/stop')
+    async def stop_bot(payload:BotCommand,value=Depends(authenticated)):
+        return jsonable(app.state.runtime.stop_bot())
     @app.post('/paper/start')
     def start(value=Depends(authenticated)):
         raise HTTPException(409,'Reference reconciliation failed. Reference-dependent strategies remain disabled.')
     @app.post('/paper/stop')
-    def stop(payload:AccountCommand,value=Depends(authenticated)):
+    async def stop(payload:AccountCommand,value=Depends(authenticated)):
+        app.state.runtime.stop_bot()
         store.halt(payload.account_id,'MANUAL_STOP'); return {'status':'HALTED','mode':'PAPER'}
     @app.post('/paper/pause')
     def pause(payload:AccountCommand,value=Depends(authenticated)):
@@ -122,6 +136,7 @@ def create_app(store=None,settings=None,runtime_factory=Runtime):
         except ValueError as error: raise HTTPException(409,str(error))
         return {'status':'REFERENCE_BLOCKED','reference_validated':False}
     def intent(payload):
+        if payload.account_id==BOT_ACCOUNT:raise HTTPException(403,'Automation account does not accept manual tickets')
         try:
             qty=decimal(payload.qty); price=decimal(payload.limit)
             if qty<=0 or qty>1000000 or not 0<price<1: raise ValueError('Invalid quantity or price')

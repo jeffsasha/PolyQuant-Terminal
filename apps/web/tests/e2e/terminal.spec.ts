@@ -1,7 +1,7 @@
 import {test,expect,type Page} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
-async function login(page:Page){await page.goto('/');await page.getByLabel('Local password').fill(readFileSync(resolve(__dirname,'../../../../.local/login-password.txt'),'utf8').trim());await page.getByRole('button',{name:'Open terminal'}).click();await expect(page.getByTestId('paper-mode')).toHaveText('PAPER');}
+async function login(page:Page){await page.goto('/');await page.getByLabel('Local password').fill(readFileSync(resolve(__dirname,'../../../../.local/login-password.txt'),'utf8').trim());await page.getByRole('button',{name:'Open terminal'}).click();await expect(page.getByTestId('paper-mode')).toHaveText('PAPER');await page.getByLabel('Paper account').selectOption('manual');}
 
 async function inspect(page:Page){
  for(let attempt=0;attempt<4;attempt++){
@@ -18,7 +18,7 @@ test('English controls, persistent stop and strategy gate work',async({page})=>{
  await login(page);await expect(page.getByText('Reference reconstruction unresolved',{exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Enable live trading'})).toHaveCount(0);
  await page.getByRole('button',{name:'Emergency stop'}).click();await expect(page.getByTestId('risk-state')).toContainText('HALTED');
- await page.reload();await expect(page.getByTestId('risk-state')).toContainText('HALTED');
+ await page.reload();await page.getByLabel('Paper account').selectOption('manual');await expect(page.getByTestId('risk-state')).toContainText('HALTED');
  await page.getByRole('button',{name:'Resume paper account'}).click();await expect(page.getByTestId('risk-state')).not.toContainText('HALTED');
  await page.getByLabel('Paper account').selectOption('probability');await expect(page.getByTestId('risk-state')).not.toContainText('MANUAL PAPER');
  await page.getByRole('button',{name:'Data health',exact:true}).click();await expect(page.getByText('Reference reconciliation',{exact:true})).toBeVisible();

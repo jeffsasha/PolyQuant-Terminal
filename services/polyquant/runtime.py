@@ -3,7 +3,7 @@ from .venue.transport import RateLimitCooldown
 from datetime import timedelta
 from collections import deque
 from decimal import Decimal as D
-from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot,ACCOUNT_IDS,MarketTerms
+from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot,ACCOUNT_IDS,MarketTerms,OrderIntent,BOT_ACCOUNT
 from .venue.us import USDataAdapter
 from .reference import ReferenceProvider,SpotProvider
 from .recorder import Recorder,StorageHalt
@@ -11,7 +11,7 @@ from .execution import PaperExecutionEngine,sweep
 from .settlement import SettlementProvider
 from .strategies.probability import ProbabilityStrategy
 from .strategies.momentum import MomentumStrategy
-from .strategies.book import BookStrategy
+from .strategies.book import BookStrategy,ExperimentalBookStrategy
 
 
 class Runtime:
@@ -25,6 +25,8 @@ class Runtime:
         self.errors={}; self.tasks=[]; self.running=True; self.collection=True; self.latency_ms=None
         self.last_discovery=None; self.last_update=None; self.strategies=[ProbabilityStrategy(),MomentumStrategy(),BookStrategy()]
         self.book_locks={}; self.command_locks={}; self.settlement_checks={}; self.settlement=SettlementProvider(self.venue.transport,store)
+        self.bot_enabled=False; self.book_strategy=ExperimentalBookStrategy(); self.bot_signals={}
+        self.bot_tick_lock=asyncio.Lock()
         self.started_at=utcnow(); self.stream_status='NOT_CONFIGURED'; self.last_stream=None; self.gaps=0
     def event(self,kind,payload,market_id=None,source_at=None):
         self.sequence+=1; at=utcnow()
@@ -52,10 +54,10 @@ class Runtime:
             for manifest in self.recorder.recover(): self.store.save_manifest(manifest)
             if self.recorder.recovery_errors: self.persistence_halt('PERSISTENCE_FAILED')
         except Exception: self.persistence_halt('PERSISTENCE_FAILED')
-        self.store.reconcile(); self.store.audit('RUNTIME_STARTED',payload={'mode':'PAPER','reference_validated':False})
+        self.store.reconcile(); self.stop_bot('RESTART_REQUIRES_RUN'); self.store.audit('RUNTIME_STARTED',payload={'mode':'PAPER','reference_validated':False})
         for row in self.store.held_instruments():
             market=MarketTerms.from_raw(row['raw']); self.markets[market.id]=market
-        self.tasks=[asyncio.create_task(loop()) for loop in [self.data_loop,self.book_loop,self.execution_loop,self.settlement_loop,self.strategy_loop,self.stream_loop]]
+        self.tasks=[asyncio.create_task(loop()) for loop in [self.data_loop,self.book_loop,self.execution_loop,self.settlement_loop,self.strategy_loop,self.bot_loop,self.stream_loop]]
     async def close(self):
         self.running=False
         for task in self.tasks: task.cancel()
@@ -172,6 +174,75 @@ class Runtime:
                     self.errors['settlement:'+market.id]=type(error).__name__
                     self.settlement_checks[market.id]=utcnow()+timedelta(seconds=30)
             await asyncio.sleep(10)
+    def bot_status(self):
+        account=self.store.state(BOT_ACCOUNT)
+        return {'account_id':BOT_ACCOUNT,'status':'STOPPED' if not self.bot_enabled else 'HALTED' if account.halts else 'RUNNING',
+                'enabled':self.bot_enabled,'validated':False,'strategy':self.book_strategy.version,
+                'config':self.book_strategy.config,'config_hash':self.book_strategy.config_hash,
+                'signals':self.bot_signals,'halts':account.halts,'restart_requires_run':True}
+    def run_bot(self):
+        if not self.collection or self.recorder.halted:raise ValueError('Resolve collection/persistence fault before RUN')
+        if self.bot_enabled:
+            if self.store.state(BOT_ACCOUNT).halts:raise ValueError('Bot is halted; STOP and resolve the risk lock before RUN')
+            return self.bot_status()
+        self.store.resume(BOT_ACCOUNT)
+        self.book_strategy.history.clear();self.bot_signals.clear()
+        self.store.audit('EXPERIMENTAL_BOT_RUN',BOT_ACCOUNT,{'config':self.book_strategy.config,'config_hash':self.book_strategy.config_hash})
+        self.bot_enabled=True
+        return self.bot_status()
+    def stop_bot(self,reason='BOT_STOPPED'):
+        self.bot_enabled=False
+        self.book_strategy.history.clear()
+        self.store.halt(BOT_ACCOUNT,reason)
+        self.store.audit('EXPERIMENTAL_BOT_STOP',BOT_ACCOUNT,{'reason':reason,'positions_retained':True})
+        return self.bot_status()
+    async def bot_tick(self):
+        async with self.bot_tick_lock:
+            if not self.bot_enabled:return
+            for market in list(self.markets.values()):
+                if not market.start<=utcnow()<market.end:continue
+                account=self.store.state(BOT_ACCOUNT)
+                reasons=list(account.halts)
+                if account.cooldown_until and utcnow()<account.cooldown_until:reasons.append('LOSS_COOLDOWN')
+                if any(p.get('horizon')==market.horizon for p in account.positions+account.pending):reasons.append('CADENCE_POSITION_LIMIT')
+                if (market.end-utcnow()).total_seconds()<={'15m':120,'1h':300}[market.horizon]:reasons.append('NO_ENTRY_WINDOW')
+                identity=str(uuid.uuid5(uuid.NAMESPACE_URL,self.book_strategy.version+':'+market.id))
+                if self.store.get_order(identity):reasons.append('MARKET_ATTEMPT_ALREADY_RECORDED')
+                signal={'action':'NO_TRADE','reasons':reasons,'validated':False,'config_hash':self.book_strategy.config_hash}
+                if not reasons:
+                    try:
+                        book=await self.capture_book(market.id)
+                        # STOP can arrive while the read is in flight. Never reserve after it.
+                        if not self.bot_enabled:return
+                        signal=self.book_strategy.observe(book,utcnow())
+                        if signal['action'].startswith('BUY_'):
+                            down=signal['action'].endswith('DOWN')
+                            price=(1-book.bids[0][0] if down else book.asks[0][0])+market.tick
+                            qty=max(D('1'),market.minimum_qty)//market.minimum_qty*market.minimum_qty
+                            if not D('.05')<=price<=D('.90'):
+                                signal={**signal,'action':'NO_TRADE','reasons':['ENTRY_PRICE_RANGE']}
+                            else:
+                                intent=OrderIntent(identity,BOT_ACCOUNT,market.id,signal['action'],qty,price,self.book_strategy.version,None,'conservative')
+                                decision=self.engine.submit(intent)
+                                signal={**signal,'action':'ORDER_SUBMITTED' if decision.allowed else 'REJECTED',
+                                        'side':intent.side,'order_id':identity,'qty':str(qty),'limit':str(price),
+                                        'maximum_cost':str(decision.maximum_cost),'reasons':list(decision.reasons)}
+                    except StorageHalt: return
+                    except Exception as error:
+                        self.book_strategy.history.pop(market.id,None)
+                        limited=isinstance(error,RateLimitCooldown) or getattr(getattr(error,'response',None),'status_code',None)==429
+                        signal={**signal,'action':'NO_TRADE','reasons':['VENUE_RATE_LIMITED' if limited else 'BOOK_REFRESH_FAILED'],'error':type(error).__name__}
+                self.bot_signals[market.horizon]={'market_id':market.id,'at':utcnow(),**signal}
+                self.store.decision(BOT_ACCOUNT,market.id,self.book_strategy.version,self.bot_signals[market.horizon])
+            active=set(self.markets)
+            self.book_strategy.history={k:v for k,v in self.book_strategy.history.items() if k in active}
+    async def bot_loop(self):
+        while self.running:
+            try:await self.bot_tick()
+            except Exception as error:
+                self.errors['bot']=type(error).__name__
+                self.stop_bot('BOT_ERROR')
+            await asyncio.sleep(5)
     async def strategy_loop(self):
         while self.running:
             try:
@@ -242,7 +313,7 @@ class Runtime:
                   'source_age_seconds':(now-book.source_at).total_seconds() if book and book.source_at else None}
             markets.append(item)
         accounts=[jsonable(self.store.state(name,self.marks())) for name in ACCOUNT_IDS]
-        return jsonable({'mode':'PAPER','environment':'production','server_time':now,'started_at':self.started_at,
+        return jsonable({'bot':self.bot_status(),'copy_trading':{'status':'UNAVAILABLE_US_IDENTIFIABLE_TRADE_FEED','enabled':False},'mode':'PAPER','environment':'production','server_time':now,'started_at':self.started_at,
             'collection':self.collection,'engine_state':'REFERENCE_BLOCKED','reference_validated':False,
             'rest_cooldown_seconds':math.ceil(max(0,getattr(getattr(self.venue,'transport',None),'blocked_until',0)-time.monotonic())),
             'manual_trading_ready':self.collection and not self.store.state('manual').halts and any(book.fresh(now) for book in self.books.values()),

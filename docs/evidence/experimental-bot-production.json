@@ -1,0 +1,1296 @@
+{
+  "mode": "PAPER",
+  "environment": "production",
+  "reference_validated": false,
+  "stream_status": "NOT_CONFIGURED",
+  "copy_trading": {
+    "status": "UNAVAILABLE_US_IDENTIFIABLE_TRADE_FEED",
+    "enabled": false
+  },
+  "observations": [
+    {
+      "server_time": "2026-10-17T05:53:56.288861+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {},
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:53:58.364027+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {},
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:00.465345+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {},
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:02.554595+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {},
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:04.650036+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:03.590684+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "1834.1800",
+              "top3_ask_qty": "3915.9900",
+              "imbalance": "-0.3620432091572944799892872732"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:03.306053+00:00",
+                "received_at": "2026-10-17T05:54:03.590603+00:00",
+                "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+                "direction": "DOWN",
+                "imbalance": "-0.3620432091572944799892872732"
+              }
+            ]
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:06.852220+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:03.590684+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "1834.1800",
+              "top3_ask_qty": "3915.9900",
+              "imbalance": "-0.3620432091572944799892872732"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:03.306053+00:00",
+                "received_at": "2026-10-17T05:54:03.590603+00:00",
+                "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+                "direction": "DOWN",
+                "imbalance": "-0.3620432091572944799892872732"
+              }
+            ]
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:05.838179+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6542.0900",
+              "top3_ask_qty": "4313.6500",
+              "imbalance": "0.2052775766552994084235620971"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:05.705986+00:00",
+                "received_at": "2026-10-17T05:54:05.838118+00:00",
+                "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+                "direction": "UP",
+                "imbalance": "0.2052775766552994084235620971"
+              }
+            ]
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:08.953561+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:03.590684+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "1834.1800",
+              "top3_ask_qty": "3915.9900",
+              "imbalance": "-0.3620432091572944799892872732"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:03.306053+00:00",
+                "received_at": "2026-10-17T05:54:03.590603+00:00",
+                "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+                "direction": "DOWN",
+                "imbalance": "-0.3620432091572944799892872732"
+              }
+            ]
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:05.838179+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6542.0900",
+              "top3_ask_qty": "4313.6500",
+              "imbalance": "0.2052775766552994084235620971"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:05.705986+00:00",
+                "received_at": "2026-10-17T05:54:05.838118+00:00",
+                "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+                "direction": "UP",
+                "imbalance": "0.2052775766552994084235620971"
+              }
+            ]
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:11.030659+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:03.590684+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "1834.1800",
+              "top3_ask_qty": "3915.9900",
+              "imbalance": "-0.3620432091572944799892872732"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:03.306053+00:00",
+                "received_at": "2026-10-17T05:54:03.590603+00:00",
+                "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+                "direction": "DOWN",
+                "imbalance": "-0.3620432091572944799892872732"
+              }
+            ]
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:05.838179+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6542.0900",
+              "top3_ask_qty": "4313.6500",
+              "imbalance": "0.2052775766552994084235620971"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:05.705986+00:00",
+                "received_at": "2026-10-17T05:54:05.838118+00:00",
+                "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+                "direction": "UP",
+                "imbalance": "0.2052775766552994084235620971"
+              }
+            ]
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:13.116939+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:03.590684+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "1834.1800",
+              "top3_ask_qty": "3915.9900",
+              "imbalance": "-0.3620432091572944799892872732"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:03.306053+00:00",
+                "received_at": "2026-10-17T05:54:03.590603+00:00",
+                "book_version": "21a43d6047a49e44d14bb502584053f29d3f5612094db4c45833e8aae3d52166",
+                "direction": "DOWN",
+                "imbalance": "-0.3620432091572944799892872732"
+              }
+            ]
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:05.838179+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6542.0900",
+              "top3_ask_qty": "4313.6500",
+              "imbalance": "0.2052775766552994084235620971"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:05.705986+00:00",
+                "received_at": "2026-10-17T05:54:05.838118+00:00",
+                "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+                "direction": "UP",
+                "imbalance": "0.2052775766552994084235620971"
+              }
+            ]
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:15.205679+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:13.614807+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "2d0fa833f81f8b5f79ba94fc7a8f1afc9b805355d52c8c18f7e29d8c8158cf13",
+            "reasons": [
+              "IMBALANCE_BELOW_THRESHOLD"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "2900.1800",
+              "top3_ask_qty": "3280.7300",
+              "imbalance": "-0.06156860397578997267392665481"
+            }
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:05.838179+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6542.0900",
+              "top3_ask_qty": "4313.6500",
+              "imbalance": "0.2052775766552994084235620971"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:05.705986+00:00",
+                "received_at": "2026-10-17T05:54:05.838118+00:00",
+                "book_version": "37d8a7b6efe9ff0d9ec04fb65005669dceac63299d9ed3e916a66eeaa6594d74",
+                "direction": "UP",
+                "imbalance": "0.2052775766552994084235620971"
+              }
+            ]
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:17.297717+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:13.614807+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "2d0fa833f81f8b5f79ba94fc7a8f1afc9b805355d52c8c18f7e29d8c8158cf13",
+            "reasons": [
+              "IMBALANCE_BELOW_THRESHOLD"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "2900.1800",
+              "top3_ask_qty": "3280.7300",
+              "imbalance": "-0.06156860397578997267392665481"
+            }
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:15.800434+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "5455745e4fb1da1716d70d5e7eaaf7e685d0f1e610cd078657b90d3705a89ab7",
+            "reasons": [
+              "IMBALANCE_BELOW_THRESHOLD"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6081.8800",
+              "top3_ask_qty": "7728.8900",
+              "imbalance": "-0.1192554796003408933752426548"
+            }
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:19.371730+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:13.614807+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "2d0fa833f81f8b5f79ba94fc7a8f1afc9b805355d52c8c18f7e29d8c8158cf13",
+            "reasons": [
+              "IMBALANCE_BELOW_THRESHOLD"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "2900.1800",
+              "top3_ask_qty": "3280.7300",
+              "imbalance": "-0.06156860397578997267392665481"
+            }
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:15.800434+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "5455745e4fb1da1716d70d5e7eaaf7e685d0f1e610cd078657b90d3705a89ab7",
+            "reasons": [
+              "IMBALANCE_BELOW_THRESHOLD"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6081.8800",
+              "top3_ask_qty": "7728.8900",
+              "imbalance": "-0.1192554796003408933752426548"
+            }
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:21.512379+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:13.614807+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "2d0fa833f81f8b5f79ba94fc7a8f1afc9b805355d52c8c18f7e29d8c8158cf13",
+            "reasons": [
+              "IMBALANCE_BELOW_THRESHOLD"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "2900.1800",
+              "top3_ask_qty": "3280.7300",
+              "imbalance": "-0.06156860397578997267392665481"
+            }
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:15.800434+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "5455745e4fb1da1716d70d5e7eaaf7e685d0f1e610cd078657b90d3705a89ab7",
+            "reasons": [
+              "IMBALANCE_BELOW_THRESHOLD"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6081.8800",
+              "top3_ask_qty": "7728.8900",
+              "imbalance": "-0.1192554796003408933752426548"
+            }
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:23.585329+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:22.374644+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "f7f0b5813bbe1a86f7bce76d2382af70dfcc66c06cbac9901f041ce70593ad72",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "2386.3900",
+              "top3_ask_qty": "4225.7300",
+              "imbalance": "-0.2781770445787432774964761680"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:22.104641+00:00",
+                "received_at": "2026-10-17T05:54:22.374600+00:00",
+                "book_version": "f7f0b5813bbe1a86f7bce76d2382af70dfcc66c06cbac9901f041ce70593ad72",
+                "direction": "DOWN",
+                "imbalance": "-0.2781770445787432774964761680"
+              }
+            ]
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:23.446226+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "82bc353dd0968c8bc57e183c0f587c283e9c8193e6de3cf815a4448804d864fa",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6891.5300",
+              "top3_ask_qty": "4123.3500",
+              "imbalance": "0.2513127696352570341211161629"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:23.433373+00:00",
+                "received_at": "2026-10-17T05:54:23.446181+00:00",
+                "book_version": "82bc353dd0968c8bc57e183c0f587c283e9c8193e6de3cf815a4448804d864fa",
+                "direction": "UP",
+                "imbalance": "0.2513127696352570341211161629"
+              }
+            ]
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 0
+    },
+    {
+      "server_time": "2026-10-17T05:54:25.668010+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:22.374644+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "f7f0b5813bbe1a86f7bce76d2382af70dfcc66c06cbac9901f041ce70593ad72",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "2386.3900",
+              "top3_ask_qty": "4225.7300",
+              "imbalance": "-0.2781770445787432774964761680"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:22.104641+00:00",
+                "received_at": "2026-10-17T05:54:22.374600+00:00",
+                "book_version": "f7f0b5813bbe1a86f7bce76d2382af70dfcc66c06cbac9901f041ce70593ad72",
+                "direction": "DOWN",
+                "imbalance": "-0.2781770445787432774964761680"
+              }
+            ]
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:23.446226+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "82bc353dd0968c8bc57e183c0f587c283e9c8193e6de3cf815a4448804d864fa",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6891.5300",
+              "top3_ask_qty": "4123.3500",
+              "imbalance": "0.2513127696352570341211161629"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:23.433373+00:00",
+                "received_at": "2026-10-17T05:54:23.446181+00:00",
+                "book_version": "82bc353dd0968c8bc57e183c0f587c283e9c8193e6de3cf815a4448804d864fa",
+                "direction": "UP",
+                "imbalance": "0.2513127696352570341211161629"
+              }
+            ]
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 10
+    },
+    {
+      "server_time": "2026-10-17T05:54:27.744934+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:22.374644+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "f7f0b5813bbe1a86f7bce76d2382af70dfcc66c06cbac9901f041ce70593ad72",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "2386.3900",
+              "top3_ask_qty": "4225.7300",
+              "imbalance": "-0.2781770445787432774964761680"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:22.104641+00:00",
+                "received_at": "2026-10-17T05:54:22.374600+00:00",
+                "book_version": "f7f0b5813bbe1a86f7bce76d2382af70dfcc66c06cbac9901f041ce70593ad72",
+                "direction": "DOWN",
+                "imbalance": "-0.2781770445787432774964761680"
+              }
+            ]
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:23.446226+00:00",
+            "action": "NO_TRADE",
+            "probability": null,
+            "validated": false,
+            "model_version": "book-imbalance-experiment-v1",
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "book_version": "82bc353dd0968c8bc57e183c0f587c283e9c8193e6de3cf815a4448804d864fa",
+            "reasons": [
+              "SIGNAL_WARMUP"
+            ],
+            "features": {
+              "spread": "0.0100",
+              "top3_bid_qty": "6891.5300",
+              "top3_ask_qty": "4123.3500",
+              "imbalance": "0.2513127696352570341211161629"
+            },
+            "observations": [
+              {
+                "source_at": "2026-10-17T05:54:23.433373+00:00",
+                "received_at": "2026-10-17T05:54:23.446181+00:00",
+                "book_version": "82bc353dd0968c8bc57e183c0f587c283e9c8193e6de3cf815a4448804d864fa",
+                "direction": "UP",
+                "imbalance": "0.2513127696352570341211161629"
+              }
+            ]
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 8
+    },
+    {
+      "server_time": "2026-10-17T05:54:29.815400+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:28.471679+00:00",
+            "action": "NO_TRADE",
+            "reasons": [
+              "VENUE_RATE_LIMITED"
+            ],
+            "validated": false,
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "error": "RateLimitCooldown"
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:28.489033+00:00",
+            "action": "NO_TRADE",
+            "reasons": [
+              "VENUE_RATE_LIMITED"
+            ],
+            "validated": false,
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "error": "RateLimitCooldown"
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 6
+    },
+    {
+      "server_time": "2026-10-17T05:54:31.882720+00:00",
+      "bot": {
+        "account_id": "book_experiment",
+        "status": "RUNNING",
+        "enabled": true,
+        "validated": false,
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "signals": {
+          "1h": {
+            "market_id": "1482721",
+            "at": "2026-10-17T05:54:28.471679+00:00",
+            "action": "NO_TRADE",
+            "reasons": [
+              "VENUE_RATE_LIMITED"
+            ],
+            "validated": false,
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "error": "RateLimitCooldown"
+          },
+          "15m": {
+            "market_id": "1493856",
+            "at": "2026-10-17T05:54:28.489033+00:00",
+            "action": "NO_TRADE",
+            "reasons": [
+              "VENUE_RATE_LIMITED"
+            ],
+            "validated": false,
+            "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+            "error": "RateLimitCooldown"
+          }
+        },
+        "halts": [],
+        "restart_requires_run": true
+      },
+      "rest_cooldown_seconds": 4
+    }
+  ],
+  "final_bot": {
+    "account_id": "book_experiment",
+    "status": "STOPPED",
+    "enabled": false,
+    "validated": false,
+    "strategy": "book-imbalance-experiment-v1",
+    "config": {
+      "version": "book-imbalance-experiment-v1",
+      "levels": 3,
+      "imbalance_threshold": "0.20",
+      "confirmations": 3,
+      "minimum_signal_span_seconds": 4,
+      "maximum_signal_span_seconds": 30,
+      "maximum_gap_seconds": 20,
+      "maximum_spread": "0.05",
+      "minimum_entry_price": "0.05",
+      "maximum_entry_price": "0.90",
+      "target_contracts": "1",
+      "scenario": "conservative",
+      "exit": "OFFICIAL_SETTLEMENT",
+      "attempts_per_market": 1,
+      "validated": false
+    },
+    "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+    "signals": {
+      "1h": {
+        "market_id": "1482721",
+        "at": "2026-10-17T05:54:33.509965+00:00",
+        "action": "NO_TRADE",
+        "reasons": [
+          "VENUE_RATE_LIMITED"
+        ],
+        "validated": false,
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "error": "RateLimitCooldown"
+      },
+      "15m": {
+        "market_id": "1493856",
+        "at": "2026-10-17T05:54:33.525748+00:00",
+        "action": "NO_TRADE",
+        "reasons": [
+          "VENUE_RATE_LIMITED"
+        ],
+        "validated": false,
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "error": "RateLimitCooldown"
+      }
+    },
+    "halts": [
+      "BOT_STOPPED"
+    ],
+    "restart_requires_run": true
+  },
+  "account": {
+    "id": "book_experiment",
+    "cash": "1000.00000000",
+    "reserved": "0E-8",
+    "equity": "1000.00000000",
+    "day_start_equity": "1000.00000000",
+    "positions": [],
+    "pending": [],
+    "halts": [
+      "BOT_STOPPED"
+    ],
+    "consecutive_losses": 0,
+    "cooldown_until": null
+  },
+  "orders": [],
+  "fills": []
+}

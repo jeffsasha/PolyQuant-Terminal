@@ -1,5 +1,5 @@
 from decimal import Decimal as D
-from .types import RiskDecision,DISCRETIONARY_IDS
+from .types import RiskDecision,DISCRETIONARY_IDS,BOT_ACCOUNT,BOT_STRATEGY
 from .fees import FeeModel
 
 
@@ -7,6 +7,8 @@ class RiskManager:
     def evaluate(self,intent,account,market,book,reference,config,at):
         reasons=[]; selling=intent.side.startswith('SELL_')
         discretionary=intent.account_id in DISCRETIONARY_IDS and intent.strategy=='manual_discretionary'
+        experiment=intent.account_id==BOT_ACCOUNT and intent.strategy==BOT_STRATEGY
+        independent=discretionary or experiment
         if intent.side not in ['BUY_UP','BUY_DOWN','SELL_UP','SELL_DOWN']: reasons.append('INVALID_SIDE')
         if not intent.qty.is_finite() or not intent.limit.is_finite() or intent.qty<=0 or not 0<intent.limit<1:
             return RiskDecision(False,('INVALID_ORDER_VALUES',))
@@ -25,7 +27,7 @@ class RiskManager:
             held=sum((p['qty'] for p in account.positions if p['market_id']==market.id and p['direction']==intent.side.split('_')[-1]),D('0'))
             if held<intent.qty: reasons.append('UNCOVERED_SALE')
         else:
-            if not discretionary:
+            if not independent:
                 if not reference.validated: reasons.append('REFERENCE_RECONCILIATION_FAILED')
                 elif not reference.source_at or not 0<=(at-reference.source_at).total_seconds()<=3: reasons.append('STALE_REFERENCE')
             if market.threshold is None: reasons.append('OFFICIAL_THRESHOLD_UNAVAILABLE')
@@ -41,7 +43,7 @@ class RiskManager:
             if committed+maximum_cost>account.equity*config.exposure_limit: reasons.append('COMBINED_EXPOSURE_LIMIT')
             cadence=sum((p['cost'] for p in positions if p.get('horizon')==market.horizon),D('0'))+sum((p['reserved'] for p in pending if p.get('horizon')==market.horizon),D('0'))
             if cadence+maximum_cost>account.equity*config.cadence_limit: reasons.append('CADENCE_EXPOSURE_LIMIT')
-            if discretionary: pass  # Human decision, never represented as a model/edge observation.
+            if independent: pass  # Discretionary or explicitly authorized heuristic; no calibrated edge claim.
             elif intent.probability is None or not intent.probability.is_finite() or not 0<=intent.probability<=1:
                 reasons.append('MODEL_PROBABILITY_UNAVAILABLE')
             elif intent.probability-intent.limit-fee/intent.qty<config.min_edge: reasons.append('INSUFFICIENT_NET_EDGE')

@@ -7,6 +7,7 @@ class FixtureRuntime:
     def __init__(self,store,settings): self.store=store; self.settings=settings; self.collection=True
     async def start(self): pass
     async def close(self): pass
+    def stop_bot(self):self.store.halt('book_experiment','BOT_STOPPED')
     def snapshot(self): return {'mode':'PAPER','reference_validated':False,'fixture':True}
 
 def client_for(store,monkeypatch):

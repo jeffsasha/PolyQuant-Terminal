@@ -5,7 +5,9 @@ import hashlib
 import json
 
 DISCRETIONARY_IDS=('manual','verification')
-ACCOUNT_IDS=DISCRETIONARY_IDS+('probability','momentum','book')
+BOT_ACCOUNT='book_experiment'
+BOT_STRATEGY='book-imbalance-experiment-v1'
+ACCOUNT_IDS=DISCRETIONARY_IDS+('probability','momentum','book',BOT_ACCOUNT)
 
 
 def decimal(value) -> Decimal:

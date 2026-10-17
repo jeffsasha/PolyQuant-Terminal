@@ -1,0 +1,67 @@
+{
+  "server_time": "2026-10-17T05:56:22.609620+00:00",
+  "mode": "PAPER",
+  "reference_validated": false,
+  "bot": {
+    "account_id": "book_experiment",
+    "status": "STOPPED",
+    "enabled": false,
+    "validated": false,
+    "strategy": "book-imbalance-experiment-v1",
+    "config": {
+      "version": "book-imbalance-experiment-v1",
+      "levels": 3,
+      "imbalance_threshold": "0.20",
+      "confirmations": 3,
+      "minimum_signal_span_seconds": 4,
+      "maximum_signal_span_seconds": 30,
+      "maximum_gap_seconds": 20,
+      "maximum_spread": "0.05",
+      "minimum_entry_price": "0.05",
+      "maximum_entry_price": "0.90",
+      "target_contracts": "1",
+      "scenario": "conservative",
+      "exit": "OFFICIAL_SETTLEMENT",
+      "attempts_per_market": 1,
+      "validated": false
+    },
+    "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+    "signals": {},
+    "halts": [
+      "RESTART_REQUIRES_RUN"
+    ],
+    "restart_requires_run": true
+  },
+  "copy_trading": {
+    "status": "UNAVAILABLE_US_IDENTIFIABLE_TRADE_FEED",
+    "enabled": false
+  },
+  "account": {
+    "id": "book_experiment",
+    "cash": "1000.00000000",
+    "reserved": "0E-8",
+    "equity": "1000.00000000",
+    "day_start_equity": "1000.00000000",
+    "positions": [],
+    "pending": [],
+    "halts": [
+      "RESTART_REQUIRES_RUN"
+    ],
+    "consecutive_losses": 0,
+    "cooldown_until": null
+  },
+  "orders": [],
+  "fills": [],
+  "markets": [
+    {
+      "id": "1493856",
+      "horizon": "15m",
+      "end": "2026-10-17T06:00:00+00:00"
+    },
+    {
+      "id": "1482721",
+      "horizon": "1h",
+      "end": "2026-10-17T06:00:00+00:00"
+    }
+  ]
+}
