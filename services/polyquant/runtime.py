@@ -3,6 +3,7 @@ from .venue.transport import RateLimitCooldown
 from datetime import timedelta
 from collections import deque
 from decimal import Decimal as D
+from .clock import next_risk_day_start
 from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot,ACCOUNT_IDS,MarketTerms,OrderIntent,BOT_ACCOUNT,AGGRESSIVE_ACCOUNT,BOT_PROFILES
 from .venue.us import USDataAdapter
 from .reference import ReferenceProvider,SpotProvider
@@ -220,7 +221,9 @@ class Runtime:
                 'signals':self.bot_signals,'halts':account.halts,'restart_requires_run':True,'profiles':profiles,
                 'risk':config_for(self.bot_account_id,self.book_strategy.version),'risk_equity':account.equity,
                 'committed':committed_cost(account),'utilization':committed_cost(account)/account.equity if account.equity>0 else None,
-                'valuation':'CONSERVATIVE_NET_LIQUIDATION_OR_ZERO_RISK_BOUND'}
+                'valuation':'CONSERVATIVE_NET_LIQUIDATION_OR_ZERO_RISK_BOUND',
+                # A same-day daily-loss lock cannot be cleared by RUN; entries can resume after this time.
+                'risk_day_ends_at':next_risk_day_start(utcnow())}
     def run_bot(self,account_id=AGGRESSIVE_ACCOUNT):
         if account_id not in BOT_PROFILES:raise ValueError('Unknown automation profile')
         if not self.collection or self.recorder.halted:raise ValueError('Resolve collection/persistence fault before RUN')

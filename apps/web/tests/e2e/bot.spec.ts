@@ -9,8 +9,18 @@ test('RUN and STOP control the isolated experimental bot without manual tickets'
  await expect(page.getByTestId('risk-per-trade')).toContainText('40%');
  await expect(page.getByRole('button',{name:'Place paper order',exact:true})).toHaveCount(0);
  await expect(page.getByRole('button',{name:'Inspect costs & risk →'})).toHaveCount(0);
- await page.getByRole('button',{name:'RUN',exact:true}).click();await expect(page.getByTestId('bot-status')).toHaveText('RUNNING');
- await page.getByRole('button',{name:'STOP',exact:true}).click();await expect(page.getByTestId('bot-status')).toHaveText('STOPPED');
+ const before=await (await page.request.get('/api/state')).json();
+ const locked=before.accounts.find((a:{id:string})=>a.id==='book_aggressive').halts.includes('DAILY_LOSS_LIMIT');
+ if(locked){
+  // A same-risk-day daily-loss lock must not be cleared by RUN, and the page must say why and until when.
+  await expect(page.getByTestId('daily-lock')).toContainText('RUN cannot clear it');
+  await page.getByRole('button',{name:'RUN',exact:true}).click();
+  await expect(page.getByRole('status')).toContainText('Daily loss lock cannot be cleared');
+  await expect(page.getByTestId('bot-status')).toHaveText('STOPPED');
+ }else{
+  await page.getByRole('button',{name:'RUN',exact:true}).click();await expect(page.getByTestId('bot-status')).toHaveText('RUNNING');
+  await page.getByRole('button',{name:'STOP',exact:true}).click();await expect(page.getByTestId('bot-status')).toHaveText('STOPPED');
+ }
  await page.reload();await expect(page.getByTestId('bot-status')).toHaveText('STOPPED');
  await page.getByLabel('Bot profile').selectOption('book_experiment');await expect(page.getByTestId('risk-per-trade')).toContainText('0.5%');
  await page.getByLabel('Bot profile').selectOption('book_aggressive');

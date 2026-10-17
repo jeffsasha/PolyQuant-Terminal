@@ -26,3 +26,15 @@ def test_typed_discovery_rejects_duration_mismatch():
     assert MarketTerms.from_raw(raw).horizon=='15m'
     raw['assetPriceTerms']['horizon']='1h'
     with pytest.raises(ValueError): MarketTerms.from_raw(raw)
+
+
+def test_next_risk_day_start_is_exactly_where_risk_day_id_changes():
+    from datetime import datetime, timedelta, timezone
+    from polyquant.clock import next_risk_day_start, risk_day_id
+    for text in ['2026-10-17T20:40:00', '2026-10-17T21:00:00', '2026-11-01T21:30:00', '2026-11-01T22:30:00',
+                 '2026-03-08T21:30:00']:
+        at = datetime.fromisoformat(text).replace(tzinfo=timezone.utc)
+        boundary = next_risk_day_start(at)
+        assert boundary > at
+        assert risk_day_id(boundary - timedelta(seconds=1)) == risk_day_id(at)
+        assert risk_day_id(boundary) != risk_day_id(at)
