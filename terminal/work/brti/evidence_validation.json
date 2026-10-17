@@ -1,0 +1,100 @@
+{
+  "raw_hashes_checked": 67,
+  "hash_failures": [],
+  "unique_resolved_binary_payoff_samples": {
+    "15m": [
+      "1000588",
+      "1000678",
+      "1244140",
+      "1483123"
+    ],
+    "1h": [
+      "1466843",
+      "1467903",
+      "1471756"
+    ]
+  },
+  "anchor_relations": [
+    {
+      "id": "1483123",
+      "horizon": "15m",
+      "status": "MARKET_STATUS_RESOLVED",
+      "open_anchor_is_T_minus_1": true,
+      "open_anchor_is_T": false,
+      "close_anchor_is_T_minus_1": true,
+      "close_anchor_is_T": false
+    },
+    {
+      "id": "1000588",
+      "horizon": "15m",
+      "status": "MARKET_STATUS_RESOLVED",
+      "open_anchor_is_T_minus_1": false,
+      "open_anchor_is_T": true,
+      "close_anchor_is_T_minus_1": false,
+      "close_anchor_is_T": true
+    },
+    {
+      "id": "1000678",
+      "horizon": "15m",
+      "status": "MARKET_STATUS_RESOLVED",
+      "open_anchor_is_T_minus_1": false,
+      "open_anchor_is_T": true,
+      "close_anchor_is_T_minus_1": false,
+      "close_anchor_is_T": true
+    },
+    {
+      "id": "1467903",
+      "horizon": "1h",
+      "status": "MARKET_STATUS_RESOLVED",
+      "open_anchor_is_T_minus_1": true,
+      "open_anchor_is_T": false,
+      "close_anchor_is_T_minus_1": true,
+      "close_anchor_is_T": false
+    },
+    {
+      "id": "1000736",
+      "horizon": "1h",
+      "status": "MARKET_STATUS_RESOLVED",
+      "open_anchor_is_T_minus_1": false,
+      "open_anchor_is_T": true,
+      "close_anchor_is_T_minus_1": false,
+      "close_anchor_is_T": true
+    },
+    {
+      "id": "1244140",
+      "horizon": "15m",
+      "status": "MARKET_STATUS_RESOLVED",
+      "open_anchor_is_T_minus_1": true,
+      "open_anchor_is_T": false,
+      "close_anchor_is_T_minus_1": true,
+      "close_anchor_is_T": false
+    },
+    {
+      "id": "1466843",
+      "horizon": "1h",
+      "status": "MARKET_STATUS_RESOLVED",
+      "open_anchor_is_T_minus_1": true,
+      "open_anchor_is_T": false,
+      "close_anchor_is_T_minus_1": true,
+      "close_anchor_is_T": false
+    },
+    {
+      "id": "1467903",
+      "horizon": "1h",
+      "status": "MARKET_STATUS_RESOLVED",
+      "open_anchor_is_T_minus_1": true,
+      "open_anchor_is_T": false,
+      "close_anchor_is_T_minus_1": true,
+      "close_anchor_is_T": false
+    },
+    {
+      "id": "1471756",
+      "horizon": "1h",
+      "status": "MARKET_STATUS_RESOLVED",
+      "open_anchor_is_T_minus_1": true,
+      "open_anchor_is_T": false,
+      "close_anchor_is_T_minus_1": true,
+      "close_anchor_is_T": false
+    }
+  ]
+}

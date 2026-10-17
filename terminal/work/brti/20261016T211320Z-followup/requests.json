@@ -1,0 +1,304 @@
+[
+  {
+    "url": "https://gateway.polymarket.us/v1/markets?closed=true&categories=crypto&includeHidden=true&limit=100&offset=0&endDateMin=2026-10-16T18%3A00%3A00Z&endDateMax=2026-10-16T21%3A30%3A00Z",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:20.463488+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:20 GMT",
+      "content-type": "application/json",
+      "last-modified": "Fri, 16 Oct 2026 21:13:20 GMT",
+      "cache-control": "public, max-age=30",
+      "cf-cache-status": "MISS",
+      "cf-ray": "a4ba11202ad1a715-DFW"
+    },
+    "sha256": "40e87e1c737d42a1f9264d02c1e77c7a63f9ad6404f30b1a3ef6137cefd1c933",
+    "bytes": 325899,
+    "body_file": "001.body",
+    "received_at": "2026-10-16T21:13:20.842372+00:00",
+    "elapsed_seconds": 0.379013
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/markets?closed=true&categories=crypto&includeHidden=true&limit=100&offset=100&endDateMin=2026-10-16T18%3A00%3A00Z&endDateMax=2026-10-16T21%3A30%3A00Z",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:20.843292+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:21 GMT",
+      "content-type": "application/json",
+      "last-modified": "Fri, 16 Oct 2026 21:13:21 GMT",
+      "cache-control": "public, max-age=30",
+      "cf-cache-status": "MISS",
+      "cf-ray": "a4ba11222cb6921a-DFW"
+    },
+    "sha256": "8f165537f7c8323307addff8638a3aef7b0b258a7365bd424b329cf3371fbb45",
+    "bytes": 326476,
+    "body_file": "002.body",
+    "received_at": "2026-10-16T21:13:21.208073+00:00",
+    "elapsed_seconds": 0.364798
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/markets?closed=true&categories=crypto&includeHidden=true&limit=100&offset=200&endDateMin=2026-10-16T18%3A00%3A00Z&endDateMax=2026-10-16T21%3A30%3A00Z",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:21.208742+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:21 GMT",
+      "content-type": "application/json",
+      "last-modified": "Fri, 16 Oct 2026 21:13:21 GMT",
+      "cache-control": "public, max-age=30",
+      "cf-cache-status": "MISS",
+      "cf-ray": "a4ba11247802a91e-DFW"
+    },
+    "sha256": "1d26dab444b20761784464cc896ad47f2c0733c52d5318cdc36616414b201f27",
+    "bytes": 333501,
+    "body_file": "003.body",
+    "received_at": "2026-10-16T21:13:21.441563+00:00",
+    "elapsed_seconds": 0.232826
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/markets?closed=true&categories=crypto&includeHidden=true&limit=100&offset=300&endDateMin=2026-10-16T18%3A00%3A00Z&endDateMax=2026-10-16T21%3A30%3A00Z",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:21.441824+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:21 GMT",
+      "content-type": "application/json",
+      "last-modified": "Fri, 16 Oct 2026 21:13:21 GMT",
+      "cache-control": "public, max-age=30",
+      "cf-cache-status": "MISS",
+      "cf-ray": "a4ba1125dda7f08c-DFW"
+    },
+    "sha256": "b208d6f683582173dbbc069ce8b9cedfe91e70d4e6912e2ae020ce7d665515ed",
+    "bytes": 332662,
+    "body_file": "004.body",
+    "received_at": "2026-10-16T21:13:21.714814+00:00",
+    "elapsed_seconds": 0.272999
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/market/id/1466843",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:21.715062+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:21 GMT",
+      "content-type": "application/json",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4ba11279ebff070-DFW"
+    },
+    "sha256": "90266cbc54f18f64812af8eb3c5f04ed9e379b57d9be794d4fd882ddee7b6ead",
+    "bytes": 3287,
+    "body_file": "005.body",
+    "received_at": "2026-10-16T21:13:21.838563+00:00",
+    "elapsed_seconds": 0.123513
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/asset-prices/history?assets=crypto%3Abtc&from=1792169940&to=1792170000&bucket=ASSET_PRICE_BUCKET_1S",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:21.838916+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "content-type": "application/json",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4ba11285af593d5-DFW"
+    },
+    "sha256": "b00dead7be8d72fc021ed6b0ce1f8bb7856e44479e3273d2837daea2f6a011bb",
+    "bytes": 7372,
+    "body_file": "006.body",
+    "received_at": "2026-10-16T21:13:21.955842+00:00",
+    "elapsed_seconds": 0.11695
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/asset-prices/history?assets=crypto%3Abtc&from=1792173540&to=1792173600&bucket=ASSET_PRICE_BUCKET_1S",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:21.956920+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "content-type": "application/json",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4ba112919a9a5fa-DFW"
+    },
+    "sha256": "9833a2b47053fb63037b069914e32c44b9af40f270e1184c74d197841e52aa3a",
+    "bytes": 7372,
+    "body_file": "007.body",
+    "received_at": "2026-10-16T21:13:22.109850+00:00",
+    "elapsed_seconds": 0.152949
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/markets/cpc-btc-updown-1h-2026-10-16-1700z/settlement",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:22.110881+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "content-type": "application/json",
+      "last-modified": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "cache-control": "public, max-age=30",
+      "cf-cache-status": "EXPIRED",
+      "cf-ray": "a4ba112a1fbf9b3e-DFW"
+    },
+    "sha256": "a696d7d44191a91c7d1f34830ee18ea6311f596a46c0843c4815f62ddc94111a",
+    "bytes": 60,
+    "body_file": "008.body",
+    "received_at": "2026-10-16T21:13:22.222261+00:00",
+    "elapsed_seconds": 0.111396
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/market/id/1467903",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:22.223217+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "content-type": "application/json",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4ba112acd0d504f-DFW"
+    },
+    "sha256": "48b1769017cd283d4fb2777d38b15c30042176fce695d561b344da26aadbdb4f",
+    "bytes": 3287,
+    "body_file": "009.body",
+    "received_at": "2026-10-16T21:13:22.340719+00:00",
+    "elapsed_seconds": 0.117533
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/asset-prices/history?assets=crypto%3Abtc&from=1792173540&to=1792173600&bucket=ASSET_PRICE_BUCKET_1S",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:22.341796+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "content-type": "application/json",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4ba112b8f2ef056-DFW"
+    },
+    "sha256": "9833a2b47053fb63037b069914e32c44b9af40f270e1184c74d197841e52aa3a",
+    "bytes": 7372,
+    "body_file": "010.body",
+    "received_at": "2026-10-16T21:13:22.459613+00:00",
+    "elapsed_seconds": 0.117807
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/asset-prices/history?assets=crypto%3Abtc&from=1792177140&to=1792177200&bucket=ASSET_PRICE_BUCKET_1S",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:22.460681+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "content-type": "application/json",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4ba112c3cd95060-DFW"
+    },
+    "sha256": "dc4de3e6aa5944a5923b465cd05988faffc7c4176f128a25f69da419c040f62a",
+    "bytes": 7372,
+    "body_file": "011.body",
+    "received_at": "2026-10-16T21:13:22.632548+00:00",
+    "elapsed_seconds": 0.171865
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/markets/cpc-btc-updown-1h-2026-10-16-1800z/settlement",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:22.632887+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "content-type": "application/json",
+      "last-modified": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "cache-control": "public, max-age=30",
+      "cf-cache-status": "EXPIRED",
+      "cf-ray": "a4ba112d4e396c73-DFW"
+    },
+    "sha256": "0600eaf9195ec857ddcbeda09a1377070b0f76eac3aa1dddc45f9e1e150d818f",
+    "bytes": 61,
+    "body_file": "012.body",
+    "received_at": "2026-10-16T21:13:22.739471+00:00",
+    "elapsed_seconds": 0.10659
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/market/id/1471756",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:22.739876+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:22 GMT",
+      "content-type": "application/json",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4ba112df8a00ab5-DFW"
+    },
+    "sha256": "e15f7a434842375838abd29fe41dda4da6871e33526cf54e8c5db0ba386353d2",
+    "bytes": 3287,
+    "body_file": "013.body",
+    "received_at": "2026-10-16T21:13:22.856474+00:00",
+    "elapsed_seconds": 0.116609
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/asset-prices/history?assets=crypto%3Abtc&from=1792177140&to=1792177200&bucket=ASSET_PRICE_BUCKET_1S",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:22.857195+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:23 GMT",
+      "content-type": "application/json",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4ba112ebf1b2c85-DFW"
+    },
+    "sha256": "dc4de3e6aa5944a5923b465cd05988faffc7c4176f128a25f69da419c040f62a",
+    "bytes": 7372,
+    "body_file": "014.body",
+    "received_at": "2026-10-16T21:13:22.969037+00:00",
+    "elapsed_seconds": 0.111874
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/asset-prices/history?assets=crypto%3Abtc&from=1792180740&to=1792180800&bucket=ASSET_PRICE_BUCKET_1S",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:22.970701+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:23 GMT",
+      "content-type": "application/json",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a4ba112f684cf0b4-DFW"
+    },
+    "sha256": "a12230f93741adead915c4c2e153da8c5b0067e522ec8663010d28efbaa6c9bd",
+    "bytes": 7001,
+    "body_file": "015.body",
+    "received_at": "2026-10-16T21:13:23.159073+00:00",
+    "elapsed_seconds": 0.188386
+  },
+  {
+    "url": "https://gateway.polymarket.us/v1/markets/cpc-btc-updown-1h-2026-10-16-1900z/settlement",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:13:23.160423+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:13:23 GMT",
+      "content-type": "application/json",
+      "last-modified": "Fri, 16 Oct 2026 21:13:23 GMT",
+      "cache-control": "public, max-age=30",
+      "cf-cache-status": "EXPIRED",
+      "cf-ray": "a4ba1130a9165473-DFW"
+    },
+    "sha256": "991aad333aa41e947f79a0d117c6b2808bf87810c6972035f87da38c482b5324",
+    "bytes": 60,
+    "body_file": "016.body",
+    "received_at": "2026-10-16T21:13:23.332084+00:00",
+    "elapsed_seconds": 0.171676
+  }
+]

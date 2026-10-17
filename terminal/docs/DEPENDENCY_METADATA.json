@@ -1,0 +1,428 @@
+[
+  {
+    "registry": "pypi",
+    "name": "fastapi",
+    "version": "0.143.3",
+    "requires_python": ">=3.10",
+    "license": "MIT",
+    "project_urls": {
+      "Changelog": "https://fastapi.tiangolo.com/release-notes/",
+      "Documentation": "https://fastapi.tiangolo.com/",
+      "Homepage": "https://github.com/fastapi/fastapi",
+      "Issues": "https://github.com/fastapi/fastapi/issues",
+      "Repository": "https://github.com/fastapi/fastapi"
+    },
+    "dependencies": [
+      "starlette>=0.46.0",
+      "pydantic>=2.9.0",
+      "typing-extensions>=4.8.0",
+      "typing-inspection>=0.4.2",
+      "annotated-doc>=0.0.2",
+      "opentelemetry-api>=1.44.0",
+      "opentelemetry-sdk>=1.44.0; extra == \"opentelemetry\"",
+      "opentelemetry-exporter-otlp-proto-http>=1.44.0; extra == \"opentelemetry\"",
+      "opentelemetry-sdk>=1.44.0; extra == \"standard\"",
+      "opentelemetry-exporter-otlp-proto-http>=1.44.0; extra == \"standard\"",
+      "fastapi-cli[standard]>=0.0.32; extra == \"standard\"",
+      "fastar>=0.9.0; extra == \"standard\"",
+      "httpx<1.0.0,>=0.23.0; extra == \"standard\"",
+      "jinja2>=3.1.5; extra == \"standard\"",
+      "python-multipart>=0.0.18; extra == \"standard\"",
+      "email-validator>=2.0.0; extra == \"standard\"",
+      "uvicorn[standard]>=0.12.0; extra == \"standard\"",
+      "pydantic-settings>=2.0.0; extra == \"standard\"",
+      "pydantic-extra-types>=2.0.0; extra == \"standard\"",
+      "opentelemetry-sdk>=1.44.0; extra == \"standard-no-fastapi-cloud-cli\"",
+      "opentelemetry-exporter-otlp-proto-http>=1.44.0; extra == \"standard-no-fastapi-cloud-cli\"",
+      "fastapi-cli[standard-no-fastapi-cloud-cli]>=0.0.32; extra == \"standard-no-fastapi-cloud-cli\"",
+      "httpx<1.0.0,>=0.23.0; extra == \"standard-no-fastapi-cloud-cli\"",
+      "jinja2>=3.1.5; extra == \"standard-no-fastapi-cloud-cli\"",
+      "python-multipart>=0.0.18; extra == \"standard-no-fastapi-cloud-cli\"",
+      "email-validator>=2.0.0; extra == \"standard-no-fastapi-cloud-cli\"",
+      "uvicorn[standard]>=0.12.0; extra == \"standard-no-fastapi-cloud-cli\"",
+      "pydantic-settings>=2.0.0; extra == \"standard-no-fastapi-cloud-cli\"",
+      "pydantic-extra-types>=2.0.0; extra == \"standard-no-fastapi-cloud-cli\"",
+      "opentelemetry-sdk>=1.44.0; extra == \"all\"",
+      "opentelemetry-exporter-otlp-proto-http>=1.44.0; extra == \"all\"",
+      "fastapi-cli[standard]>=0.0.32; extra == \"all\"",
+      "httpx<1.0.0,>=0.23.0; extra == \"all\"",
+      "jinja2>=3.1.5; extra == \"all\"",
+      "python-multipart>=0.0.18; extra == \"all\"",
+      "itsdangerous>=1.1.0; extra == \"all\"",
+      "pyyaml>=5.3.1; extra == \"all\"",
+      "email-validator>=2.0.0; extra == \"all\"",
+      "uvicorn[standard]>=0.12.0; extra == \"all\"",
+      "pydantic-settings>=2.0.0; extra == \"all\"",
+      "pydantic-extra-types>=2.0.0; extra == \"all\""
+    ]
+  },
+  {
+    "registry": "pypi",
+    "name": "uvicorn",
+    "version": "0.54.0",
+    "requires_python": ">=3.10",
+    "license": "BSD-3-Clause",
+    "project_urls": {
+      "Changelog": "https://uvicorn.dev/release-notes",
+      "Funding": "https://github.com/sponsors/Kludex",
+      "Homepage": "https://uvicorn.dev/",
+      "Source": "https://github.com/Kludex/uvicorn"
+    },
+    "dependencies": [
+      "click>=7.0",
+      "h11>=0.8",
+      "typing-extensions>=4.0; python_version < \"3.11\"",
+      "httptools>=0.8.0; extra == \"standard\"",
+      "python-dotenv>=0.13; extra == \"standard\"",
+      "pyyaml>=5.1; extra == \"standard\"",
+      "uvloop>=0.15.1; (sys_platform != \"win32\" and (sys_platform != \"cygwin\" and platform_python_implementation != \"PyPy\")) and extra == \"standard\"",
+      "watchfiles>=0.20; extra == \"standard\"",
+      "websockets>=13.0; extra == \"standard\""
+    ]
+  },
+  {
+    "registry": "pypi",
+    "name": "psycopg",
+    "version": "3.3.6",
+    "requires_python": ">=3.10",
+    "license": "LGPL-3.0-only",
+    "project_urls": {
+      "Changes": "https://psycopg.org/psycopg3/docs/news.html",
+      "Code": "https://github.com/psycopg/psycopg",
+      "Documentation": "https://psycopg.org/psycopg3/docs/",
+      "Funding": "https://github.com/sponsors/dvarrazzo",
+      "Homepage": "https://psycopg.org/",
+      "Issue Tracker": "https://github.com/psycopg/psycopg/issues"
+    },
+    "dependencies": [
+      "typing-extensions>=4.6; python_version < \"3.13\"",
+      "tzdata; sys_platform == \"win32\"",
+      "psycopg-c==3.3.6; implementation_name != \"pypy\" and extra == \"c\"",
+      "psycopg-binary==3.3.6; implementation_name != \"pypy\" and extra == \"binary\"",
+      "psycopg-pool; extra == \"pool\"",
+      "anyio>=4.0; extra == \"test\"",
+      "mypy>=2.1.0; implementation_name != \"pypy\" and extra == \"test\"",
+      "pproxy>=2.7; extra == \"test\"",
+      "pytest>=6.2.5; extra == \"test\"",
+      "pytest-cov>=3.0; extra == \"test\"",
+      "pytest-randomly>=3.5; extra == \"test\"",
+      "ast-comments>=1.1.2; extra == \"dev\"",
+      "black>=26.1.0; extra == \"dev\"",
+      "codespell>=2.2; extra == \"dev\"",
+      "cython-lint>=0.21; extra == \"dev\"",
+      "dnspython>=2.1; extra == \"dev\"",
+      "flake8>=4.0; extra == \"dev\"",
+      "isort[colors]>=6.0; extra == \"dev\"",
+      "isort-psycopg>=0.0.3; extra == \"dev\"",
+      "mypy>=2.1.0; extra == \"dev\"",
+      "pre-commit>=4.0.1; extra == \"dev\"",
+      "types-setuptools>=57.4; extra == \"dev\"",
+      "types-shapely>=2.0; extra == \"dev\"",
+      "wheel>=0.37; extra == \"dev\"",
+      "Sphinx>=9.1; extra == \"docs\"",
+      "furo==2025.12.19; extra == \"docs\"",
+      "sphinx-autobuild>=2025.8.25; extra == \"docs\"",
+      "sphinx-autodoc-typehints>=3.10.2; extra == \"docs\""
+    ]
+  },
+  {
+    "registry": "pypi",
+    "name": "httpx",
+    "version": "0.28.1",
+    "requires_python": ">=3.8",
+    "license": "BSD-3-Clause",
+    "project_urls": {
+      "Changelog": "https://github.com/encode/httpx/blob/master/CHANGELOG.md",
+      "Documentation": "https://www.python-httpx.org",
+      "Homepage": "https://github.com/encode/httpx",
+      "Source": "https://github.com/encode/httpx"
+    },
+    "dependencies": [
+      "anyio",
+      "certifi",
+      "httpcore==1.*",
+      "idna",
+      "brotli; platform_python_implementation == \"CPython\" and extra == \"brotli\"",
+      "brotlicffi; platform_python_implementation != \"CPython\" and extra == \"brotli\"",
+      "click==8.*; extra == \"cli\"",
+      "pygments==2.*; extra == \"cli\"",
+      "rich<14,>=10; extra == \"cli\"",
+      "h2<5,>=3; extra == \"http2\"",
+      "socksio==1.*; extra == \"socks\"",
+      "zstandard>=0.18.0; extra == \"zstd\""
+    ]
+  },
+  {
+    "registry": "pypi",
+    "name": "polymarket-us",
+    "version": "2.4.1",
+    "requires_python": ">=3.10",
+    "license": "MIT",
+    "project_urls": {
+      "Documentation": "https://docs.polymarket.us",
+      "Homepage": "https://docs.polymarket.us",
+      "Repository": "https://github.com/Polymarket/polymarket-us-python"
+    },
+    "dependencies": [
+      "httpx>=0.27.0",
+      "pynacl>=1.5.0",
+      "websockets>=13.0",
+      "mypy>=1.10.0; extra == \"dev\"",
+      "pytest-asyncio>=0.23.0; extra == \"dev\"",
+      "pytest-httpx>=0.30.0; extra == \"dev\"",
+      "pytest>=8.0.0; extra == \"dev\"",
+      "ruff>=0.4.0; extra == \"dev\""
+    ]
+  },
+  {
+    "registry": "pypi",
+    "name": "pytest",
+    "version": "9.1.1",
+    "requires_python": ">=3.10",
+    "license": "MIT",
+    "project_urls": {
+      "Changelog": "https://docs.pytest.org/en/stable/changelog.html",
+      "Contact": "https://docs.pytest.org/en/stable/contact.html",
+      "Funding": "https://docs.pytest.org/en/stable/sponsor.html",
+      "Homepage": "https://docs.pytest.org/en/latest/",
+      "Source": "https://github.com/pytest-dev/pytest",
+      "Tracker": "https://github.com/pytest-dev/pytest/issues"
+    },
+    "dependencies": [
+      "colorama>=0.4; sys_platform == \"win32\"",
+      "exceptiongroup>=1; python_version < \"3.11\"",
+      "iniconfig>=1.0.1",
+      "packaging>=22",
+      "pluggy<2,>=1.5",
+      "pygments>=2.7.2",
+      "tomli>=1; python_version < \"3.11\"",
+      "argcomplete; extra == \"dev\"",
+      "attrs>=19.2; extra == \"dev\"",
+      "hypothesis>=3.56; extra == \"dev\"",
+      "mock; extra == \"dev\"",
+      "requests; extra == \"dev\"",
+      "setuptools; extra == \"dev\"",
+      "xmlschema; extra == \"dev\""
+    ]
+  },
+  {
+    "registry": "pypi",
+    "name": "pip-tools",
+    "version": "7.6.2",
+    "requires_python": ">=3.9",
+    "license": "BSD-3-Clause",
+    "project_urls": {
+      "changelog": "https://github.com/jazzband/pip-tools/releases",
+      "documentation": "https://pip-tools.readthedocs.io/en/latest/",
+      "homepage": "https://github.com/jazzband/pip-tools/",
+      "repository": "https://github.com/jazzband/pip-tools"
+    },
+    "dependencies": [
+      "build>=1.0.0",
+      "click>=8",
+      "pip>=22.2",
+      "pyproject_hooks",
+      "typing_extensions>=4.6.0; python_version < \"3.11\"",
+      "tomli; python_version < \"3.11\"",
+      "setuptools",
+      "wheel",
+      "pytest>=7.2.0; extra == \"testing\"",
+      "pytest-mock>=3.15.1; extra == \"testing\"",
+      "pytest-rerunfailures; extra == \"testing\"",
+      "pytest-xdist; extra == \"testing\"",
+      "tomli-w; extra == \"testing\"",
+      "flit_core<4,>=2; extra == \"testing\"",
+      "poetry_core>=1.0.0; extra == \"testing\"",
+      "covdefaults; extra == \"coverage\"",
+      "pytest-cov; extra == \"coverage\""
+    ]
+  },
+  {
+    "registry": "npm",
+    "name": "next",
+    "version": "16.4.2",
+    "license": "MIT",
+    "repository": {
+      "url": "git+https://github.com/vercel/next.js.git",
+      "type": "git"
+    },
+    "engines": {
+      "node": ">=20.9.0"
+    },
+    "dependencies": {
+      "postcss": "8.5.23",
+      "@next/env": "16.4.2",
+      "styled-jsx": "5.1.6",
+      "@swc/helpers": "0.5.23",
+      "caniuse-lite": "^1.0.30001579",
+      "baseline-browser-mapping": "^2.9.19"
+    },
+    "integrity": "sha512-r+oBJojfefUjOiWkBhXgLS+igxX/7BWyK59uHnyOyplMSLtBZ+QLP3okrdYTbrfrbrmNTVWLBPaHDX9KRaIt3w=="
+  },
+  {
+    "registry": "npm",
+    "name": "react",
+    "version": "19.3.1",
+    "license": "MIT",
+    "repository": {
+      "url": "git+https://github.com/react/react.git",
+      "type": "git",
+      "directory": "packages/react"
+    },
+    "engines": {
+      "node": ">=0.10.0"
+    },
+    "dependencies": null,
+    "integrity": "sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw=="
+  },
+  {
+    "registry": "npm",
+    "name": "react-dom",
+    "version": "19.3.1",
+    "license": "MIT",
+    "repository": {
+      "url": "git+https://github.com/react/react.git",
+      "type": "git",
+      "directory": "packages/react-dom"
+    },
+    "engines": null,
+    "dependencies": {
+      "scheduler": "^0.28.0"
+    },
+    "integrity": "sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ=="
+  },
+  {
+    "registry": "npm",
+    "name": "typescript",
+    "version": "7.0.2",
+    "license": "Apache-2.0",
+    "repository": {
+      "url": "git+https://github.com/microsoft/TypeScript.git",
+      "type": "git"
+    },
+    "engines": {
+      "node": ">=16.20.0"
+    },
+    "dependencies": {
+      "@typescript/typescript-aix-ppc64": "7.0.2",
+      "@typescript/typescript-linux-arm": "7.0.2",
+      "@typescript/typescript-linux-x64": "7.0.2",
+      "@typescript/typescript-sunos-x64": "7.0.2",
+      "@typescript/typescript-win32-x64": "7.0.2",
+      "@typescript/typescript-darwin-x64": "7.0.2",
+      "@typescript/typescript-netbsd-x64": "7.0.2",
+      "@typescript/typescript-freebsd-x64": "7.0.2",
+      "@typescript/typescript-linux-arm64": "7.0.2",
+      "@typescript/typescript-linux-ppc64": "7.0.2",
+      "@typescript/typescript-linux-s390x": "7.0.2",
+      "@typescript/typescript-openbsd-x64": "7.0.2",
+      "@typescript/typescript-win32-arm64": "7.0.2",
+      "@typescript/typescript-darwin-arm64": "7.0.2",
+      "@typescript/typescript-netbsd-arm64": "7.0.2",
+      "@typescript/typescript-freebsd-arm64": "7.0.2",
+      "@typescript/typescript-linux-loong64": "7.0.2",
+      "@typescript/typescript-linux-riscv64": "7.0.2",
+      "@typescript/typescript-openbsd-arm64": "7.0.2",
+      "@typescript/typescript-linux-mips64el": "7.0.2"
+    },
+    "integrity": "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="
+  },
+  {
+    "registry": "npm",
+    "name": "lightweight-charts",
+    "version": "5.2.1",
+    "license": "Apache-2.0",
+    "repository": {
+      "url": "git+https://github.com/tradingview/lightweight-charts.git",
+      "type": "git"
+    },
+    "engines": null,
+    "dependencies": {
+      "fancy-canvas": "2.1.0"
+    },
+    "integrity": "sha512-IVwoK1RLFiLPubaKIjNbtjWLnpPMqiABSrTay6whmNa8L1+19292VtHJ+BWyPUuLCwF0tcQlhEWd1CLB2a1nsQ=="
+  },
+  {
+    "registry": "npm",
+    "name": "tailwindcss",
+    "version": "4.3.3",
+    "license": "MIT",
+    "repository": {
+      "url": "https://github.com/tailwindlabs/tailwindcss.git",
+      "type": "git",
+      "directory": "packages/tailwindcss"
+    },
+    "engines": null,
+    "dependencies": null,
+    "integrity": "sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ=="
+  },
+  {
+    "registry": "npm",
+    "name": "@tailwindcss/postcss",
+    "version": "4.3.3",
+    "license": "MIT",
+    "repository": {
+      "url": "https://github.com/tailwindlabs/tailwindcss.git",
+      "type": "git",
+      "directory": "packages/@tailwindcss-postcss"
+    },
+    "engines": null,
+    "dependencies": {
+      "postcss": "^8.5.16",
+      "tailwindcss": "4.3.3",
+      "@alloc/quick-lru": "^5.2.0",
+      "@tailwindcss/node": "4.3.3",
+      "@tailwindcss/oxide": "4.3.3"
+    },
+    "integrity": "sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg=="
+  },
+  {
+    "registry": "npm",
+    "name": "@types/react",
+    "version": "19.3.0",
+    "license": "MIT",
+    "repository": {
+      "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+      "type": "git",
+      "directory": "types/react"
+    },
+    "engines": null,
+    "dependencies": {
+      "csstype": "^3.2.2"
+    },
+    "integrity": "sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg=="
+  },
+  {
+    "registry": "npm",
+    "name": "@types/node",
+    "version": "26.6.5",
+    "license": "MIT",
+    "repository": {
+      "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+      "type": "git",
+      "directory": "types/node"
+    },
+    "engines": null,
+    "dependencies": {
+      "undici-types": "~8.9.0"
+    },
+    "integrity": "sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg=="
+  },
+  {
+    "registry": "npm",
+    "name": "@playwright/test",
+    "version": "1.64.1",
+    "license": "Apache-2.0",
+    "repository": {
+      "url": "git+https://github.com/microsoft/playwright.git",
+      "type": "git"
+    },
+    "engines": {
+      "node": ">=20"
+    },
+    "dependencies": {
+      "playwright": "1.64.1"
+    },
+    "integrity": "sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg=="
+  }
+]

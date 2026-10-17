@@ -1,0 +1,561 @@
+{
+  "observed_server_time": "2026-10-17T05:32:49.248446+00:00",
+  "mode": "PAPER",
+  "reference_validated": false,
+  "stream_status": "NOT_CONFIGURED",
+  "rest_cooldown_seconds": 0,
+  "accounts": [
+    {
+      "id": "manual",
+      "cash": "1000.52000000",
+      "reserved": "0E-8",
+      "equity": "1000.52000000",
+      "day_start_equity": "1000.00000000",
+      "positions": [],
+      "pending": [],
+      "halts": [],
+      "consecutive_losses": 0,
+      "cooldown_until": null
+    },
+    {
+      "id": "verification",
+      "cash": "999.54000000",
+      "reserved": "0E-8",
+      "equity": "999.54000000",
+      "day_start_equity": "1000.00000000",
+      "positions": [],
+      "pending": [],
+      "halts": [],
+      "consecutive_losses": 2,
+      "cooldown_until": null
+    },
+    {
+      "id": "probability",
+      "cash": "1000.00000000",
+      "reserved": "0E-8",
+      "equity": "1000.00000000",
+      "day_start_equity": "1000.00000000",
+      "positions": [],
+      "pending": [],
+      "halts": [
+        "MANUAL_STOP"
+      ],
+      "consecutive_losses": 0,
+      "cooldown_until": null
+    },
+    {
+      "id": "momentum",
+      "cash": "1000.00000000",
+      "reserved": "0E-8",
+      "equity": "1000.00000000",
+      "day_start_equity": "1000.00000000",
+      "positions": [],
+      "pending": [],
+      "halts": [],
+      "consecutive_losses": 0,
+      "cooldown_until": null
+    },
+    {
+      "id": "book",
+      "cash": "1000.00000000",
+      "reserved": "0E-8",
+      "equity": "1000.00000000",
+      "day_start_equity": "1000.00000000",
+      "positions": [],
+      "pending": [],
+      "halts": [],
+      "consecutive_losses": 0,
+      "cooldown_until": null
+    }
+  ],
+  "orders": [
+    {
+      "id": "1ab7416a-3d0a-4b5f-87f6-632769be7bb4",
+      "account_id": "verification",
+      "market_id": "1485828",
+      "side": "SELL_UP",
+      "qty": "1.00000000",
+      "limit_price": "0.01000000",
+      "reserved": "0E-8",
+      "status": "CANCELED",
+      "reason": "ARRIVAL_BOOK_REFRESH_FAILED",
+      "strategy": "manual_discretionary",
+      "scenario": "conservative",
+      "probability": null,
+      "created_at": "2026-10-16T16:41:53.800792-05:00",
+      "arrival_at": "2026-10-16T16:41:54.797551-05:00",
+      "book_version": "",
+      "horizon": "15m"
+    },
+    {
+      "id": "63c27fd6-2c5f-46e5-b642-108aa377429d",
+      "account_id": "verification",
+      "market_id": "1485828",
+      "side": "BUY_UP",
+      "qty": "1.00000000",
+      "limit_price": "0.95000000",
+      "reserved": "0E-8",
+      "status": "FILLED",
+      "reason": "",
+      "strategy": "manual_discretionary",
+      "scenario": "conservative",
+      "probability": null,
+      "created_at": "2026-10-16T16:41:46.626674-05:00",
+      "arrival_at": "2026-10-16T16:41:47.622441-05:00",
+      "book_version": "d2084e9fb3ff9ae7ff4f1b4978705328407bf0962bfb2efbd848f05b84244dce",
+      "horizon": "15m"
+    },
+    {
+      "id": "4c5503fc-a6f5-49e7-b5e9-168cc8dd9970",
+      "account_id": "verification",
+      "market_id": "1474570",
+      "side": "SELL_UP",
+      "qty": "1.00000000",
+      "limit_price": "0.01000000",
+      "reserved": "0E-8",
+      "status": "FILLED",
+      "reason": "",
+      "strategy": "manual_discretionary",
+      "scenario": "conservative",
+      "probability": null,
+      "created_at": "2026-10-16T16:41:29.426459-05:00",
+      "arrival_at": "2026-10-16T16:41:30.421946-05:00",
+      "book_version": "345712cc1e38ff827fd246520535e0356b37bcfeebf2518c71c32dc5f7c516c6",
+      "horizon": "1h"
+    },
+    {
+      "id": "674794ce-4c82-47d3-9da3-123a53532761",
+      "account_id": "verification",
+      "market_id": "1474570",
+      "side": "BUY_UP",
+      "qty": "1.00000000",
+      "limit_price": "0.95000000",
+      "reserved": "0E-8",
+      "status": "FILLED",
+      "reason": "",
+      "strategy": "manual_discretionary",
+      "scenario": "conservative",
+      "probability": null,
+      "created_at": "2026-10-16T16:41:13.490204-05:00",
+      "arrival_at": "2026-10-16T16:41:14.487512-05:00",
+      "book_version": "bf5d84662d2419ada95632d5e3f361cfd0ea0402a68536fa163bdd0491040a99",
+      "horizon": "1h"
+    },
+    {
+      "id": "1c262040-26b4-4d83-8661-889af4cd4dc0",
+      "account_id": "manual",
+      "market_id": "1474570",
+      "side": "BUY_DOWN",
+      "qty": "1.00000000",
+      "limit_price": "0.95000000",
+      "reserved": "0E-8",
+      "status": "FILLED",
+      "reason": "",
+      "strategy": "manual_discretionary",
+      "scenario": "conservative",
+      "probability": null,
+      "created_at": "2026-10-16T16:32:45.302282-05:00",
+      "arrival_at": "2026-10-16T16:32:46.297896-05:00",
+      "book_version": "edeaeb9feda26506f26f7e779dfa25e508e6cd388fed064aa02ddd743b80e69d",
+      "horizon": "1h"
+    }
+  ],
+  "fills": [
+    {
+      "id": "63c27fd6-2c5f-46e5-b642-108aa377429d:0",
+      "order_id": "63c27fd6-2c5f-46e5-b642-108aa377429d",
+      "price": "0.36000000",
+      "qty": "1.00000000",
+      "fee": "0.02000000",
+      "created_at": "2026-10-16T16:41:47.868320-05:00",
+      "account_id": "verification",
+      "market_id": "1485828",
+      "side": "BUY_UP",
+      "book_version": "d2084e9fb3ff9ae7ff4f1b4978705328407bf0962bfb2efbd848f05b84244dce",
+      "scenario": "conservative"
+    },
+    {
+      "id": "4c5503fc-a6f5-49e7-b5e9-168cc8dd9970:0",
+      "order_id": "4c5503fc-a6f5-49e7-b5e9-168cc8dd9970",
+      "price": "0.34000000",
+      "qty": "1.00000000",
+      "fee": "0.02000000",
+      "created_at": "2026-10-16T16:41:31.694153-05:00",
+      "account_id": "verification",
+      "market_id": "1474570",
+      "side": "SELL_UP",
+      "book_version": "345712cc1e38ff827fd246520535e0356b37bcfeebf2518c71c32dc5f7c516c6",
+      "scenario": "conservative"
+    },
+    {
+      "id": "674794ce-4c82-47d3-9da3-123a53532761:0",
+      "order_id": "674794ce-4c82-47d3-9da3-123a53532761",
+      "price": "0.38000000",
+      "qty": "1.00000000",
+      "fee": "0.02000000",
+      "created_at": "2026-10-16T16:41:14.677526-05:00",
+      "account_id": "verification",
+      "market_id": "1474570",
+      "side": "BUY_UP",
+      "book_version": "bf5d84662d2419ada95632d5e3f361cfd0ea0402a68536fa163bdd0491040a99",
+      "scenario": "conservative"
+    },
+    {
+      "id": "1c262040-26b4-4d83-8661-889af4cd4dc0:0",
+      "order_id": "1c262040-26b4-4d83-8661-889af4cd4dc0",
+      "price": "0.46000000",
+      "qty": "1.00000000",
+      "fee": "0.02000000",
+      "created_at": "2026-10-16T16:32:46.560977-05:00",
+      "account_id": "manual",
+      "market_id": "1474570",
+      "side": "BUY_DOWN",
+      "book_version": "edeaeb9feda26506f26f7e779dfa25e508e6cd388fed064aa02ddd743b80e69d",
+      "scenario": "conservative"
+    }
+  ],
+  "positions": [
+    {
+      "id": 3,
+      "account_id": "verification",
+      "market_id": "1485828",
+      "direction": "UP",
+      "qty": "1.00000000",
+      "cost": "0.36000000",
+      "fees": "0.02000000",
+      "status": "SETTLED",
+      "payout": "0E-8",
+      "horizon": "15m",
+      "settled_at": "2026-10-16T16:47:29.171661-05:00",
+      "realized_pnl": "0E-8"
+    },
+    {
+      "id": 2,
+      "account_id": "verification",
+      "market_id": "1474570",
+      "direction": "UP",
+      "qty": "0E-8",
+      "cost": "0E-8",
+      "fees": "0E-8",
+      "status": "CLOSED",
+      "payout": "0E-8",
+      "horizon": "1h",
+      "settled_at": "2026-10-16T16:41:31.695735-05:00",
+      "realized_pnl": "-0.08000000"
+    },
+    {
+      "id": 1,
+      "account_id": "manual",
+      "market_id": "1474570",
+      "direction": "DOWN",
+      "qty": "1.00000000",
+      "cost": "0.46000000",
+      "fees": "0.02000000",
+      "status": "SETTLED",
+      "payout": "1.00000000",
+      "horizon": "1h",
+      "settled_at": "2026-10-16T17:00:27.921376-05:00",
+      "realized_pnl": "0E-8"
+    }
+  ],
+  "settlements": [
+    {
+      "id": "0702a728de31fc3abe7ce21354a975a92f1f0d35fb3cf3d6572d191239d2542e",
+      "market_id": "1474570",
+      "outcome": "DOWN",
+      "payload": {
+        "final": true,
+        "provenance": {
+          "http": {
+            "detail": {
+              "date": "Fri, 16 Oct 2026 22:00:26 GMT",
+              "cf-cache-status": "DYNAMIC"
+            },
+            "payout": {
+              "date": "Fri, 16 Oct 2026 22:00:27 GMT",
+              "cf-cache-status": "MISS"
+            }
+          },
+          "detail": {
+            "market": {
+              "id": "1474570",
+              "slug": "cpc-btc-updown-1h-2026-10-16-2100z",
+              "tags": [],
+              "title": "BTC Up or Down Hourly",
+              "active": true,
+              "closed": true,
+              "hidden": false,
+              "status": "MARKET_STATUS_RESOLVED",
+              "endDate": "2026-10-16T22:00:14Z",
+              "archived": false,
+              "category": "crypto",
+              "outcomes": "[\"Yes\",\"No\"]",
+              "politics": null,
+              "question": "BTC Up or Down Hourly",
+              "subtitle": "Oct 16, 5:00PM - 6:00PM",
+              "createdAt": "2026-10-15T22:04:02Z",
+              "ep3Status": "EXPIRED",
+              "startDate": "2026-10-15T22:00:19Z",
+              "updatedAt": "2026-10-16T22:00:20Z",
+              "marketType": "",
+              "titleShort": "BTC Up or Down Hourly",
+              "description": "This market will settle to Up if the Bitcoin price at 6:00PM ET on Oct 16, 2026 is greater than or equal to the price at 5:00PM ET on Oct 16, 2026. Otherwise, this market will settle to Down. Outcome sourced from CF Benchmarks' Bitcoin Real-Time Index (BRTI), available at https://www.cfbenchmarks.com/data/indices/BRTI. The price at the beginning and at the end of the time range is determined the same way: in the last minute before each of those two times, 60 BRTI prices are collected. The official value for that time is the simple average of these prices, rounded to the nearest 2 decimal places. Please note that this market is about the price according to CF Benchmarks' BRTI, not according to other sources or spot markets.",
+              "ep3SyncedAt": "2026-10-16T22:00:16Z",
+              "marketSides": [
+                {
+                  "id": "2948618",
+                  "long": true,
+                  "price": "0",
+                  "marketId": 1474570,
+                  "tradable": true,
+                  "createdAt": "2026-10-15T22:04:02Z",
+                  "updatedAt": "2026-10-15T22:04:02Z",
+                  "identifier": "cpc-btc-updown-1h-2026-10-16-2100z",
+                  "description": "Yes",
+                  "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT"
+                },
+                {
+                  "id": "2948619",
+                  "long": false,
+                  "price": "1",
+                  "marketId": 1474570,
+                  "tradable": true,
+                  "createdAt": "2026-10-15T22:04:02Z",
+                  "updatedAt": "2026-10-15T22:04:02Z",
+                  "identifier": "cpc-btc-updown-1h-2026-10-16-2100z",
+                  "description": "No",
+                  "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT"
+                }
+              ],
+              "comboEnabled": false,
+              "gameStartTime": "2026-10-16T21:00:00Z",
+              "outcomePrices": "[\"0\",\"1\"]",
+              "feeCoefficient": "0.0695",
+              "assetPriceTerms": {
+                "asset": {
+                  "symbol": "btc",
+                  "assetClass": "ASSET_CLASS_CRYPTO"
+                },
+                "chart": {
+                  "axis": {
+                    "snap": "0.001",
+                    "minSpan": null,
+                    "headroom": "0.15",
+                    "tickCount": 5,
+                    "expandRate": "0.22",
+                    "contractRate": "0.03"
+                  },
+                  "color": {
+                    "dark": "#F7931A",
+                    "light": "#F7931A"
+                  },
+                  "ranges": [
+                    {
+                      "kind": "ASSET_PRICE_CHART_KIND_LIVE",
+                      "span": "30s",
+                      "bucket": "ASSET_PRICE_BUCKET_1S"
+                    },
+                    {
+                      "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+                      "span": "3600s",
+                      "bucket": "ASSET_PRICE_BUCKET_5S"
+                    },
+                    {
+                      "kind": "ASSET_PRICE_CHART_KIND_LOOKBACK",
+                      "span": "86400s",
+                      "bucket": "ASSET_PRICE_BUCKET_1M"
+                    }
+                  ],
+                  "resolved": {
+                    "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+                    "span": "3600s",
+                    "bucket": "ASSET_PRICE_BUCKET_5S"
+                  }
+                },
+                "strike": null,
+                "horizon": "1h",
+                "direction": "ASSET_PRICE_DIRECTION_UNSPECIFIED",
+                "rangeKind": "ASSET_PRICE_RANGE_KIND_UNSPECIFIED",
+                "windowEnd": "2026-10-16T22:00:00Z",
+                "marketType": "ASSET_PRICE_MARKET_TYPE_UP_DOWN",
+                "rangeLower": null,
+                "rangeUpper": null,
+                "indexSymbol": "BRTI",
+                "priceToBeat": {
+                  "value": "81628.32",
+                  "currency": "USD"
+                },
+                "windowStart": "2026-10-16T21:00:00Z",
+                "priceDecimals": 2,
+                "settlementPrice": {
+                  "value": "81570.84",
+                  "currency": "USD"
+                }
+              },
+              "minimumTradeQty": "0.01",
+              "manualActivation": false,
+              "sportsMarketType": "",
+              "sportsMarketTypeV2": "SPORTS_MARKET_TYPE_UNSPECIFIED",
+              "orderPriceMinTickSize": "0.01"
+            }
+          },
+          "payout": {
+            "slug": "cpc-btc-updown-1h-2026-10-16-2100z",
+            "settlement": 0
+          },
+          "observed_at": "2026-10-16T22:00:27.914939+00:00"
+        }
+      },
+      "created_at": "2026-10-16T17:00:27.921376-05:00"
+    },
+    {
+      "id": "b7cb29f0e53db796a4f489612a1573ff0fe6a48022b124ebce874845366bccc2",
+      "market_id": "1485828",
+      "outcome": "DOWN",
+      "payload": {
+        "final": true,
+        "provenance": {
+          "http": {
+            "detail": {
+              "date": "Fri, 16 Oct 2026 21:47:26 GMT",
+              "cf-cache-status": "DYNAMIC"
+            },
+            "payout": {
+              "date": "Fri, 16 Oct 2026 21:47:29 GMT",
+              "cf-cache-status": "MISS"
+            }
+          },
+          "detail": {
+            "market": {
+              "id": "1485828",
+              "slug": "cpc-btc-updown-15m-2026-10-16-2130z",
+              "tags": [],
+              "title": "BTC Up or Down 15m",
+              "active": true,
+              "closed": true,
+              "hidden": false,
+              "status": "MARKET_STATUS_RESOLVED",
+              "endDate": "2026-10-16T21:45:10Z",
+              "archived": false,
+              "category": "crypto",
+              "outcomes": "[\"Yes\",\"No\"]",
+              "politics": null,
+              "question": "BTC Up or Down 15m",
+              "subtitle": "Oct 16, 5:30PM - 5:45PM",
+              "createdAt": "2026-10-16T09:32:00Z",
+              "ep3Status": "EXPIRED",
+              "startDate": "2026-10-16T09:30:13Z",
+              "updatedAt": "2026-10-16T21:47:19Z",
+              "marketType": "",
+              "titleShort": "BTC Up or Down 15m",
+              "description": "This market will settle to Up if the Bitcoin price at 5:45PM ET on Oct 16, 2026 is greater than or equal to the price at 5:30PM ET on Oct 16, 2026. Otherwise, this market will settle to Down. Outcome sourced from CF Benchmarks' Bitcoin Real-Time Index (BRTI), available at https://www.cfbenchmarks.com/data/indices/BRTI. The price at the beginning and at the end of the time range is determined the same way: in the last minute before each of those two times, 60 BRTI prices are collected. The official value for that time is the simple average of these prices, rounded to the nearest 2 decimal places. Please note that this market is about the price according to CF Benchmarks' BRTI, not according to other sources or spot markets.",
+              "ep3SyncedAt": "2026-10-16T21:47:18Z",
+              "marketSides": [
+                {
+                  "id": "2971134",
+                  "long": true,
+                  "price": "0",
+                  "marketId": 1485828,
+                  "tradable": true,
+                  "createdAt": "2026-10-16T09:32:00Z",
+                  "updatedAt": "2026-10-16T09:32:00Z",
+                  "identifier": "cpc-btc-updown-15m-2026-10-16-2130z",
+                  "description": "Yes",
+                  "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT"
+                },
+                {
+                  "id": "2971135",
+                  "long": false,
+                  "price": "1",
+                  "marketId": 1485828,
+                  "tradable": true,
+                  "createdAt": "2026-10-16T09:32:00Z",
+                  "updatedAt": "2026-10-16T09:32:00Z",
+                  "identifier": "cpc-btc-updown-15m-2026-10-16-2130z",
+                  "description": "No",
+                  "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT"
+                }
+              ],
+              "comboEnabled": false,
+              "gameStartTime": "2026-10-16T21:30:00Z",
+              "outcomePrices": "[\"0\",\"1\"]",
+              "feeCoefficient": "0.0695",
+              "assetPriceTerms": {
+                "asset": {
+                  "symbol": "btc",
+                  "assetClass": "ASSET_CLASS_CRYPTO"
+                },
+                "chart": {
+                  "axis": {
+                    "snap": "0.001",
+                    "minSpan": null,
+                    "headroom": "0.15",
+                    "tickCount": 5,
+                    "expandRate": "0.22",
+                    "contractRate": "0.03"
+                  },
+                  "color": {
+                    "dark": "#F7931A",
+                    "light": "#F7931A"
+                  },
+                  "ranges": [
+                    {
+                      "kind": "ASSET_PRICE_CHART_KIND_LIVE",
+                      "span": "30s",
+                      "bucket": "ASSET_PRICE_BUCKET_1S"
+                    },
+                    {
+                      "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+                      "span": "900s",
+                      "bucket": "ASSET_PRICE_BUCKET_1S"
+                    },
+                    {
+                      "kind": "ASSET_PRICE_CHART_KIND_LOOKBACK",
+                      "span": "3600s",
+                      "bucket": "ASSET_PRICE_BUCKET_5S"
+                    }
+                  ],
+                  "resolved": {
+                    "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+                    "span": "900s",
+                    "bucket": "ASSET_PRICE_BUCKET_1S"
+                  }
+                },
+                "strike": null,
+                "horizon": "15m",
+                "direction": "ASSET_PRICE_DIRECTION_UNSPECIFIED",
+                "rangeKind": "ASSET_PRICE_RANGE_KIND_UNSPECIFIED",
+                "windowEnd": "2026-10-16T21:45:00Z",
+                "marketType": "ASSET_PRICE_MARKET_TYPE_UP_DOWN",
+                "rangeLower": null,
+                "rangeUpper": null,
+                "indexSymbol": "BRTI",
+                "priceToBeat": {
+                  "value": "81611.54",
+                  "currency": "USD"
+                },
+                "windowStart": "2026-10-16T21:30:00Z",
+                "priceDecimals": 2,
+                "settlementPrice": {
+                  "value": "81586.78",
+                  "currency": "USD"
+                }
+              },
+              "minimumTradeQty": "0.01",
+              "manualActivation": false,
+              "sportsMarketType": "",
+              "sportsMarketTypeV2": "SPORTS_MARKET_TYPE_UNSPECIFIED",
+              "orderPriceMinTickSize": "0.01"
+            }
+          },
+          "payout": {
+            "slug": "cpc-btc-updown-15m-2026-10-16-2130z",
+            "settlement": 0
+          },
+          "observed_at": "2026-10-16T21:47:29.166331+00:00"
+        }
+      },
+      "created_at": "2026-10-16T16:47:29.171661-05:00"
+    }
+  ]
+}

@@ -1,0 +1,424 @@
+{
+  "scope": "PUBLIC_READ_ONLY_NO_CREDENTIALS_NO_ORDERS",
+  "listing_bodies": [
+    "001.body",
+    "002.body",
+    "003.body",
+    "004.body"
+  ],
+  "market_count": 400,
+  "discovery_complete": false,
+  "markets": [
+    {
+      "id": "1466843",
+      "slug": "cpc-btc-updown-1h-2026-10-16-1700z",
+      "status": "MARKET_STATUS_RESOLVED",
+      "ep3Status": "EXPIRED",
+      "closed": true,
+      "active": true,
+      "outcomePrices": "[\"0\",\"1\"]",
+      "marketSides": [
+        {
+          "id": "2933164",
+          "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT",
+          "identifier": "cpc-btc-updown-1h-2026-10-16-1700z",
+          "createdAt": "2026-10-15T17:34:07Z",
+          "updatedAt": "2026-10-15T17:34:07Z",
+          "description": "Yes",
+          "price": "0",
+          "marketId": 1466843,
+          "long": true,
+          "tradable": true
+        },
+        {
+          "id": "2933165",
+          "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT",
+          "identifier": "cpc-btc-updown-1h-2026-10-16-1700z",
+          "createdAt": "2026-10-15T17:34:07Z",
+          "updatedAt": "2026-10-15T17:34:07Z",
+          "description": "No",
+          "price": "1",
+          "marketId": 1466843,
+          "long": false,
+          "tradable": true
+        }
+      ],
+      "detail_body": "005.body",
+      "terms": {
+        "marketType": "ASSET_PRICE_MARKET_TYPE_UP_DOWN",
+        "asset": {
+          "assetClass": "ASSET_CLASS_CRYPTO",
+          "symbol": "btc"
+        },
+        "indexSymbol": "BRTI",
+        "horizon": "1h",
+        "windowStart": "2026-10-16T17:00:00Z",
+        "windowEnd": "2026-10-16T18:00:00Z",
+        "priceToBeat": {
+          "value": "81322.44",
+          "currency": "USD"
+        },
+        "strike": null,
+        "rangeLower": null,
+        "rangeUpper": null,
+        "rangeKind": "ASSET_PRICE_RANGE_KIND_UNSPECIFIED",
+        "direction": "ASSET_PRICE_DIRECTION_UNSPECIFIED",
+        "settlementPrice": {
+          "value": "81088.94",
+          "currency": "USD"
+        },
+        "chart": {
+          "ranges": [
+            {
+              "kind": "ASSET_PRICE_CHART_KIND_LIVE",
+              "span": "30s",
+              "bucket": "ASSET_PRICE_BUCKET_1S"
+            },
+            {
+              "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+              "span": "3600s",
+              "bucket": "ASSET_PRICE_BUCKET_5S"
+            },
+            {
+              "kind": "ASSET_PRICE_CHART_KIND_LOOKBACK",
+              "span": "86400s",
+              "bucket": "ASSET_PRICE_BUCKET_1M"
+            }
+          ],
+          "resolved": {
+            "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+            "span": "3600s",
+            "bucket": "ASSET_PRICE_BUCKET_5S"
+          },
+          "color": {
+            "light": "#F7931A",
+            "dark": "#F7931A"
+          },
+          "axis": {
+            "headroom": 0.15,
+            "expandRate": 0.22,
+            "contractRate": 0.03,
+            "snap": 0.001,
+            "tickCount": 5,
+            "minSpan": null
+          }
+        },
+        "priceDecimals": 2
+      },
+      "description": "This market will settle to Up if the Bitcoin price at 2:00PM ET on Oct 16, 2026 is greater than or equal to the price at 1:00PM ET on Oct 16, 2026. Otherwise, this market will settle to Down. Outcome sourced from CF Benchmarks' Bitcoin Real-Time Index (BRTI), available at https://www.cfbenchmarks.com/data/indices/BRTI. The price at the beginning and at the end of the time range is determined the same way: in the last minute before each of those two times, 60 BRTI prices are collected. The official value for that time is the simple average of these prices, rounded to the nearest 2 decimal places. Please note that this market is about the price according to CF Benchmarks' BRTI, not according to other sources or spot markets.",
+      "open_check": {
+        "request_body": "006.body",
+        "request_sha256": "b00dead7be8d72fc021ed6b0ce1f8bb7856e44479e3273d2837daea2f6a011bb",
+        "effective_from": 1792169940,
+        "effective_to": 1792170000,
+        "count": 61,
+        "timestamps_complete": true,
+        "tick_counts": [
+          60
+        ],
+        "all_ohlc_equal": true,
+        "mean_pre": "81321.46",
+        "mean_inclusive": "81321.58",
+        "last_pre": "81322.44",
+        "at_boundary": "81322.66",
+        "first_pre": "81315.06"
+      },
+      "close_check": {
+        "request_body": "007.body",
+        "request_sha256": "9833a2b47053fb63037b069914e32c44b9af40f270e1184c74d197841e52aa3a",
+        "effective_from": 1792173540,
+        "effective_to": 1792173600,
+        "count": 61,
+        "timestamps_complete": true,
+        "tick_counts": [
+          60
+        ],
+        "all_ohlc_equal": true,
+        "mean_pre": "81081.86",
+        "mean_inclusive": "81082.00",
+        "last_pre": "81088.94",
+        "at_boundary": "81089.53",
+        "first_pre": "81081.15"
+      },
+      "settlement_route": {
+        "slug": "cpc-btc-updown-1h-2026-10-16-1700z",
+        "settlement": 0
+      },
+      "settlement_route_body": "008.body"
+    },
+    {
+      "id": "1467903",
+      "slug": "cpc-btc-updown-1h-2026-10-16-1800z",
+      "status": "MARKET_STATUS_RESOLVED",
+      "ep3Status": "EXPIRED",
+      "closed": true,
+      "active": true,
+      "outcomePrices": "[\"0\",\"1\"]",
+      "marketSides": [
+        {
+          "id": "2935284",
+          "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT",
+          "identifier": "cpc-btc-updown-1h-2026-10-16-1800z",
+          "createdAt": "2026-10-15T18:08:10Z",
+          "updatedAt": "2026-10-15T18:08:10Z",
+          "description": "Yes",
+          "price": "0",
+          "marketId": 1467903,
+          "long": true,
+          "tradable": true
+        },
+        {
+          "id": "2935285",
+          "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT",
+          "identifier": "cpc-btc-updown-1h-2026-10-16-1800z",
+          "createdAt": "2026-10-15T18:08:10Z",
+          "updatedAt": "2026-10-15T18:08:10Z",
+          "description": "No",
+          "price": "1",
+          "marketId": 1467903,
+          "long": false,
+          "tradable": true
+        }
+      ],
+      "detail_body": "009.body",
+      "terms": {
+        "marketType": "ASSET_PRICE_MARKET_TYPE_UP_DOWN",
+        "asset": {
+          "assetClass": "ASSET_CLASS_CRYPTO",
+          "symbol": "btc"
+        },
+        "indexSymbol": "BRTI",
+        "horizon": "1h",
+        "windowStart": "2026-10-16T18:00:00Z",
+        "windowEnd": "2026-10-16T19:00:00Z",
+        "priceToBeat": {
+          "value": "81088.94",
+          "currency": "USD"
+        },
+        "strike": null,
+        "rangeLower": null,
+        "rangeUpper": null,
+        "rangeKind": "ASSET_PRICE_RANGE_KIND_UNSPECIFIED",
+        "direction": "ASSET_PRICE_DIRECTION_UNSPECIFIED",
+        "settlementPrice": {
+          "value": "81006.81",
+          "currency": "USD"
+        },
+        "chart": {
+          "ranges": [
+            {
+              "kind": "ASSET_PRICE_CHART_KIND_LIVE",
+              "span": "30s",
+              "bucket": "ASSET_PRICE_BUCKET_1S"
+            },
+            {
+              "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+              "span": "3600s",
+              "bucket": "ASSET_PRICE_BUCKET_5S"
+            },
+            {
+              "kind": "ASSET_PRICE_CHART_KIND_LOOKBACK",
+              "span": "86400s",
+              "bucket": "ASSET_PRICE_BUCKET_1M"
+            }
+          ],
+          "resolved": {
+            "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+            "span": "3600s",
+            "bucket": "ASSET_PRICE_BUCKET_5S"
+          },
+          "color": {
+            "light": "#F7931A",
+            "dark": "#F7931A"
+          },
+          "axis": {
+            "headroom": 0.15,
+            "expandRate": 0.22,
+            "contractRate": 0.03,
+            "snap": 0.001,
+            "tickCount": 5,
+            "minSpan": null
+          }
+        },
+        "priceDecimals": 2
+      },
+      "description": "This market will settle to Up if the Bitcoin price at 3:00PM ET on Oct 16, 2026 is greater than or equal to the price at 2:00PM ET on Oct 16, 2026. Otherwise, this market will settle to Down. Outcome sourced from CF Benchmarks' Bitcoin Real-Time Index (BRTI), available at https://www.cfbenchmarks.com/data/indices/BRTI. The price at the beginning and at the end of the time range is determined the same way: in the last minute before each of those two times, 60 BRTI prices are collected. The official value for that time is the simple average of these prices, rounded to the nearest 2 decimal places. Please note that this market is about the price according to CF Benchmarks' BRTI, not according to other sources or spot markets.",
+      "open_check": {
+        "request_body": "010.body",
+        "request_sha256": "9833a2b47053fb63037b069914e32c44b9af40f270e1184c74d197841e52aa3a",
+        "effective_from": 1792173540,
+        "effective_to": 1792173600,
+        "count": 61,
+        "timestamps_complete": true,
+        "tick_counts": [
+          60
+        ],
+        "all_ohlc_equal": true,
+        "mean_pre": "81081.86",
+        "mean_inclusive": "81082.00",
+        "last_pre": "81088.94",
+        "at_boundary": "81089.53",
+        "first_pre": "81081.15"
+      },
+      "close_check": {
+        "request_body": "011.body",
+        "request_sha256": "dc4de3e6aa5944a5923b465cd05988faffc7c4176f128a25f69da419c040f62a",
+        "effective_from": 1792177140,
+        "effective_to": 1792177200,
+        "count": 61,
+        "timestamps_complete": true,
+        "tick_counts": [
+          60
+        ],
+        "all_ohlc_equal": true,
+        "mean_pre": "81002.85",
+        "mean_inclusive": "81002.98",
+        "last_pre": "81006.81",
+        "at_boundary": "81007.29",
+        "first_pre": "80999.74"
+      },
+      "settlement_route": {
+        "slug": "cpc-btc-updown-1h-2026-10-16-1800z",
+        "settlement": 0
+      },
+      "settlement_route_body": "012.body"
+    },
+    {
+      "id": "1471756",
+      "slug": "cpc-btc-updown-1h-2026-10-16-1900z",
+      "status": "MARKET_STATUS_RESOLVED",
+      "ep3Status": "EXPIRED",
+      "closed": true,
+      "active": true,
+      "outcomePrices": "[\"1\",\"0\"]",
+      "marketSides": [
+        {
+          "id": "2942990",
+          "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT",
+          "identifier": "cpc-btc-updown-1h-2026-10-16-1900z",
+          "createdAt": "2026-10-15T19:16:04Z",
+          "updatedAt": "2026-10-15T19:16:04Z",
+          "description": "Yes",
+          "price": "1",
+          "marketId": 1471756,
+          "long": true,
+          "tradable": true
+        },
+        {
+          "id": "2942991",
+          "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT",
+          "identifier": "cpc-btc-updown-1h-2026-10-16-1900z",
+          "createdAt": "2026-10-15T19:16:04Z",
+          "updatedAt": "2026-10-15T19:16:04Z",
+          "description": "No",
+          "price": "0",
+          "marketId": 1471756,
+          "long": false,
+          "tradable": true
+        }
+      ],
+      "detail_body": "013.body",
+      "terms": {
+        "marketType": "ASSET_PRICE_MARKET_TYPE_UP_DOWN",
+        "asset": {
+          "assetClass": "ASSET_CLASS_CRYPTO",
+          "symbol": "btc"
+        },
+        "indexSymbol": "BRTI",
+        "horizon": "1h",
+        "windowStart": "2026-10-16T19:00:00Z",
+        "windowEnd": "2026-10-16T20:00:00Z",
+        "priceToBeat": {
+          "value": "81006.81",
+          "currency": "USD"
+        },
+        "strike": null,
+        "rangeLower": null,
+        "rangeUpper": null,
+        "rangeKind": "ASSET_PRICE_RANGE_KIND_UNSPECIFIED",
+        "direction": "ASSET_PRICE_DIRECTION_UNSPECIFIED",
+        "settlementPrice": {
+          "value": "81484.51",
+          "currency": "USD"
+        },
+        "chart": {
+          "ranges": [
+            {
+              "kind": "ASSET_PRICE_CHART_KIND_LIVE",
+              "span": "30s",
+              "bucket": "ASSET_PRICE_BUCKET_1S"
+            },
+            {
+              "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+              "span": "3600s",
+              "bucket": "ASSET_PRICE_BUCKET_5S"
+            },
+            {
+              "kind": "ASSET_PRICE_CHART_KIND_LOOKBACK",
+              "span": "86400s",
+              "bucket": "ASSET_PRICE_BUCKET_1M"
+            }
+          ],
+          "resolved": {
+            "kind": "ASSET_PRICE_CHART_KIND_WINDOW",
+            "span": "3600s",
+            "bucket": "ASSET_PRICE_BUCKET_5S"
+          },
+          "color": {
+            "light": "#F7931A",
+            "dark": "#F7931A"
+          },
+          "axis": {
+            "headroom": 0.15,
+            "expandRate": 0.22,
+            "contractRate": 0.03,
+            "snap": 0.001,
+            "tickCount": 5,
+            "minSpan": null
+          }
+        },
+        "priceDecimals": 2
+      },
+      "description": "This market will settle to Up if the Bitcoin price at 4:00PM ET on Oct 16, 2026 is greater than or equal to the price at 3:00PM ET on Oct 16, 2026. Otherwise, this market will settle to Down. Outcome sourced from CF Benchmarks' Bitcoin Real-Time Index (BRTI), available at https://www.cfbenchmarks.com/data/indices/BRTI. The price at the beginning and at the end of the time range is determined the same way: in the last minute before each of those two times, 60 BRTI prices are collected. The official value for that time is the simple average of these prices, rounded to the nearest 2 decimal places. Please note that this market is about the price according to CF Benchmarks' BRTI, not according to other sources or spot markets.",
+      "open_check": {
+        "request_body": "014.body",
+        "request_sha256": "dc4de3e6aa5944a5923b465cd05988faffc7c4176f128a25f69da419c040f62a",
+        "effective_from": 1792177140,
+        "effective_to": 1792177200,
+        "count": 61,
+        "timestamps_complete": true,
+        "tick_counts": [
+          60
+        ],
+        "all_ohlc_equal": true,
+        "mean_pre": "81002.85",
+        "mean_inclusive": "81002.98",
+        "last_pre": "81006.81",
+        "at_boundary": "81007.29",
+        "first_pre": "80999.74"
+      },
+      "close_check": {
+        "request_body": "015.body",
+        "request_sha256": "a12230f93741adead915c4c2e153da8c5b0067e522ec8663010d28efbaa6c9bd",
+        "effective_from": 1792180740,
+        "effective_to": 1792180800,
+        "count": 61,
+        "timestamps_complete": true,
+        "tick_counts": [
+          60
+        ],
+        "all_ohlc_equal": true,
+        "mean_pre": "81488.63",
+        "mean_inclusive": "81488.38",
+        "last_pre": "81484.51",
+        "at_boundary": "81484.20",
+        "first_pre": "81499.33"
+      },
+      "settlement_route": {
+        "slug": "cpc-btc-updown-1h-2026-10-16-1900z",
+        "settlement": 1
+      },
+      "settlement_route_body": "016.body"
+    }
+  ]
+}
