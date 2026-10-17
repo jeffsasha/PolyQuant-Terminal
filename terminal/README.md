@@ -62,7 +62,13 @@ Official paper settlement requires **MARKET_STATUS_RESOLVED**, a matching slug, 
 
 Coinbase BTC-USD candles are separately labeled spot context. Smart Money remains unavailable without a verified US performance feed. **Recordings → Verify recording** checks event causality and integrity; it is not a profitability backtest.
 
-The authenticated US market socket is unverified until credentials are configured. Later, add the following variables to the backend `.env` locally and restart. Never use NEXT_PUBLIC_ for secrets or paste them into chat:
+**Authenticated US market stream (configured and verified 2026-10-17).** With a read-only key in the backend `.env`,
+the bot reads full order books from `wss://api.polymarket.us/v1/ws/markets` (complete book on every change). Each book
+still has to pass the unchanged two-second freshness rule on its own source and receive times. Arrival fills need a
+book observed after the modeled arrival. Public REST remains the fallback. Market cards show each book's source
+(**US stream** / **Public REST**) and age. **Data health** shows stream frames, rejected frames and connections.
+Without a key, the bot falls back to rate-limited public REST, which in earlier production observations left books
+routinely staler than two seconds. Add credentials to the backend `.env` only, never with `NEXT_PUBLIC_`:
 
 ```dotenv
 POLYMARKET_US_KEY_ID=
