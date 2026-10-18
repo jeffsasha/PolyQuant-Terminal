@@ -1,21 +1,69 @@
+<div align="center">
+
 # PolyQuant Terminal
 
-Research and **paper-trading** infrastructure for Polymarket US BTC 15-minute and 1-hour Up/Down markets.
+**Research and autonomous _paper_ trading for Polymarket US BTC 15-minute and 1-hour Up/Down markets.**
 
-The goal is to find out whether a real, repeatable, executable edge exists. The goal is not to look
-profitable.
+[![CI](https://github.com/jeffsasha/PolyQuant-Terminal/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jeffsasha/PolyQuant-Terminal/actions/workflows/ci.yml)
+![Mode: paper only](https://img.shields.io/badge/mode-PAPER%20ONLY-2ea44f)
+![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB?logo=python&logoColor=white)
+![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white)
+[![Secret scan: gitleaks](https://img.shields.io/badge/secrets-gitleaks-blueviolet)](.github/workflows/ci.yml)
+![Edge: not proven](https://img.shields.io/badge/edge-not%20proven-lightgrey)
 
-> **Mode: PAPER ONLY.** Live order submission is disabled at the code boundary (`docs/SECURITY.md` §3).
-> No environment variable, config file or UI toggle can enable it.
+[Terminal app](terminal/README.md) ·
+[Architecture](docs/ARCHITECTURE.md) ·
+[Research audit](docs/RESEARCH_AUDIT.md) ·
+[Strategy A report](reports/phase4/strategy_a.md) ·
+[Stream bot verification](terminal/docs/STREAM_BOT_VERIFICATION.md) ·
+[Security](docs/SECURITY.md)
+
+<img src="terminal/docs/images/production-paper-trading.png" alt="PolyQuant Terminal: the local paper-trading website" width="900">
+
+</div>
+
+> [!IMPORTANT]
+> **Paper only.** Live order submission is disabled at the code boundary ([`docs/SECURITY.md`](docs/SECURITY.md) §3).
+> No environment variable, config file or UI toggle can enable it. Static tests check that no exchange order path
+> exists.
+
+> [!WARNING]
+> **No edge is claimed.** The goal is to find out whether a real, repeatable, executable edge exists, not to look
+> profitable. The paper bot's strategy is an unvalidated hypothesis, and its recorded paper results are losses.
+> Nothing here is investment advice.
+
+## Highlights
+
+| | |
+|---|---|
+| 🖥️ **Local trading website** | [`terminal/`](terminal/README.md): live order books, RUN / STOP automation, signal log, orders, fills, positions and data health at `http://127.0.0.1:3000` |
+| 📡 **Real production data** | Authenticated US market stream (full books, ~0.1 s age), the official BRTI reference index, and Kraken 1 s spot bars |
+| 🧾 **Honest paper execution** | Fills only on a book observed after modeled arrival, 50 % visible depth, one adverse tick, venue fees, IOC cancel. Official settlement only |
+| 🛡️ **Central risk engine** | Per-entry, exposure and daily-loss limits; every decision, including rejections, is stored with its reasons |
+| 🔬 **Pre-registered research** | Chronological splits, an untouched test set, walk-forward and leakage tests ([Strategy A report](reports/phase4/strategy_a.md)) |
+| ✅ **Tested in CI** | Secret scan, root tests, terminal backend on Postgres 17, and the web typecheck and build |
+
+## Repository map
+
+| Path | What |
+|---|---|
+| [`terminal/`](terminal/README.md) | **The product:** the autonomous paper-trading website (FastAPI backend + Next.js UI) |
+| [`services/engine/`](services/engine) | Research engine: data recorder, fees, paper execution, risk, calibration, replay |
+| [`docs/`](docs) | Spec review, research audit, architecture, strategy research, security, test reports |
+| [`reports/`](reports) | Generated calibration, backtest and Strategy A reports |
+| [`tests/`](tests) | Unit and integration tests with recorded real responses as fixtures |
 
 ## Status
 
 | Phase | State |
 |---|---|
 | 0–1 Spec review, research, architecture | done: see `docs/` |
-| 2a Public-data layer and recorder | **done** (this branch, see `docs/TEST_REPORT_PHASE2A.md`) |
+| 2a Public-data layer and recorder | **done** (see `docs/TEST_REPORT_PHASE2A.md`) |
 | 2b Authenticated L2 WebSocket | **done** (see `docs/TEST_REPORT_PHASE2B.md`). Runs automatically when `.env` has a key. |
-| 2c Next.js terminal UI | blocked on Node.js ≥20 being installed |
+| 2c Terminal UI | **done** in [`terminal/`](terminal/README.md): local website with RUN / STOP paper automation |
 | 3 Fees, paper execution, risk, ledger, settlement | **done** (see `docs/TEST_REPORT_PHASE3.md`) |
 | 4 Strategy framework, fair-probability baseline, calibration, replay | **done** (see `docs/TEST_REPORT_PHASE4.md`; no edge shown) |
 | 5–6 Smart Money doc, QA | not started |
