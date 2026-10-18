@@ -1,0 +1,589 @@
+{
+  "status": 200,
+  "received_at": 1792185089.9123719,
+  "headers": {
+    "date": "Fri, 16 Oct 2026 21:11:29 GMT",
+    "content-type": "application/json",
+    "transfer-encoding": "chunked",
+    "connection": "keep-alive",
+    "speculation-rules": "\"/cdn-cgi/speculation\"",
+    "vary": "Origin, Accept-Encoding",
+    "x-pm-server-latency": "0",
+    "last-modified": "Fri, 16 Oct 2026 21:11:29 GMT",
+    "expires": "Fri, 16 Oct 2026 21:11:59 GMT",
+    "cache-control": "public, max-age=30",
+    "cf-cache-status": "MISS",
+    "content-encoding": "gzip",
+    "server": "cloudflare",
+    "cf-ray": "a4ba0e6b6ac9315c-DFW",
+    "alt-svc": "h3=\":443\"; ma=86400"
+  },
+  "body": {
+    "marketData": {
+      "marketSlug": "cpc-btc-updown-1h-2026-10-16-2100z",
+      "bids": [
+        {
+          "px": {
+            "value": "0.4000",
+            "currency": "USD"
+          },
+          "qty": "526.0000"
+        },
+        {
+          "px": {
+            "value": "0.3900",
+            "currency": "USD"
+          },
+          "qty": "1357.0000"
+        },
+        {
+          "px": {
+            "value": "0.3800",
+            "currency": "USD"
+          },
+          "qty": "1525.0000"
+        },
+        {
+          "px": {
+            "value": "0.3700",
+            "currency": "USD"
+          },
+          "qty": "504.0000"
+        },
+        {
+          "px": {
+            "value": "0.3600",
+            "currency": "USD"
+          },
+          "qty": "1213.0000"
+        },
+        {
+          "px": {
+            "value": "0.3500",
+            "currency": "USD"
+          },
+          "qty": "491.4500"
+        },
+        {
+          "px": {
+            "value": "0.3400",
+            "currency": "USD"
+          },
+          "qty": "3.0000"
+        },
+        {
+          "px": {
+            "value": "0.3300",
+            "currency": "USD"
+          },
+          "qty": "497.0000"
+        },
+        {
+          "px": {
+            "value": "0.3200",
+            "currency": "USD"
+          },
+          "qty": "3501.0000"
+        },
+        {
+          "px": {
+            "value": "0.3100",
+            "currency": "USD"
+          },
+          "qty": "500.0000"
+        },
+        {
+          "px": {
+            "value": "0.3000",
+            "currency": "USD"
+          },
+          "qty": "101.0000"
+        },
+        {
+          "px": {
+            "value": "0.2900",
+            "currency": "USD"
+          },
+          "qty": "1.0000"
+        },
+        {
+          "px": {
+            "value": "0.2800",
+            "currency": "USD"
+          },
+          "qty": "1.0000"
+        },
+        {
+          "px": {
+            "value": "0.2700",
+            "currency": "USD"
+          },
+          "qty": "1000.0000"
+        },
+        {
+          "px": {
+            "value": "0.2500",
+            "currency": "USD"
+          },
+          "qty": "300.0000"
+        },
+        {
+          "px": {
+            "value": "0.2400",
+            "currency": "USD"
+          },
+          "qty": "733.0000"
+        },
+        {
+          "px": {
+            "value": "0.2100",
+            "currency": "USD"
+          },
+          "qty": "600.0000"
+        },
+        {
+          "px": {
+            "value": "0.2000",
+            "currency": "USD"
+          },
+          "qty": "642.0000"
+        },
+        {
+          "px": {
+            "value": "0.1900",
+            "currency": "USD"
+          },
+          "qty": "1592.6300"
+        },
+        {
+          "px": {
+            "value": "0.1800",
+            "currency": "USD"
+          },
+          "qty": "1471.1100"
+        },
+        {
+          "px": {
+            "value": "0.1700",
+            "currency": "USD"
+          },
+          "qty": "1716.4700"
+        },
+        {
+          "px": {
+            "value": "0.1600",
+            "currency": "USD"
+          },
+          "qty": "1250.0000"
+        },
+        {
+          "px": {
+            "value": "0.1500",
+            "currency": "USD"
+          },
+          "qty": "1333.3300"
+        },
+        {
+          "px": {
+            "value": "0.1400",
+            "currency": "USD"
+          },
+          "qty": "1428.5700"
+        },
+        {
+          "px": {
+            "value": "0.1300",
+            "currency": "USD"
+          },
+          "qty": "1538.4600"
+        },
+        {
+          "px": {
+            "value": "0.1200",
+            "currency": "USD"
+          },
+          "qty": "1666.6700"
+        },
+        {
+          "px": {
+            "value": "0.1100",
+            "currency": "USD"
+          },
+          "qty": "1818.1800"
+        },
+        {
+          "px": {
+            "value": "0.1000",
+            "currency": "USD"
+          },
+          "qty": "2000.0000"
+        },
+        {
+          "px": {
+            "value": "0.0900",
+            "currency": "USD"
+          },
+          "qty": "2222.2200"
+        },
+        {
+          "px": {
+            "value": "0.0800",
+            "currency": "USD"
+          },
+          "qty": "2839.4100"
+        },
+        {
+          "px": {
+            "value": "0.0700",
+            "currency": "USD"
+          },
+          "qty": "3028.4800"
+        },
+        {
+          "px": {
+            "value": "0.0600",
+            "currency": "USD"
+          },
+          "qty": "3929.3900"
+        },
+        {
+          "px": {
+            "value": "0.0500",
+            "currency": "USD"
+          },
+          "qty": "4000.0000"
+        },
+        {
+          "px": {
+            "value": "0.0400",
+            "currency": "USD"
+          },
+          "qty": "5317.4200"
+        },
+        {
+          "px": {
+            "value": "0.0300",
+            "currency": "USD"
+          },
+          "qty": "7129.7500"
+        },
+        {
+          "px": {
+            "value": "0.0200",
+            "currency": "USD"
+          },
+          "qty": "11000.0000"
+        },
+        {
+          "px": {
+            "value": "0.0100",
+            "currency": "USD"
+          },
+          "qty": "21001.0000"
+        }
+      ],
+      "offers": [
+        {
+          "px": {
+            "value": "0.4100",
+            "currency": "USD"
+          },
+          "qty": "933.6700"
+        },
+        {
+          "px": {
+            "value": "0.4200",
+            "currency": "USD"
+          },
+          "qty": "8.0000"
+        },
+        {
+          "px": {
+            "value": "0.4300",
+            "currency": "USD"
+          },
+          "qty": "1470.0000"
+        },
+        {
+          "px": {
+            "value": "0.4400",
+            "currency": "USD"
+          },
+          "qty": "2.0000"
+        },
+        {
+          "px": {
+            "value": "0.4500",
+            "currency": "USD"
+          },
+          "qty": "352.0000"
+        },
+        {
+          "px": {
+            "value": "0.4600",
+            "currency": "USD"
+          },
+          "qty": "354.0000"
+        },
+        {
+          "px": {
+            "value": "0.4700",
+            "currency": "USD"
+          },
+          "qty": "10.0000"
+        },
+        {
+          "px": {
+            "value": "0.4900",
+            "currency": "USD"
+          },
+          "qty": "9.0000"
+        },
+        {
+          "px": {
+            "value": "0.5000",
+            "currency": "USD"
+          },
+          "qty": "700.0000"
+        },
+        {
+          "px": {
+            "value": "0.5100",
+            "currency": "USD"
+          },
+          "qty": "8.0000"
+        },
+        {
+          "px": {
+            "value": "0.5200",
+            "currency": "USD"
+          },
+          "qty": "3802.0000"
+        },
+        {
+          "px": {
+            "value": "0.5400",
+            "currency": "USD"
+          },
+          "qty": "1000.0000"
+        },
+        {
+          "px": {
+            "value": "0.6000",
+            "currency": "USD"
+          },
+          "qty": "139.4500"
+        },
+        {
+          "px": {
+            "value": "0.6700",
+            "currency": "USD"
+          },
+          "qty": "200.0000"
+        },
+        {
+          "px": {
+            "value": "0.7400",
+            "currency": "USD"
+          },
+          "qty": "500.0000"
+        },
+        {
+          "px": {
+            "value": "0.7500",
+            "currency": "USD"
+          },
+          "qty": "240.0000"
+        },
+        {
+          "px": {
+            "value": "0.8000",
+            "currency": "USD"
+          },
+          "qty": "1000.0000"
+        },
+        {
+          "px": {
+            "value": "0.8100",
+            "currency": "USD"
+          },
+          "qty": "1052.6300"
+        },
+        {
+          "px": {
+            "value": "0.8200",
+            "currency": "USD"
+          },
+          "qty": "1193.7400"
+        },
+        {
+          "px": {
+            "value": "0.8300",
+            "currency": "USD"
+          },
+          "qty": "1176.4700"
+        },
+        {
+          "px": {
+            "value": "0.8400",
+            "currency": "USD"
+          },
+          "qty": "1250.0000"
+        },
+        {
+          "px": {
+            "value": "0.8500",
+            "currency": "USD"
+          },
+          "qty": "1333.3300"
+        },
+        {
+          "px": {
+            "value": "0.8600",
+            "currency": "USD"
+          },
+          "qty": "1428.5700"
+        },
+        {
+          "px": {
+            "value": "0.8700",
+            "currency": "USD"
+          },
+          "qty": "1538.4600"
+        },
+        {
+          "px": {
+            "value": "0.8800",
+            "currency": "USD"
+          },
+          "qty": "1666.6700"
+        },
+        {
+          "px": {
+            "value": "0.8900",
+            "currency": "USD"
+          },
+          "qty": "1818.1800"
+        },
+        {
+          "px": {
+            "value": "0.9000",
+            "currency": "USD"
+          },
+          "qty": "2000.0000"
+        },
+        {
+          "px": {
+            "value": "0.9100",
+            "currency": "USD"
+          },
+          "qty": "2222.2200"
+        },
+        {
+          "px": {
+            "value": "0.9200",
+            "currency": "USD"
+          },
+          "qty": "3518.2300"
+        },
+        {
+          "px": {
+            "value": "0.9300",
+            "currency": "USD"
+          },
+          "qty": "3371.1600"
+        },
+        {
+          "px": {
+            "value": "0.9400",
+            "currency": "USD"
+          },
+          "qty": "5121.5100"
+        },
+        {
+          "px": {
+            "value": "0.9500",
+            "currency": "USD"
+          },
+          "qty": "4000.0000"
+        },
+        {
+          "px": {
+            "value": "0.9600",
+            "currency": "USD"
+          },
+          "qty": "5952.2600"
+        },
+        {
+          "px": {
+            "value": "0.9700",
+            "currency": "USD"
+          },
+          "qty": "7129.7500"
+        },
+        {
+          "px": {
+            "value": "0.9800",
+            "currency": "USD"
+          },
+          "qty": "11000.0000"
+        },
+        {
+          "px": {
+            "value": "0.9900",
+            "currency": "USD"
+          },
+          "qty": "21001.0000"
+        }
+      ],
+      "state": "MARKET_STATE_OPEN",
+      "stats": {
+        "openPx": {
+          "value": "0.4500",
+          "currency": "USD"
+        },
+        "lowPx": {
+          "value": "0.2400",
+          "currency": "USD"
+        },
+        "highPx": {
+          "value": "0.5000",
+          "currency": "USD"
+        },
+        "lastTradePx": {
+          "value": "0.4100",
+          "currency": "USD"
+        },
+        "sharesTraded": "18119.4000",
+        "notionalTraded": {
+          "value": "6745.7048",
+          "currency": "USD"
+        },
+        "lastTradeQty": "1.3300",
+        "openInterest": "5356.5400",
+        "openSetTime": "2026-10-16T21:00:07.767573412Z",
+        "highSetTime": "2026-10-16T21:00:50.135984098Z",
+        "lowSetTime": "2026-10-16T21:03:30.730658801Z",
+        "lastTradeSetTime": "2026-10-16T21:11:25.283080225Z",
+        "openInterestSetTime": "2026-10-16T21:11:02.124735731Z",
+        "notionalSetTime": "2026-10-16T21:11:25.283080225Z",
+        "currentPx": {
+          "value": "0.4050",
+          "currency": "USD"
+        },
+        "lastPriceSample": {
+          "longPx": {
+            "value": "0.4100",
+            "currency": "USD"
+          },
+          "shortPx": {
+            "value": "0.59",
+            "currency": "USD"
+          },
+          "ts": "2026-10-16T21:11:29.441118453Z"
+        }
+      },
+      "transactTime": "2026-10-16T21:11:29.441118453Z"
+    }
+  }
+}

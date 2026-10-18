@@ -1,0 +1,1946 @@
+{
+  "scope": "PUBLIC_READ_ONLY_NO_CREDENTIALS_NO_ORDERS",
+  "rows": [
+    {
+      "T": 1791313200,
+      "bucket": "ASSET_PRICE_BUCKET_1S",
+      "body_file": "001.body",
+      "series": {
+        "series": [
+          {
+            "asset": {
+              "assetClass": "ASSET_CLASS_CRYPTO",
+              "symbol": "btc"
+            },
+            "currency": "USD",
+            "bucket": "ASSET_PRICE_BUCKET_1S",
+            "from": 1791313140,
+            "to": 1791313199,
+            "candles": [
+              {
+                "timestamp": 1791313140,
+                "open": "85500.56",
+                "high": "85500.56",
+                "low": "85500.56",
+                "close": "85500.56",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313141,
+                "open": "85500.57",
+                "high": "85500.57",
+                "low": "85500.57",
+                "close": "85500.57",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313142,
+                "open": "85500.57",
+                "high": "85500.57",
+                "low": "85500.57",
+                "close": "85500.57",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313143,
+                "open": "85500.60",
+                "high": "85500.60",
+                "low": "85500.60",
+                "close": "85500.60",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313144,
+                "open": "85500.65",
+                "high": "85500.65",
+                "low": "85500.65",
+                "close": "85500.65",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313145,
+                "open": "85500.69",
+                "high": "85500.69",
+                "low": "85500.69",
+                "close": "85500.69",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313146,
+                "open": "85500.74",
+                "high": "85500.74",
+                "low": "85500.74",
+                "close": "85500.74",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313147,
+                "open": "85500.80",
+                "high": "85500.80",
+                "low": "85500.80",
+                "close": "85500.80",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313148,
+                "open": "85500.87",
+                "high": "85500.87",
+                "low": "85500.87",
+                "close": "85500.87",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313149,
+                "open": "85501.03",
+                "high": "85501.03",
+                "low": "85501.03",
+                "close": "85501.03",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313150,
+                "open": "85501.13",
+                "high": "85501.13",
+                "low": "85501.13",
+                "close": "85501.13",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313151,
+                "open": "85501.22",
+                "high": "85501.22",
+                "low": "85501.22",
+                "close": "85501.22",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313152,
+                "open": "85501.29",
+                "high": "85501.29",
+                "low": "85501.29",
+                "close": "85501.29",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313153,
+                "open": "85501.37",
+                "high": "85501.37",
+                "low": "85501.37",
+                "close": "85501.37",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313154,
+                "open": "85501.44",
+                "high": "85501.44",
+                "low": "85501.44",
+                "close": "85501.44",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313155,
+                "open": "85501.51",
+                "high": "85501.51",
+                "low": "85501.51",
+                "close": "85501.51",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313156,
+                "open": "85501.56",
+                "high": "85501.56",
+                "low": "85501.56",
+                "close": "85501.56",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313157,
+                "open": "85501.61",
+                "high": "85501.61",
+                "low": "85501.61",
+                "close": "85501.61",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313158,
+                "open": "85501.68",
+                "high": "85501.68",
+                "low": "85501.68",
+                "close": "85501.68",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313159,
+                "open": "85501.75",
+                "high": "85501.75",
+                "low": "85501.75",
+                "close": "85501.75",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313160,
+                "open": "85501.82",
+                "high": "85501.82",
+                "low": "85501.82",
+                "close": "85501.82",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313161,
+                "open": "85501.88",
+                "high": "85501.88",
+                "low": "85501.88",
+                "close": "85501.88",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313162,
+                "open": "85501.94",
+                "high": "85501.94",
+                "low": "85501.94",
+                "close": "85501.94",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313163,
+                "open": "85501.93",
+                "high": "85501.93",
+                "low": "85501.93",
+                "close": "85501.93",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313164,
+                "open": "85501.95",
+                "high": "85501.95",
+                "low": "85501.95",
+                "close": "85501.95",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313165,
+                "open": "85501.99",
+                "high": "85501.99",
+                "low": "85501.99",
+                "close": "85501.99",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313166,
+                "open": "85502.06",
+                "high": "85502.06",
+                "low": "85502.06",
+                "close": "85502.06",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313167,
+                "open": "85502.11",
+                "high": "85502.11",
+                "low": "85502.11",
+                "close": "85502.11",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313168,
+                "open": "85502.17",
+                "high": "85502.17",
+                "low": "85502.17",
+                "close": "85502.17",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313169,
+                "open": "85502.20",
+                "high": "85502.20",
+                "low": "85502.20",
+                "close": "85502.20",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313170,
+                "open": "85502.24",
+                "high": "85502.24",
+                "low": "85502.24",
+                "close": "85502.24",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313171,
+                "open": "85502.25",
+                "high": "85502.25",
+                "low": "85502.25",
+                "close": "85502.25",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313172,
+                "open": "85502.26",
+                "high": "85502.26",
+                "low": "85502.26",
+                "close": "85502.26",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313173,
+                "open": "85502.27",
+                "high": "85502.27",
+                "low": "85502.27",
+                "close": "85502.27",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313174,
+                "open": "85502.32",
+                "high": "85502.32",
+                "low": "85502.32",
+                "close": "85502.32",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313175,
+                "open": "85502.31",
+                "high": "85502.31",
+                "low": "85502.31",
+                "close": "85502.31",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313176,
+                "open": "85502.30",
+                "high": "85502.30",
+                "low": "85502.30",
+                "close": "85502.30",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313177,
+                "open": "85502.27",
+                "high": "85502.27",
+                "low": "85502.27",
+                "close": "85502.27",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313178,
+                "open": "85502.25",
+                "high": "85502.25",
+                "low": "85502.25",
+                "close": "85502.25",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313179,
+                "open": "85502.25",
+                "high": "85502.25",
+                "low": "85502.25",
+                "close": "85502.25",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313180,
+                "open": "85502.26",
+                "high": "85502.26",
+                "low": "85502.26",
+                "close": "85502.26",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313181,
+                "open": "85502.26",
+                "high": "85502.26",
+                "low": "85502.26",
+                "close": "85502.26",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313182,
+                "open": "85502.27",
+                "high": "85502.27",
+                "low": "85502.27",
+                "close": "85502.27",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313183,
+                "open": "85502.25",
+                "high": "85502.25",
+                "low": "85502.25",
+                "close": "85502.25",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313184,
+                "open": "85502.21",
+                "high": "85502.21",
+                "low": "85502.21",
+                "close": "85502.21",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313185,
+                "open": "85502.17",
+                "high": "85502.17",
+                "low": "85502.17",
+                "close": "85502.17",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313186,
+                "open": "85502.14",
+                "high": "85502.14",
+                "low": "85502.14",
+                "close": "85502.14",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313187,
+                "open": "85502.12",
+                "high": "85502.12",
+                "low": "85502.12",
+                "close": "85502.12",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313188,
+                "open": "85502.10",
+                "high": "85502.10",
+                "low": "85502.10",
+                "close": "85502.10",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313189,
+                "open": "85502.06",
+                "high": "85502.06",
+                "low": "85502.06",
+                "close": "85502.06",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313190,
+                "open": "85502.03",
+                "high": "85502.03",
+                "low": "85502.03",
+                "close": "85502.03",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313191,
+                "open": "85502.00",
+                "high": "85502.00",
+                "low": "85502.00",
+                "close": "85502.00",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313192,
+                "open": "85501.97",
+                "high": "85501.97",
+                "low": "85501.97",
+                "close": "85501.97",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313193,
+                "open": "85501.88",
+                "high": "85501.88",
+                "low": "85501.88",
+                "close": "85501.88",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313194,
+                "open": "85501.80",
+                "high": "85501.80",
+                "low": "85501.80",
+                "close": "85501.80",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313195,
+                "open": "85501.73",
+                "high": "85501.73",
+                "low": "85501.73",
+                "close": "85501.73",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313196,
+                "open": "85501.66",
+                "high": "85501.66",
+                "low": "85501.66",
+                "close": "85501.66",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313197,
+                "open": "85501.59",
+                "high": "85501.59",
+                "low": "85501.59",
+                "close": "85501.59",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313198,
+                "open": "85501.52",
+                "high": "85501.52",
+                "low": "85501.52",
+                "close": "85501.52",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1791313199,
+                "open": "85501.45",
+                "high": "85501.45",
+                "low": "85501.45",
+                "close": "85501.45",
+                "tickCount": 60
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "T": 1791313200,
+      "bucket": "ASSET_PRICE_BUCKET_5S",
+      "body_file": "002.body",
+      "series": {
+        "series": [
+          {
+            "asset": {
+              "assetClass": "ASSET_CLASS_CRYPTO",
+              "symbol": "btc"
+            },
+            "currency": "USD",
+            "bucket": "ASSET_PRICE_BUCKET_5S",
+            "from": 1791313140,
+            "to": 1791313200,
+            "candles": [
+              {
+                "timestamp": 1791313140,
+                "open": "85501.26",
+                "high": "85501.90",
+                "low": "85501.26",
+                "close": "85501.90",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313145,
+                "open": "85502.21",
+                "high": "85509.05",
+                "low": "85502.21",
+                "close": "85509.05",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313150,
+                "open": "85505.77",
+                "high": "85505.77",
+                "low": "85504.42",
+                "close": "85504.42",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313155,
+                "open": "85504.09",
+                "high": "85504.09",
+                "low": "85502.29",
+                "close": "85502.29",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313160,
+                "open": "85502.36",
+                "high": "85502.37",
+                "low": "85502.14",
+                "close": "85502.14",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313165,
+                "open": "85502.42",
+                "high": "85503.47",
+                "low": "85501.07",
+                "close": "85501.07",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313170,
+                "open": "85501.15",
+                "high": "85503.18",
+                "low": "85500.78",
+                "close": "85503.18",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313175,
+                "open": "85500.19",
+                "high": "85500.70",
+                "low": "85499.38",
+                "close": "85500.70",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313180,
+                "open": "85501.41",
+                "high": "85501.41",
+                "low": "85500.56",
+                "close": "85500.56",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313185,
+                "open": "85500.56",
+                "high": "85500.59",
+                "low": "85500.18",
+                "close": "85500.18",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313190,
+                "open": "85500.61",
+                "high": "85500.98",
+                "low": "85496.41",
+                "close": "85496.67",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1791313195,
+                "open": "85496.85",
+                "high": "85497.21",
+                "low": "85496.85",
+                "close": "85497.21",
+                "tickCount": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "T": 1791313200,
+      "bucket": "ASSET_PRICE_BUCKET_1M",
+      "body_file": "003.body",
+      "series": {
+        "series": [
+          {
+            "asset": {
+              "assetClass": "ASSET_CLASS_CRYPTO",
+              "symbol": "btc"
+            },
+            "currency": "USD",
+            "bucket": "ASSET_PRICE_BUCKET_1M",
+            "from": 1791313140,
+            "to": 1791313200,
+            "candles": [
+              {
+                "timestamp": 1791313140,
+                "open": "85501.26",
+                "high": "85509.05",
+                "low": "85496.41",
+                "close": "85497.21",
+                "tickCount": 60
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "T": 1792173600,
+      "bucket": "ASSET_PRICE_BUCKET_1S",
+      "body_file": "004.body",
+      "series": {
+        "series": [
+          {
+            "asset": {
+              "assetClass": "ASSET_CLASS_CRYPTO",
+              "symbol": "btc"
+            },
+            "currency": "USD",
+            "bucket": "ASSET_PRICE_BUCKET_1S",
+            "from": 1792173540,
+            "to": 1792173599,
+            "candles": [
+              {
+                "timestamp": 1792173540,
+                "open": "81081.15",
+                "high": "81081.15",
+                "low": "81081.15",
+                "close": "81081.15",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173541,
+                "open": "81080.53",
+                "high": "81080.53",
+                "low": "81080.53",
+                "close": "81080.53",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173542,
+                "open": "81079.85",
+                "high": "81079.85",
+                "low": "81079.85",
+                "close": "81079.85",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173543,
+                "open": "81079.37",
+                "high": "81079.37",
+                "low": "81079.37",
+                "close": "81079.37",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173544,
+                "open": "81078.90",
+                "high": "81078.90",
+                "low": "81078.90",
+                "close": "81078.90",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173545,
+                "open": "81078.84",
+                "high": "81078.84",
+                "low": "81078.84",
+                "close": "81078.84",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173546,
+                "open": "81078.64",
+                "high": "81078.64",
+                "low": "81078.64",
+                "close": "81078.64",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173547,
+                "open": "81078.47",
+                "high": "81078.47",
+                "low": "81078.47",
+                "close": "81078.47",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173548,
+                "open": "81078.39",
+                "high": "81078.39",
+                "low": "81078.39",
+                "close": "81078.39",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173549,
+                "open": "81078.31",
+                "high": "81078.31",
+                "low": "81078.31",
+                "close": "81078.31",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173550,
+                "open": "81078.24",
+                "high": "81078.24",
+                "low": "81078.24",
+                "close": "81078.24",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173551,
+                "open": "81078.34",
+                "high": "81078.34",
+                "low": "81078.34",
+                "close": "81078.34",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173552,
+                "open": "81078.39",
+                "high": "81078.39",
+                "low": "81078.39",
+                "close": "81078.39",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173553,
+                "open": "81078.44",
+                "high": "81078.44",
+                "low": "81078.44",
+                "close": "81078.44",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173554,
+                "open": "81078.56",
+                "high": "81078.56",
+                "low": "81078.56",
+                "close": "81078.56",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173555,
+                "open": "81078.55",
+                "high": "81078.55",
+                "low": "81078.55",
+                "close": "81078.55",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173556,
+                "open": "81078.63",
+                "high": "81078.63",
+                "low": "81078.63",
+                "close": "81078.63",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173557,
+                "open": "81078.66",
+                "high": "81078.66",
+                "low": "81078.66",
+                "close": "81078.66",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173558,
+                "open": "81078.74",
+                "high": "81078.74",
+                "low": "81078.74",
+                "close": "81078.74",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173559,
+                "open": "81078.78",
+                "high": "81078.78",
+                "low": "81078.78",
+                "close": "81078.78",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173560,
+                "open": "81078.93",
+                "high": "81078.93",
+                "low": "81078.93",
+                "close": "81078.93",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173561,
+                "open": "81079.14",
+                "high": "81079.14",
+                "low": "81079.14",
+                "close": "81079.14",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173562,
+                "open": "81079.41",
+                "high": "81079.41",
+                "low": "81079.41",
+                "close": "81079.41",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173563,
+                "open": "81079.73",
+                "high": "81079.73",
+                "low": "81079.73",
+                "close": "81079.73",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173564,
+                "open": "81080.13",
+                "high": "81080.13",
+                "low": "81080.13",
+                "close": "81080.13",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173565,
+                "open": "81080.41",
+                "high": "81080.41",
+                "low": "81080.41",
+                "close": "81080.41",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173566,
+                "open": "81080.55",
+                "high": "81080.55",
+                "low": "81080.55",
+                "close": "81080.55",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173567,
+                "open": "81080.86",
+                "high": "81080.86",
+                "low": "81080.86",
+                "close": "81080.86",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173568,
+                "open": "81081.03",
+                "high": "81081.03",
+                "low": "81081.03",
+                "close": "81081.03",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173569,
+                "open": "81081.49",
+                "high": "81081.49",
+                "low": "81081.49",
+                "close": "81081.49",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173570,
+                "open": "81081.77",
+                "high": "81081.77",
+                "low": "81081.77",
+                "close": "81081.77",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173571,
+                "open": "81082.06",
+                "high": "81082.06",
+                "low": "81082.06",
+                "close": "81082.06",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173572,
+                "open": "81082.16",
+                "high": "81082.16",
+                "low": "81082.16",
+                "close": "81082.16",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173573,
+                "open": "81082.29",
+                "high": "81082.29",
+                "low": "81082.29",
+                "close": "81082.29",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173574,
+                "open": "81082.46",
+                "high": "81082.46",
+                "low": "81082.46",
+                "close": "81082.46",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173575,
+                "open": "81082.59",
+                "high": "81082.59",
+                "low": "81082.59",
+                "close": "81082.59",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173576,
+                "open": "81082.63",
+                "high": "81082.63",
+                "low": "81082.63",
+                "close": "81082.63",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173577,
+                "open": "81082.72",
+                "high": "81082.72",
+                "low": "81082.72",
+                "close": "81082.72",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173578,
+                "open": "81082.81",
+                "high": "81082.81",
+                "low": "81082.81",
+                "close": "81082.81",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173579,
+                "open": "81083.03",
+                "high": "81083.03",
+                "low": "81083.03",
+                "close": "81083.03",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173580,
+                "open": "81083.27",
+                "high": "81083.27",
+                "low": "81083.27",
+                "close": "81083.27",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173581,
+                "open": "81083.51",
+                "high": "81083.51",
+                "low": "81083.51",
+                "close": "81083.51",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173582,
+                "open": "81083.71",
+                "high": "81083.71",
+                "low": "81083.71",
+                "close": "81083.71",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173583,
+                "open": "81083.92",
+                "high": "81083.92",
+                "low": "81083.92",
+                "close": "81083.92",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173584,
+                "open": "81084.12",
+                "high": "81084.12",
+                "low": "81084.12",
+                "close": "81084.12",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173585,
+                "open": "81084.33",
+                "high": "81084.33",
+                "low": "81084.33",
+                "close": "81084.33",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173586,
+                "open": "81084.60",
+                "high": "81084.60",
+                "low": "81084.60",
+                "close": "81084.60",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173587,
+                "open": "81084.67",
+                "high": "81084.67",
+                "low": "81084.67",
+                "close": "81084.67",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173588,
+                "open": "81084.78",
+                "high": "81084.78",
+                "low": "81084.78",
+                "close": "81084.78",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173589,
+                "open": "81084.90",
+                "high": "81084.90",
+                "low": "81084.90",
+                "close": "81084.90",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173590,
+                "open": "81085.00",
+                "high": "81085.00",
+                "low": "81085.00",
+                "close": "81085.00",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173591,
+                "open": "81085.15",
+                "high": "81085.15",
+                "low": "81085.15",
+                "close": "81085.15",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173592,
+                "open": "81085.45",
+                "high": "81085.45",
+                "low": "81085.45",
+                "close": "81085.45",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173593,
+                "open": "81085.80",
+                "high": "81085.80",
+                "low": "81085.80",
+                "close": "81085.80",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173594,
+                "open": "81086.18",
+                "high": "81086.18",
+                "low": "81086.18",
+                "close": "81086.18",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173595,
+                "open": "81086.50",
+                "high": "81086.50",
+                "low": "81086.50",
+                "close": "81086.50",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173596,
+                "open": "81087.06",
+                "high": "81087.06",
+                "low": "81087.06",
+                "close": "81087.06",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173597,
+                "open": "81087.66",
+                "high": "81087.66",
+                "low": "81087.66",
+                "close": "81087.66",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173598,
+                "open": "81088.32",
+                "high": "81088.32",
+                "low": "81088.32",
+                "close": "81088.32",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792173599,
+                "open": "81088.94",
+                "high": "81088.94",
+                "low": "81088.94",
+                "close": "81088.94",
+                "tickCount": 60
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "T": 1792173600,
+      "bucket": "ASSET_PRICE_BUCKET_5S",
+      "body_file": "005.body",
+      "series": {
+        "series": [
+          {
+            "asset": {
+              "assetClass": "ASSET_CLASS_CRYPTO",
+              "symbol": "btc"
+            },
+            "currency": "USD",
+            "bucket": "ASSET_PRICE_BUCKET_5S",
+            "from": 1792173540,
+            "to": 1792173600,
+            "candles": [
+              {
+                "timestamp": 1792173540,
+                "open": "81055.86",
+                "high": "81065.99",
+                "low": "81053.06",
+                "close": "81065.99",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173545,
+                "open": "81076.00",
+                "high": "81079.63",
+                "low": "81073.55",
+                "close": "81079.63",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173550,
+                "open": "81080.90",
+                "high": "81092.22",
+                "low": "81080.90",
+                "close": "81092.22",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173555,
+                "open": "81092.57",
+                "high": "81095.27",
+                "low": "81092.57",
+                "close": "81094.81",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173560,
+                "open": "81095.89",
+                "high": "81099.98",
+                "low": "81095.89",
+                "close": "81099.43",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173565,
+                "open": "81099.73",
+                "high": "81102.94",
+                "low": "81092.34",
+                "close": "81102.94",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173570,
+                "open": "81101.09",
+                "high": "81101.09",
+                "low": "81090.59",
+                "close": "81091.43",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173575,
+                "open": "81089.86",
+                "high": "81092.39",
+                "low": "81089.48",
+                "close": "81092.39",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173580,
+                "open": "81095.28",
+                "high": "81095.28",
+                "low": "81092.68",
+                "close": "81093.99",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173585,
+                "open": "81094.23",
+                "high": "81095.12",
+                "low": "81082.54",
+                "close": "81090.81",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173590,
+                "open": "81088.82",
+                "high": "81090.53",
+                "low": "81086.99",
+                "close": "81090.01",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792173595,
+                "open": "81090.16",
+                "high": "81095.97",
+                "low": "81089.14",
+                "close": "81089.14",
+                "tickCount": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "T": 1792173600,
+      "bucket": "ASSET_PRICE_BUCKET_1M",
+      "body_file": "006.body",
+      "series": {
+        "series": [
+          {
+            "asset": {
+              "assetClass": "ASSET_CLASS_CRYPTO",
+              "symbol": "btc"
+            },
+            "currency": "USD",
+            "bucket": "ASSET_PRICE_BUCKET_1M",
+            "from": 1792173540,
+            "to": 1792173600,
+            "candles": [
+              {
+                "timestamp": 1792173540,
+                "open": "81055.86",
+                "high": "81102.94",
+                "low": "81053.06",
+                "close": "81089.14",
+                "tickCount": 60
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "T": 1792174500,
+      "bucket": "ASSET_PRICE_BUCKET_1S",
+      "body_file": "007.body",
+      "series": {
+        "series": [
+          {
+            "asset": {
+              "assetClass": "ASSET_CLASS_CRYPTO",
+              "symbol": "btc"
+            },
+            "currency": "USD",
+            "bucket": "ASSET_PRICE_BUCKET_1S",
+            "from": 1792174440,
+            "to": 1792174499,
+            "candles": [
+              {
+                "timestamp": 1792174440,
+                "open": "81182.88",
+                "high": "81182.88",
+                "low": "81182.88",
+                "close": "81182.88",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174441,
+                "open": "81184.03",
+                "high": "81184.03",
+                "low": "81184.03",
+                "close": "81184.03",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174442,
+                "open": "81185.27",
+                "high": "81185.27",
+                "low": "81185.27",
+                "close": "81185.27",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174443,
+                "open": "81186.48",
+                "high": "81186.48",
+                "low": "81186.48",
+                "close": "81186.48",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174444,
+                "open": "81187.68",
+                "high": "81187.68",
+                "low": "81187.68",
+                "close": "81187.68",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174445,
+                "open": "81188.80",
+                "high": "81188.80",
+                "low": "81188.80",
+                "close": "81188.80",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174446,
+                "open": "81189.92",
+                "high": "81189.92",
+                "low": "81189.92",
+                "close": "81189.92",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174447,
+                "open": "81191.41",
+                "high": "81191.41",
+                "low": "81191.41",
+                "close": "81191.41",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174448,
+                "open": "81192.77",
+                "high": "81192.77",
+                "low": "81192.77",
+                "close": "81192.77",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174449,
+                "open": "81194.00",
+                "high": "81194.00",
+                "low": "81194.00",
+                "close": "81194.00",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174450,
+                "open": "81195.25",
+                "high": "81195.25",
+                "low": "81195.25",
+                "close": "81195.25",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174451,
+                "open": "81196.53",
+                "high": "81196.53",
+                "low": "81196.53",
+                "close": "81196.53",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174452,
+                "open": "81197.81",
+                "high": "81197.81",
+                "low": "81197.81",
+                "close": "81197.81",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174453,
+                "open": "81199.08",
+                "high": "81199.08",
+                "low": "81199.08",
+                "close": "81199.08",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174454,
+                "open": "81200.47",
+                "high": "81200.47",
+                "low": "81200.47",
+                "close": "81200.47",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174455,
+                "open": "81201.76",
+                "high": "81201.76",
+                "low": "81201.76",
+                "close": "81201.76",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174456,
+                "open": "81202.99",
+                "high": "81202.99",
+                "low": "81202.99",
+                "close": "81202.99",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174457,
+                "open": "81204.21",
+                "high": "81204.21",
+                "low": "81204.21",
+                "close": "81204.21",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174458,
+                "open": "81205.47",
+                "high": "81205.47",
+                "low": "81205.47",
+                "close": "81205.47",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174459,
+                "open": "81206.74",
+                "high": "81206.74",
+                "low": "81206.74",
+                "close": "81206.74",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174460,
+                "open": "81208.06",
+                "high": "81208.06",
+                "low": "81208.06",
+                "close": "81208.06",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174461,
+                "open": "81209.38",
+                "high": "81209.38",
+                "low": "81209.38",
+                "close": "81209.38",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174462,
+                "open": "81210.65",
+                "high": "81210.65",
+                "low": "81210.65",
+                "close": "81210.65",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174463,
+                "open": "81211.85",
+                "high": "81211.85",
+                "low": "81211.85",
+                "close": "81211.85",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174464,
+                "open": "81213.00",
+                "high": "81213.00",
+                "low": "81213.00",
+                "close": "81213.00",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174465,
+                "open": "81214.15",
+                "high": "81214.15",
+                "low": "81214.15",
+                "close": "81214.15",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174466,
+                "open": "81215.27",
+                "high": "81215.27",
+                "low": "81215.27",
+                "close": "81215.27",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174467,
+                "open": "81216.26",
+                "high": "81216.26",
+                "low": "81216.26",
+                "close": "81216.26",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174468,
+                "open": "81217.24",
+                "high": "81217.24",
+                "low": "81217.24",
+                "close": "81217.24",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174469,
+                "open": "81218.15",
+                "high": "81218.15",
+                "low": "81218.15",
+                "close": "81218.15",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174470,
+                "open": "81219.12",
+                "high": "81219.12",
+                "low": "81219.12",
+                "close": "81219.12",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174471,
+                "open": "81220.25",
+                "high": "81220.25",
+                "low": "81220.25",
+                "close": "81220.25",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174472,
+                "open": "81221.29",
+                "high": "81221.29",
+                "low": "81221.29",
+                "close": "81221.29",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174473,
+                "open": "81222.22",
+                "high": "81222.22",
+                "low": "81222.22",
+                "close": "81222.22",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174474,
+                "open": "81223.00",
+                "high": "81223.00",
+                "low": "81223.00",
+                "close": "81223.00",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174475,
+                "open": "81223.86",
+                "high": "81223.86",
+                "low": "81223.86",
+                "close": "81223.86",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174476,
+                "open": "81224.55",
+                "high": "81224.55",
+                "low": "81224.55",
+                "close": "81224.55",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174477,
+                "open": "81225.06",
+                "high": "81225.06",
+                "low": "81225.06",
+                "close": "81225.06",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174478,
+                "open": "81225.49",
+                "high": "81225.49",
+                "low": "81225.49",
+                "close": "81225.49",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174479,
+                "open": "81225.56",
+                "high": "81225.56",
+                "low": "81225.56",
+                "close": "81225.56",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174480,
+                "open": "81225.75",
+                "high": "81225.75",
+                "low": "81225.75",
+                "close": "81225.75",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174481,
+                "open": "81225.95",
+                "high": "81225.95",
+                "low": "81225.95",
+                "close": "81225.95",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174482,
+                "open": "81226.03",
+                "high": "81226.03",
+                "low": "81226.03",
+                "close": "81226.03",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174483,
+                "open": "81225.92",
+                "high": "81225.92",
+                "low": "81225.92",
+                "close": "81225.92",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174484,
+                "open": "81225.74",
+                "high": "81225.74",
+                "low": "81225.74",
+                "close": "81225.74",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174485,
+                "open": "81225.54",
+                "high": "81225.54",
+                "low": "81225.54",
+                "close": "81225.54",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174486,
+                "open": "81225.37",
+                "high": "81225.37",
+                "low": "81225.37",
+                "close": "81225.37",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174487,
+                "open": "81225.18",
+                "high": "81225.18",
+                "low": "81225.18",
+                "close": "81225.18",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174488,
+                "open": "81224.95",
+                "high": "81224.95",
+                "low": "81224.95",
+                "close": "81224.95",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174489,
+                "open": "81224.68",
+                "high": "81224.68",
+                "low": "81224.68",
+                "close": "81224.68",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174490,
+                "open": "81224.38",
+                "high": "81224.38",
+                "low": "81224.38",
+                "close": "81224.38",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174491,
+                "open": "81224.19",
+                "high": "81224.19",
+                "low": "81224.19",
+                "close": "81224.19",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174492,
+                "open": "81223.91",
+                "high": "81223.91",
+                "low": "81223.91",
+                "close": "81223.91",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174493,
+                "open": "81223.53",
+                "high": "81223.53",
+                "low": "81223.53",
+                "close": "81223.53",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174494,
+                "open": "81222.99",
+                "high": "81222.99",
+                "low": "81222.99",
+                "close": "81222.99",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174495,
+                "open": "81222.56",
+                "high": "81222.56",
+                "low": "81222.56",
+                "close": "81222.56",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174496,
+                "open": "81222.13",
+                "high": "81222.13",
+                "low": "81222.13",
+                "close": "81222.13",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174497,
+                "open": "81221.83",
+                "high": "81221.83",
+                "low": "81221.83",
+                "close": "81221.83",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174498,
+                "open": "81221.50",
+                "high": "81221.50",
+                "low": "81221.50",
+                "close": "81221.50",
+                "tickCount": 60
+              },
+              {
+                "timestamp": 1792174499,
+                "open": "81221.17",
+                "high": "81221.17",
+                "low": "81221.17",
+                "close": "81221.17",
+                "tickCount": 60
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "T": 1792174500,
+      "bucket": "ASSET_PRICE_BUCKET_5S",
+      "body_file": "008.body",
+      "series": {
+        "series": [
+          {
+            "asset": {
+              "assetClass": "ASSET_CLASS_CRYPTO",
+              "symbol": "btc"
+            },
+            "currency": "USD",
+            "bucket": "ASSET_PRICE_BUCKET_5S",
+            "from": 1792174440,
+            "to": 1792174500,
+            "candles": [
+              {
+                "timestamp": 1792174440,
+                "open": "81228.64",
+                "high": "81228.64",
+                "low": "81223.67",
+                "close": "81227.38",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174445,
+                "open": "81227.46",
+                "high": "81245.97",
+                "low": "81227.15",
+                "close": "81232.21",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174450,
+                "open": "81233.32",
+                "high": "81234.08",
+                "low": "81227.26",
+                "close": "81227.94",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174455,
+                "open": "81225.99",
+                "high": "81233.08",
+                "low": "81225.99",
+                "close": "81233.08",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174460,
+                "open": "81234.60",
+                "high": "81235.79",
+                "low": "81228.74",
+                "close": "81228.74",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174465,
+                "open": "81227.70",
+                "high": "81227.70",
+                "low": "81221.30",
+                "close": "81221.79",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174470,
+                "open": "81223.43",
+                "high": "81228.29",
+                "low": "81223.43",
+                "close": "81224.91",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174475,
+                "open": "81227.99",
+                "high": "81227.99",
+                "low": "81215.47",
+                "close": "81215.75",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174480,
+                "open": "81216.14",
+                "high": "81216.14",
+                "low": "81204.42",
+                "close": "81204.54",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174485,
+                "open": "81206.11",
+                "high": "81208.09",
+                "low": "81206.11",
+                "close": "81206.39",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174490,
+                "open": "81204.51",
+                "high": "81205.89",
+                "low": "81197.58",
+                "close": "81203.47",
+                "tickCount": 5
+              },
+              {
+                "timestamp": 1792174495,
+                "open": "81207.91",
+                "high": "81209.41",
+                "low": "81207.91",
+                "close": "81208.96",
+                "tickCount": 5
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "T": 1792174500,
+      "bucket": "ASSET_PRICE_BUCKET_1M",
+      "body_file": "009.body",
+      "series": {
+        "series": [
+          {
+            "asset": {
+              "assetClass": "ASSET_CLASS_CRYPTO",
+              "symbol": "btc"
+            },
+            "currency": "USD",
+            "bucket": "ASSET_PRICE_BUCKET_1M",
+            "from": 1792174440,
+            "to": 1792174500,
+            "candles": [
+              {
+                "timestamp": 1792174440,
+                "open": "81228.64",
+                "high": "81245.97",
+                "low": "81197.58",
+                "close": "81208.96",
+                "tickCount": 60
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

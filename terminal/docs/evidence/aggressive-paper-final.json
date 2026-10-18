@@ -1,0 +1,331 @@
+{
+  "server_time": "2026-10-17T06:40:20.189661+00:00",
+  "mode": "PAPER",
+  "environment": "production",
+  "reference_validated": false,
+  "bot": {
+    "account_id": "book_aggressive",
+    "status": "STOPPED",
+    "enabled": false,
+    "validated": false,
+    "strategy": "book-imbalance-aggressive-v2",
+    "config": {
+      "version": "book-imbalance-aggressive-v2",
+      "levels": 3,
+      "imbalance_threshold": "0.20",
+      "confirmations": 3,
+      "minimum_signal_span_seconds": 4,
+      "maximum_signal_span_seconds": 30,
+      "maximum_gap_seconds": 20,
+      "maximum_spread": "0.05",
+      "minimum_entry_price": "0.05",
+      "maximum_entry_price": "0.90",
+      "target_contracts": null,
+      "scenario": "conservative",
+      "exit": "OFFICIAL_SETTLEMENT",
+      "attempts_per_market": 1,
+      "validated": false,
+      "sizing": "ADAPTIVE_FEE_INCLUSIVE",
+      "target_allocation": "0.70",
+      "cadence_target": "0.35",
+      "maximum_allocation": "0.80",
+      "per_trade_loss_cap": "0.40",
+      "cadence_cap": "0.40",
+      "daily_entry_loss_halt": "0.20"
+    },
+    "config_hash": "776c4c4b2786ca26dd3acae6c6fb00eebff10c22582bc4c8c9da4c57bab84cf1",
+    "signals": {
+      "1h": {
+        "market_id": "1483106",
+        "at": "2026-10-17T06:38:52.644381+00:00",
+        "action": "NO_TRADE",
+        "reasons": [
+          "VENUE_RATE_LIMITED"
+        ],
+        "validated": false,
+        "config_hash": "776c4c4b2786ca26dd3acae6c6fb00eebff10c22582bc4c8c9da4c57bab84cf1",
+        "error": "RateLimitCooldown"
+      },
+      "15m": {
+        "market_id": "1494883",
+        "at": "2026-10-17T06:38:52.664071+00:00",
+        "action": "NO_TRADE",
+        "reasons": [
+          "VENUE_RATE_LIMITED"
+        ],
+        "validated": false,
+        "config_hash": "776c4c4b2786ca26dd3acae6c6fb00eebff10c22582bc4c8c9da4c57bab84cf1",
+        "error": "RateLimitCooldown"
+      }
+    },
+    "halts": [
+      "BOT_STOPPED"
+    ],
+    "restart_requires_run": true,
+    "profiles": [
+      {
+        "account_id": "book_experiment",
+        "strategy": "book-imbalance-experiment-v1",
+        "config": {
+          "version": "book-imbalance-experiment-v1",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": "1",
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false
+        },
+        "config_hash": "fb3dab20b70407b422a231fbaba5b245f9191c5ee34c39cebf6476a5999f2821",
+        "risk": {
+          "version": "baseline-0.1",
+          "scenario": "conservative",
+          "risk_per_trade": "0.005",
+          "exposure_limit": "0.05",
+          "cadence_limit": "0.025",
+          "daily_loss": "0.02",
+          "min_edge": "0.03",
+          "max_spread": "0.05",
+          "max_positions": 2,
+          "seed": 417
+        }
+      },
+      {
+        "account_id": "book_aggressive",
+        "strategy": "book-imbalance-aggressive-v2",
+        "config": {
+          "version": "book-imbalance-aggressive-v2",
+          "levels": 3,
+          "imbalance_threshold": "0.20",
+          "confirmations": 3,
+          "minimum_signal_span_seconds": 4,
+          "maximum_signal_span_seconds": 30,
+          "maximum_gap_seconds": 20,
+          "maximum_spread": "0.05",
+          "minimum_entry_price": "0.05",
+          "maximum_entry_price": "0.90",
+          "target_contracts": null,
+          "scenario": "conservative",
+          "exit": "OFFICIAL_SETTLEMENT",
+          "attempts_per_market": 1,
+          "validated": false,
+          "sizing": "ADAPTIVE_FEE_INCLUSIVE",
+          "target_allocation": "0.70",
+          "cadence_target": "0.35",
+          "maximum_allocation": "0.80",
+          "per_trade_loss_cap": "0.40",
+          "cadence_cap": "0.40",
+          "daily_entry_loss_halt": "0.20"
+        },
+        "config_hash": "776c4c4b2786ca26dd3acae6c6fb00eebff10c22582bc4c8c9da4c57bab84cf1",
+        "risk": {
+          "version": "aggressive-paper-v2",
+          "scenario": "conservative",
+          "risk_per_trade": "0.40",
+          "exposure_limit": "0.80",
+          "cadence_limit": "0.40",
+          "daily_loss": "0.20",
+          "min_edge": "0.03",
+          "max_spread": "0.05",
+          "max_positions": 2,
+          "seed": 417
+        }
+      }
+    ],
+    "risk": {
+      "version": "aggressive-paper-v2",
+      "scenario": "conservative",
+      "risk_per_trade": "0.40",
+      "exposure_limit": "0.80",
+      "cadence_limit": "0.40",
+      "daily_loss": "0.20",
+      "min_edge": "0.03",
+      "max_spread": "0.05",
+      "max_positions": 2,
+      "seed": 417
+    },
+    "risk_equity": "1000.00000000",
+    "committed": "0E-8",
+    "utilization": "0",
+    "valuation": "CONSERVATIVE_NET_LIQUIDATION_OR_ZERO_RISK_BOUND"
+  },
+  "copy_trading": {
+    "status": "UNAVAILABLE_US_IDENTIFIABLE_TRADE_FEED",
+    "enabled": false
+  },
+  "markets": [
+    {
+      "id": "1494883",
+      "horizon": "15m",
+      "end": "2026-10-17T06:45:00+00:00"
+    },
+    {
+      "id": "1483106",
+      "horizon": "1h",
+      "end": "2026-10-17T07:00:00+00:00"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "manual",
+      "cash": "1000.52000000",
+      "reserved": "0E-8",
+      "equity": "1000.52000000",
+      "risk_config": {
+        "version": "baseline-0.1",
+        "scenario": "conservative",
+        "risk_per_trade": "0.005",
+        "exposure_limit": "0.05",
+        "cadence_limit": "0.025",
+        "daily_loss": "0.02",
+        "min_edge": "0.03",
+        "max_spread": "0.05",
+        "max_positions": 2,
+        "seed": 417
+      },
+      "valuation_ready": true,
+      "risk_day_ready": true,
+      "halts": []
+    },
+    {
+      "id": "verification",
+      "cash": "999.54000000",
+      "reserved": "0E-8",
+      "equity": "999.54000000",
+      "risk_config": {
+        "version": "baseline-0.1",
+        "scenario": "conservative",
+        "risk_per_trade": "0.005",
+        "exposure_limit": "0.05",
+        "cadence_limit": "0.025",
+        "daily_loss": "0.02",
+        "min_edge": "0.03",
+        "max_spread": "0.05",
+        "max_positions": 2,
+        "seed": 417
+      },
+      "valuation_ready": true,
+      "risk_day_ready": true,
+      "halts": []
+    },
+    {
+      "id": "probability",
+      "cash": "1000.00000000",
+      "reserved": "0E-8",
+      "equity": "1000.00000000",
+      "risk_config": {
+        "version": "baseline-0.1",
+        "scenario": "conservative",
+        "risk_per_trade": "0.005",
+        "exposure_limit": "0.05",
+        "cadence_limit": "0.025",
+        "daily_loss": "0.02",
+        "min_edge": "0.03",
+        "max_spread": "0.05",
+        "max_positions": 2,
+        "seed": 417
+      },
+      "valuation_ready": true,
+      "risk_day_ready": true,
+      "halts": [
+        "MANUAL_STOP"
+      ]
+    },
+    {
+      "id": "momentum",
+      "cash": "1000.00000000",
+      "reserved": "0E-8",
+      "equity": "1000.00000000",
+      "risk_config": {
+        "version": "baseline-0.1",
+        "scenario": "conservative",
+        "risk_per_trade": "0.005",
+        "exposure_limit": "0.05",
+        "cadence_limit": "0.025",
+        "daily_loss": "0.02",
+        "min_edge": "0.03",
+        "max_spread": "0.05",
+        "max_positions": 2,
+        "seed": 417
+      },
+      "valuation_ready": true,
+      "risk_day_ready": true,
+      "halts": []
+    },
+    {
+      "id": "book",
+      "cash": "1000.00000000",
+      "reserved": "0E-8",
+      "equity": "1000.00000000",
+      "risk_config": {
+        "version": "baseline-0.1",
+        "scenario": "conservative",
+        "risk_per_trade": "0.005",
+        "exposure_limit": "0.05",
+        "cadence_limit": "0.025",
+        "daily_loss": "0.02",
+        "min_edge": "0.03",
+        "max_spread": "0.05",
+        "max_positions": 2,
+        "seed": 417
+      },
+      "valuation_ready": true,
+      "risk_day_ready": true,
+      "halts": []
+    },
+    {
+      "id": "book_experiment",
+      "cash": "999.56000000",
+      "reserved": "0E-8",
+      "equity": "1000.270000000000",
+      "risk_config": {
+        "version": "baseline-0.1",
+        "scenario": "conservative",
+        "risk_per_trade": "0.005",
+        "exposure_limit": "0.05",
+        "cadence_limit": "0.025",
+        "daily_loss": "0.02",
+        "min_edge": "0.03",
+        "max_spread": "0.05",
+        "max_positions": 2,
+        "seed": 417
+      },
+      "valuation_ready": true,
+      "risk_day_ready": true,
+      "halts": [
+        "RESTART_REQUIRES_RUN",
+        "BOT_STOPPED"
+      ]
+    },
+    {
+      "id": "book_aggressive",
+      "cash": "1000.00000000",
+      "reserved": "0E-8",
+      "equity": "1000.00000000",
+      "risk_config": {
+        "version": "aggressive-paper-v2",
+        "scenario": "conservative",
+        "risk_per_trade": "0.40",
+        "exposure_limit": "0.80",
+        "cadence_limit": "0.40",
+        "daily_loss": "0.20",
+        "min_edge": "0.03",
+        "max_spread": "0.05",
+        "max_positions": 2,
+        "seed": 417
+      },
+      "valuation_ready": true,
+      "risk_day_ready": true,
+      "halts": [
+        "BOT_STOPPED"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "url": "https://gateway.polymarket.us/v1/markets?closed=true&categories=crypto&includeHidden=true&limit=100&offset=0&endDateMin=2026-10-16T18%3A00%3A00Z&endDateMax=2026-10-16T21%3A30%3A00Z&orderBy=gameStartTime&orderDirection=desc",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:12:39.409868+00:00",
+    "status": 200,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:12:39 GMT",
+      "content-type": "application/json",
+      "last-modified": "Fri, 16 Oct 2026 21:12:39 GMT",
+      "cache-control": "public, max-age=30",
+      "cf-cache-status": "MISS",
+      "cf-ray": "a4ba101f2e3a7bd4-DFW"
+    },
+    "sha256": "5fdd9438764f6d0ac154be1f9aa02fec43381cfce61f6260915b169cb276d175",
+    "bytes": 334825,
+    "body_file": "001.body",
+    "received_at": "2026-10-16T21:12:39.756306+00:00",
+    "elapsed_seconds": 0.346481
+  }
+]

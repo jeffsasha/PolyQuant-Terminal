@@ -1,0 +1,6 @@
+{
+  "scope": "PUBLIC_READ_ONLY_NO_CREDENTIALS_NO_ORDERS",
+  "listing_body": "001.body",
+  "market_count": 100,
+  "markets": []
+}

@@ -1,0 +1,46 @@
+# Migration path only. Docker is absent on the verified native host.
+services:
+  db:
+    image: postgres:17.11
+    environment:
+      POSTGRES_USER: polyquant
+      POSTGRES_DB: polyquant
+      POSTGRES_PASSWORD: ${COMPOSE_DB_PASSWORD:?Set a separate local Compose database password}
+    volumes: ["database:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U polyquant -d polyquant"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  backend:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+    environment:
+      LIVE_TRADING_ENABLED: "false"
+      DATABASE_URL: postgresql://polyquant:${COMPOSE_DB_PASSWORD}@db:5432/polyquant
+      POLYQUANT_DATA_DIR: /data
+      POLYQUANT_PASSWORD_HASH: ${POLYQUANT_PASSWORD_HASH:?Set a local password hash}
+      WEB_ORIGIN: http://127.0.0.1:3000
+      POLYMARKET_US_KEY_ID: ${POLYMARKET_US_KEY_ID:-}
+      POLYMARKET_US_SECRET_KEY: ${POLYMARKET_US_SECRET_KEY:-}
+    volumes: ["recordings:/data"]
+    depends_on:
+      db: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      BACKEND_URL: http://backend:8000
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on:
+      backend: {condition: service_healthy}
+volumes:
+  database:
+  recordings:

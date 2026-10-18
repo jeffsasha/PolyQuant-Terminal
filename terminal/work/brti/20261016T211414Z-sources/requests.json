@@ -1,0 +1,212 @@
+[
+  {
+    "url": "https://docs.polymarket.us/api-reference/asset-prices/overview.md",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:14.839658+00:00",
+    "status": 200,
+    "final_url": "https://docs.polymarket.us/api-reference/asset-prices/overview.md",
+    "body_file": "001.body",
+    "sha256": "0b671cc0be02bd4a3a53116a16d45c87553f4ddf4d374e700c403e5aa8c72335",
+    "bytes": 4726,
+    "response_headers": {
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-type": "text/markdown; charset=utf-8",
+      "date": "Fri, 16 Oct 2026 21:14:15 GMT",
+      "last-modified": "Fri, 16 Oct 2026 21:14:15 GMT"
+    },
+    "received_at": "2026-10-16T21:14:15.214311+00:00",
+    "elapsed_seconds": 0.374718
+  },
+  {
+    "url": "https://docs.polymarket.us/trader-guide/crypto-schema.md",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:15.215368+00:00",
+    "status": 200,
+    "final_url": "https://docs.polymarket.us/trader-guide/crypto-schema.md",
+    "body_file": "002.body",
+    "sha256": "fe3722d6696525db026fb6e1eea2c700b773e11d9a90f774eb7ee50a786c5a66",
+    "bytes": 20566,
+    "response_headers": {
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-type": "text/markdown; charset=utf-8",
+      "date": "Fri, 16 Oct 2026 21:14:15 GMT",
+      "last-modified": "Fri, 16 Oct 2026 21:14:15 GMT"
+    },
+    "received_at": "2026-10-16T21:14:15.475259+00:00",
+    "elapsed_seconds": 0.259908
+  },
+  {
+    "url": "https://docs.polymarket.us/faqs/crypto-faqs.md",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:15.476071+00:00",
+    "status": 200,
+    "final_url": "https://docs.polymarket.us/faqs/crypto-faqs.md",
+    "body_file": "003.body",
+    "sha256": "537fd0f903c537058c4772c495e5a0486c2820d983c4935454a65a9246f316dd",
+    "bytes": 8415,
+    "response_headers": {
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-type": "text/markdown; charset=utf-8",
+      "date": "Fri, 16 Oct 2026 21:14:15 GMT",
+      "last-modified": "Fri, 16 Oct 2026 21:14:15 GMT"
+    },
+    "received_at": "2026-10-16T21:14:15.818014+00:00",
+    "elapsed_seconds": 0.341969
+  },
+  {
+    "url": "https://docs.polymarket.us/api-reference/market/overview.md",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:15.818607+00:00",
+    "status": 200,
+    "final_url": "https://docs.polymarket.us/api-reference/market/overview.md",
+    "body_file": "004.body",
+    "sha256": "27f4c3d4eb4cb87283b3577e520a416a3c1d48dbe4c2ad378b8530632ee251d5",
+    "bytes": 16094,
+    "response_headers": {
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-type": "text/markdown; charset=utf-8",
+      "date": "Fri, 16 Oct 2026 21:14:16 GMT",
+      "last-modified": "Fri, 16 Oct 2026 21:14:16 GMT"
+    },
+    "received_at": "2026-10-16T21:14:16.113184+00:00",
+    "elapsed_seconds": 0.294574
+  },
+  {
+    "url": "https://docs.polymarket.us/changelog.md",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:16.113339+00:00",
+    "status": 200,
+    "final_url": "https://docs.polymarket.us/changelog.md",
+    "body_file": "005.body",
+    "sha256": "cec3cf434bdbd9f8c59a95638bb51eab01ae5182619319ab313fecd102967112",
+    "bytes": 125375,
+    "response_headers": {
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-type": "text/markdown; charset=utf-8",
+      "date": "Fri, 16 Oct 2026 21:14:16 GMT",
+      "last-modified": "Fri, 16 Oct 2026 21:14:16 GMT"
+    },
+    "received_at": "2026-10-16T21:14:16.403209+00:00",
+    "elapsed_seconds": 0.289909
+  },
+  {
+    "url": "https://docs.polymarket.us/api-reference/oapi-schemas/asset-prices-schema.json",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:16.404224+00:00",
+    "status": 200,
+    "final_url": "https://docs.polymarket.us/api-reference/oapi-schemas/asset-prices-schema.json",
+    "body_file": "006.body",
+    "sha256": "3da62d2a329d4937d1f8c5fef8c415d97f9db629d2847a31602d3cfe0ea56eb3",
+    "bytes": 8956,
+    "response_headers": {
+      "cache-control": "public, max-age=1800, must-revalidate",
+      "content-type": "application/json",
+      "date": "Fri, 16 Oct 2026 21:14:16 GMT",
+      "etag": "W/\"XYKqqYmKOuXxsFGM\"",
+      "last-modified": "Mon, 21 Sep 2026 22:42:35 GMT"
+    },
+    "received_at": "2026-10-16T21:14:16.833776+00:00",
+    "elapsed_seconds": 0.429569
+  },
+  {
+    "url": "https://docs.polymarket.us/learn/markets/market-resolution.md",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:16.834644+00:00",
+    "status": 200,
+    "final_url": "https://docs.polymarket.us/learn/markets/market-resolution.md",
+    "body_file": "007.body",
+    "sha256": "6bc9120a8d19e137ae61bd403d0d575fe51f44f3903fb556b39fd033ee4bb918",
+    "bytes": 3167,
+    "response_headers": {
+      "cache-control": "public, max-age=0, must-revalidate",
+      "content-type": "text/markdown; charset=utf-8",
+      "date": "Fri, 16 Oct 2026 21:14:17 GMT",
+      "last-modified": "Fri, 16 Oct 2026 21:14:17 GMT"
+    },
+    "received_at": "2026-10-16T21:14:17.158046+00:00",
+    "elapsed_seconds": 0.323403
+  },
+  {
+    "url": "https://docs.cfbenchmarks.com/CME%20CF%20Real%20Time%20Indices%20Methodology.pdf",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:17.158234+00:00",
+    "status": 200,
+    "final_url": "https://docs.cfbenchmarks.com/CME%20CF%20Real%20Time%20Indices%20Methodology.pdf",
+    "body_file": "008.body",
+    "sha256": "b0bfc2201fe812d23ed8a994a013856c7738b194293165d8456ea00d969aaadf",
+    "bytes": 695230,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:14:17 GMT",
+      "content-type": "application/pdf",
+      "last-modified": "Fri, 02 Oct 2026 15:40:06 GMT",
+      "etag": "\"581b893071a2951835f6649a59ca3d0b\""
+    },
+    "received_at": "2026-10-16T21:14:17.969386+00:00",
+    "elapsed_seconds": 0.811172
+  },
+  {
+    "url": "https://docs.cfbenchmarks.com/api/rest/latest-values/",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:17.969785+00:00",
+    "status": 200,
+    "final_url": "https://docs.cfbenchmarks.com/api/rest/latest-values/",
+    "body_file": "009.body",
+    "sha256": "766198a3c44a43854d1bdb1466ca4fa18857c0f313fa1da0821c0162d8fcb750",
+    "bytes": 18222,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:14:18 GMT",
+      "content-type": "text/html",
+      "last-modified": "Thu, 08 Oct 2026 09:36:27 GMT"
+    },
+    "received_at": "2026-10-16T21:14:18.508275+00:00",
+    "elapsed_seconds": 0.538527
+  },
+  {
+    "url": "https://docs.cfbenchmarks.com/api/rest/historical-values/",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:18.509048+00:00",
+    "status": 200,
+    "final_url": "https://docs.cfbenchmarks.com/api/rest/historical-values/",
+    "body_file": "010.body",
+    "sha256": "bca02e2206f7e44f396e29bd1b9cb976d2a2c7dfc194cc96d4464b2cec6dcfc7",
+    "bytes": 21760,
+    "response_headers": {
+      "date": "Fri, 16 Oct 2026 21:14:19 GMT",
+      "content-type": "text/html",
+      "last-modified": "Thu, 08 Oct 2026 09:36:27 GMT"
+    },
+    "received_at": "2026-10-16T21:14:19.022186+00:00",
+    "elapsed_seconds": 0.513149
+  },
+  {
+    "url": "https://polymarketexchange.com/files/legal/latest/rulebook",
+    "method": "GET",
+    "authenticated": false,
+    "started_at": "2026-10-16T21:14:19.022526+00:00",
+    "status": 200,
+    "final_url": "https://polymarketexchange.com/files/legal/Polymarket%20US%20Rulebook%20(2026.09.30).pdf",
+    "body_file": "011.body",
+    "sha256": "1635f93f6ee65f0daea036f816ec52ff2d85381692e4415c81efa3695c3d43bc",
+    "bytes": 827274,
+    "response_headers": {
+      "content-type": "application/pdf",
+      "last-modified": "Fri, 02 Oct 2026 13:41:30 GMT",
+      "date": "Fri, 16 Oct 2026 20:53:52 GMT",
+      "cache-control": "max-age=31536000, immutable",
+      "etag": "\"78c1ddf8e0218f9e6ac25d498cb9999e\"",
+      "age": "1570"
+    },
+    "received_at": "2026-10-16T21:14:21.647030+00:00",
+    "elapsed_seconds": 2.624547
+  }
+]

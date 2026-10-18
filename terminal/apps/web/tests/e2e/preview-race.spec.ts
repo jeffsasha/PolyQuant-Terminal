@@ -1,0 +1,20 @@
+import {test,expect} from '@playwright/test';
+test('fixture: edited and rolled-over tickets cannot reuse an earlier preview',async({page})=>{
+ const now=Date.now();const market={id:'fixture-A',slug:'fixture-A',horizon:'15m',start:new Date(now-300000).toISOString(),end:new Date(now+600000).toISOString(),threshold:'80000',tick:'0.01',minimum_qty:'0.01',status:'MARKET_STATUS_OPEN',book:null,book_fresh:false,source_age_seconds:null,imbalance:null};
+ const state={mode:'PAPER',environment:'fixture',server_time:new Date(now).toISOString(),collection:true,engine_state:'REFERENCE_BLOCKED',reference_validated:false,manual_trading_ready:false,rest_cooldown_seconds:0,reference:{value:null,source_at:null,source:'TEST FIXTURE'},spot:null,markets:[market],accounts:[{id:'manual',cash:'1000',reserved:'0',equity:'1000',day_start_equity:'1000',positions:[],pending:[],halts:[],consecutive_losses:0,cooldown_until:null}],http_latency_ms:null,last_update:null,stream_status:'NOT_CONFIGURED',gap_count:0,errors:{},recorder:{used_bytes:0,quota_bytes:10000000000,free_bytes:12000000000,halted:false,warning:false},decisions:[],orders:[],fills:[],datasets:[],equity_history:[],position_history:[],settlements:[],performance:{manual:{fill_count:0,net_realized_pnl:'0'}},research:{status:'INSUFFICIENT_EVIDENCE',message:'TEST FIXTURE'}};
+ await page.route('**/api/session',route=>route.fulfill({json:{csrf:'fixture-csrf'}}));
+ await page.route('**/api/state',route=>route.fulfill({json:state}));
+ await page.route('**/api/events',route=>route.fulfill({contentType:'text/event-stream',body:'event: state\ndata: '+JSON.stringify(state)+'\n\n'}));
+ await page.route('**/api/candles?*',route=>route.fulfill({json:{status:'UNAVAILABLE',candles:[]}}));
+ let blocked=true;let release=()=>{};let placed=0;
+ await page.route('**/api/paper/preview',async route=>{if(blocked)await new Promise<void>(resolve=>{release=resolve;});await route.fulfill({json:{allowed:true,reasons:[],maximum_cost:'0.52',order_id:'fixture-preview',estimate:null}});});
+ await page.route('**/api/paper/orders',route=>{placed++;return route.fulfill({json:{allowed:false}});});
+ await page.goto('/');await expect(page.getByTestId('paper-mode')).toHaveText('PAPER');await page.getByLabel('Paper account').selectOption('manual');
+ await page.getByRole('button',{name:'Inspect costs & risk →'}).click();await expect(page.getByRole('button',{name:'Inspect costs & risk →'})).toBeDisabled();
+ await page.getByLabel('Contracts',{exact:true}).fill('2');blocked=false;release();
+ await expect(page.getByRole('button',{name:'Inspect costs & risk →'})).toBeEnabled();await expect(page.getByRole('button',{name:'Place paper order',exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'Inspect costs & risk →'}).click();await expect(page.getByRole('button',{name:'Place paper order',exact:true})).toBeVisible();
+ state.markets=[{...market,id:'fixture-B',slug:'fixture-B'}];
+ await page.getByRole('button',{name:'Data health',exact:true}).click();await page.getByRole('button',{name:'Refresh terminal state'}).click();
+ await expect(page.getByRole('button',{name:'Place paper order',exact:true})).toHaveCount(0);expect(placed).toBe(0);
+});
