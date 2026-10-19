@@ -11,7 +11,7 @@ cd PolyQuant-Terminal/terminal
 python3 scripts/local.py start
 ```
 
-Open **http://127.0.0.1:3000**. Both **127.0.0.1** and **localhost** are accepted as exact local Origins. There is no username field. Read the generated local password:
+Open **http://127.0.0.1:3000**. The interface follows a Linear-based design system with an animated backdrop and a `⌘K` command palette; see [UI design](docs/UI_DESIGN.md). Both **127.0.0.1** and **localhost** are accepted as exact local Origins. There is no username field. Read the generated local password:
 
 ```sh
 cat .local/login-password.txt
