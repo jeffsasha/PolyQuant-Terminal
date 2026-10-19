@@ -6,7 +6,7 @@ from decimal import Decimal as D
 from .clock import next_risk_day_start
 from .types import utcnow,jsonable,MarketEvent,ExperimentConfig,ReferenceSnapshot,ACCOUNT_IDS,MarketTerms,OrderIntent,BOT_ACCOUNT,AGGRESSIVE_ACCOUNT,BOT_PROFILES
 from .venue.us import USDataAdapter
-from .reference import ReferenceProvider,SpotProvider
+from .reference import ReferenceProvider,ReferenceVerifier,SpotProvider
 from .recorder import Recorder,StorageHalt
 from .execution import PaperExecutionEngine,sweep
 from .risk import config_for,size_aggressive,committed_cost
@@ -20,6 +20,7 @@ class Runtime:
     def __init__(self,store,settings):
         self.store=store; self.settings=settings; self.venue=USDataAdapter()
         self.reference_provider=ReferenceProvider(self.venue.transport); self.spot_provider=SpotProvider()
+        self.reference_check=ReferenceVerifier(self.venue.transport)
         self.reference=ReferenceSnapshot(); self.spot=None; self.markets={}; self.books={}
         self.recorder=Recorder(settings.data_dir/'raw',quota=settings.raw_quota)
         self.engine=PaperExecutionEngine(store,self.markets,self.books,lambda:self.reference)
@@ -63,6 +64,9 @@ class Runtime:
         self.store.reconcile(); self.stop_bot('RESTART_REQUIRES_RUN'); self.store.audit('RUNTIME_STARTED',payload={'mode':'PAPER','reference_validated':False})
         for row in self.store.held_instruments():
             market=MarketTerms.from_raw(row['raw']); self.markets[market.id]=market
+        for row in self.store.recent_instruments():
+            try: self.reference_check.enqueue(MarketTerms.from_raw(row['raw']))
+            except (ValueError,KeyError,TypeError): pass
         self.tasks=[asyncio.create_task(loop()) for loop in [self.data_loop,self.book_loop,self.execution_loop,self.settlement_loop,self.strategy_loop,self.bot_loop,self.stream_loop]]
     async def close(self):
         self.running=False
@@ -81,7 +85,7 @@ class Runtime:
                     found=await self.venue.discover()
                     for market in found:
                         self.event('instrument',market.raw,market.id)
-                        self.store.save_instrument(market); self.markets[market.id]=market
+                        self.store.save_instrument(market); self.markets[market.id]=market; self.reference_check.enqueue(market)
                     # Retain ended instruments only while a holding needs settlement.
                     held={p['market_id'] for name in ACCOUNT_IDS for p in self.store.state(name).positions}
                     for identity in list(self.markets):
@@ -94,6 +98,7 @@ class Runtime:
                     ref=await self.reference_provider.latest()
                     self.event('index',jsonable(ref),source_at=ref.source_at); self.reference=ref; self.errors.pop('index',None)
                 except Exception as error: self.errors['index']=type(error).__name__
+                for result in await self.reference_check.run_due(): self.event('reference_check',jsonable(result),result['market_id'])
                 try:
                     spot=await self.spot_provider.latest(); self.event('spot',spot); self.spot=spot; self.errors.pop('spot',None)
                 except Exception as error: self.errors['spot']=type(error).__name__
@@ -397,7 +402,7 @@ class Runtime:
             'collection':self.collection,'engine_state':'REFERENCE_BLOCKED','reference_validated':False,
             'rest_cooldown_seconds':math.ceil(max(0,getattr(getattr(self.venue,'transport',None),'blocked_until',0)-time.monotonic())),
             'manual_trading_ready':self.collection and not self.store.state('manual').halts and any(book.fresh(now) for book in self.books.values()),
-            'reference':self.reference,'spot':self.spot,'markets':markets,'accounts':accounts,
+            'reference':self.reference,'reference_check':self.reference_check.snapshot(),'spot':self.spot,'markets':markets,'accounts':accounts,
             'http_latency_ms':self.latency_ms,'last_update':self.last_update,'stream_status':self.stream_status,
             'stream':{'live':self.stream_live(now),'frames':self.stream_frames,'rejected_frames':self.stream_rejected,
                       'connects':self.stream.connects if self.stream else 0,
@@ -409,4 +414,4 @@ class Runtime:
             'position_history':self.store.history('positions',100),'settlements':self.store.history('settlements',100),
             'performance':self.store.performance(),
             'research':{'status':'INSUFFICIENT_EVIDENCE','calibration':None,
-                        'message':'Models are unfitted. Reference reconciliation must pass before reference-dependent strategies activate.'}})
+                        'message':'Models are unfitted and no edge is validated, so reference-dependent strategies stay disabled. The reference data rule itself is cross-checked live on every resolved market (Data health).'}})

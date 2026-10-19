@@ -54,7 +54,7 @@ Risk stays enforced: 0.5% maximum possible trade loss including fees, 5% combine
 
 ## Reference investigation and production feed
 
-**Reference-dependent strategies remain disabled in code.** Follow-up evidence found that 1S BRTI history is inconsistent with coarser buckets and the documentation's reconstruction example. An already-averaged 1S series is a plausible explanation, not a confirmed replacement specification. Read [BRTI follow-up research](docs/BRTI_FOLLOWUP_RESEARCH.md).
+**Reference data: verified live. Reference-dependent strategies: still disabled in code.** The 1S BRTI history is already the trailing 60-second average, so each official anchor equals the 1S close at T−1s. The research engine confirmed this on every settled market from Sep 25 onward except one ($0.12), and the backend now re-checks both anchors of every resolved market. **Data health → Reference reconciliation** shows VERIFIED, PENDING or MISMATCH with any differing values. This check is evidence only. The trading gate stays closed because the probability and momentum models are not fitted and no edge is validated. Read [BRTI follow-up research](docs/BRTI_FOLLOWUP_RESEARCH.md).
 
 Manual trading uses production US books and official contract definitions. Public responses can be cached, unavailable, or rate limited. Fresh order reads use distinct cache keys, keep actual source/receive/cache timestamps, and retain the two-second freshness rule. The fallback uses at most one public GET/second, observes Retry-After and exponential cooldowns, and fails visibly during cooldown. Display polling is slower than an authenticated stream; inspect/order arrival refreshes again. Never interpret a stale displayed quote as tradable.
 
