@@ -192,6 +192,10 @@ class Store:
         with self.connect() as c:
             c.execute('INSERT INTO instrument_versions(id,version,raw) VALUES(%s,%s,%s) ON CONFLICT DO NOTHING',(market.id,version,Jsonb(raw)))
 
+    def recent_instruments(self,hours=6):
+        with self.connect() as c:
+            return c.execute("SELECT DISTINCT ON (id) raw FROM instrument_versions WHERE created_at>now()-make_interval(hours=>%s) ORDER BY id,created_at DESC",(hours,)).fetchall()
+
     def held_instruments(self):
         with self.connect() as c:
             return c.execute("SELECT DISTINCT ON (v.id) v.raw FROM instrument_versions v JOIN positions p ON p.market_id=v.id WHERE (p.status='OPEN' AND p.qty>0) OR p.status='SETTLED' ORDER BY v.id,v.created_at DESC").fetchall()

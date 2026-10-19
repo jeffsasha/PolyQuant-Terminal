@@ -15,7 +15,7 @@ async function inspect(page:Page){
 }
 
 test('English controls, persistent stop and strategy gate work',async({page})=>{
- await login(page);await expect(page.getByText('Reference reconstruction unresolved',{exact:true})).toBeVisible();
+ await login(page);await expect(page.getByTestId('reference-banner')).toBeVisible();
  await expect(page.getByRole('button',{name:'Enable live trading'})).toHaveCount(0);
  await page.getByRole('button',{name:'Emergency stop'}).click();await expect(page.getByTestId('risk-state')).toContainText('HALTED');
  await page.reload();await page.getByLabel('Paper account').selectOption('manual');await expect(page.getByTestId('risk-state')).toContainText('HALTED');

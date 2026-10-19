@@ -163,6 +163,11 @@ kbd{font:500 10px/1 var(--font-mono);color:var(--muted);border:1px solid var(--l
 .reference-banner p{font-size:12px;color:var(--muted);margin-top:2px}
 .reference-banner button{margin-left:auto;background:transparent;font-size:12px;color:var(--amber);border:0;white-space:nowrap}
 .reference-banner button:hover{background:color-mix(in srgb,var(--amber) 10%,transparent)}
+.reference-banner.verified{color:var(--green);background:linear-gradient(90deg,color-mix(in srgb,var(--green) 9%,transparent),color-mix(in srgb,var(--accent) 5%,transparent));border-color:color-mix(in srgb,var(--green) 24%,transparent)}
+.reference-banner.verified .warning-icon{border-color:color-mix(in srgb,var(--green) 60%,transparent)}
+.reference-banner.verified button{color:var(--green)}.reference-banner.verified button:hover{background:color-mix(in srgb,var(--green) 10%,transparent)}
+.reference-banner.mismatch{color:var(--red);background:linear-gradient(90deg,color-mix(in srgb,var(--red) 10%,transparent),color-mix(in srgb,var(--red) 3%,transparent));border-color:color-mix(in srgb,var(--red) 30%,transparent)}
+.reference-banner.mismatch .warning-icon{border-color:color-mix(in srgb,var(--red) 60%,transparent)}.reference-banner.mismatch button{color:var(--red)}
 .notice{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--panel);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-left:3px solid var(--accent);border-radius:10px;padding:10px 12px 10px 16px;margin-top:10px;color:var(--text-2);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 .notice button{font-size:12px;flex-shrink:0}
 .desk-heading{display:flex;align-items:center;justify-content:space-between;margin:28px 0 20px;gap:20px}

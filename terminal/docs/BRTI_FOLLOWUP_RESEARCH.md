@@ -1,5 +1,25 @@
 # BRTI follow-up research
 
+## Update, October 19, 2026: data rule resolved; strategies stay disabled
+
+The leading hypothesis below is now confirmed for current markets. The `1S` history is already the trailing
+60-second BRTI average, so the official anchor equals the `1S` close at `T−1s`. It is not averaged a second time.
+
+- **Full-history check** ([root research audit §1.3](../../docs/RESEARCH_AUDIT.md)): across 2,950 settled BTC 15m
+  and 1h markets, `priceToBeat` equals the `1S` close at `windowStart − 1s` for every market from September 25
+  onward except one (September 28, $0.12 off). Launch week (September 22–24) used a different computation, which
+  matches the September rows in the tables below.
+- **Live cross-check** (`ReferenceVerifier` in `services/polyquant/reference.py`): after each discovered market
+  resolves, the backend compares both `priceToBeat` and `settlementPrice` with the `1S` close at `T−1s`. Status is
+  `VERIFIED` after 3 resolved markets with no mismatch among the last 48, `MISMATCH` on any difference, and
+  `PENDING` before that. Each result is recorded as a `reference_check` event. First run, October 19: 6/6 resolved
+  markets matched on both anchors.
+- **Trading gate unchanged.** `reference_validated` stays `False` and reference-dependent accounts still reject with
+  `REFERENCE_RECONCILIATION_FAILED`. The probability and momentum models are not fitted and no edge is validated
+  ([Strategy A report](../../reports/phase4/strategy_a.md)). The live check is evidence, not an enablement switch.
+
+The October 16 observations follow unchanged.
+
 Observed October 16, 2026, 21:11–21:15 UTC. **Reference reconstruction remains unresolved; do not enable reference-dependent strategies.** The strongest new evidence is an inconsistency between the `1S` and coarser history buckets. The `1S` route appears to return an already aggregated statistic. That is a supported hypothesis, not an established replacement specification.
 
 ## Scope and reproducibility
